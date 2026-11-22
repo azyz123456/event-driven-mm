@@ -1,0 +1,22 @@
+[package]
+name = "event-driven-mm"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1"
+base64 = "0.22"
+clap = { version = "4", features = ["derive"] }
+getrandom = "0.3"
+httparse = "1"
+rust_decimal = { version = "1", default-features = false, features = ["std", "serde-with-str"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["raw_value"] }
+sha1 = "0.10"
+webpki-roots = "1"
+websocket-sans-io = "0.1"
+
+[dev-dependencies]
+rcgen = { version = "0.14", default-features = false, features = ["ring"] }
+tempfile = "3"

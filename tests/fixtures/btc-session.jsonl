@@ -1,0 +1,8 @@
+{"seq":0,"local_time_unix_ms":1700000000000,"event":"session_start","version":1,"endpoint":"wss://api.hyperliquid.xyz/ws","coin":"BTC"}
+{"seq":1,"local_time_unix_ms":1700000000100,"connection_id":1,"event":"tcp_open","local_addr":"127.0.0.1:12345","peer_addr":"192.0.2.1:443"}
+{"seq":2,"local_time_unix_ms":1700000000200,"connection_id":1,"event":"ws_out","message":{"opcode":"text","payload":"{\"method\":\"subscribe\",\"subscription\":{\"type\":\"l2Book\",\"coin\":\"BTC\"}}"}}
+{"seq":3,"local_time_unix_ms":1700000000201,"connection_id":1,"event":"ws_in","message":{"opcode":"text","payload":"{\"channel\":\"subscriptionResponse\",\"data\":{\"method\":\"subscribe\",\"subscription\":{\"type\":\"l2Book\",\"coin\":\"BTC\"}}}"}}
+{"seq":4,"local_time_unix_ms":1700000000520,"connection_id":1,"event":"ws_in","message":{"opcode":"text","payload":"{\"channel\":\"l2Book\",\"data\":{\"coin\":\"BTC\",\"time\":1700000000500,\"levels\":[[{\"px\":\"99.0\",\"sz\":\"1.0\",\"n\":1},{\"px\":\"100.1\",\"sz\":\"1.0\",\"n\":1}],[{\"px\":\"100.4\",\"sz\":\"1.0\",\"n\":1},{\"px\":\"100.2\",\"sz\":\"1.0\",\"n\":1}]]}}"}}
+{"seq":5,"local_time_unix_ms":1700000000450,"connection_id":1,"event":"ws_in","message":{"opcode":"text","payload":"{\"channel\":\"l2Book\",\"data\":{\"coin\":\"BTC\",\"time\":1700000000600,\"levels\":[[{\"px\":\"98.0\",\"sz\":\"1.0\",\"n\":1}],[{\"px\":\"99.0\",\"sz\":\"1.0\",\"n\":1}]]}}"}}
+{"seq":6,"local_time_unix_ms":1700000000470,"connection_id":1,"event":"ws_in","message":{"opcode":"text","payload":"{\"channel\":\"l2Book\",\"data\":{\"coin\":\"BTC\",\"time\":1700000000620,\"levels\":[[],[{\"px\":\"99.0\",\"sz\":\"1.0\",\"n\":1}]]}}"}}
+{"seq":7,"local_time_unix_ms":1700000000480,"connection_id":1,"event":"tcp_close","reason":"capture_complete"}
