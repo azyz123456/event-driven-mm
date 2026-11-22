@@ -1,22 +1,19 @@
 use std::collections::VecDeque;
 use std::io::Write;
-use std::sync::mpsc::SyncSender;
-use std::thread;
-use std::time::Duration;
 
 use anyhow::{Context, Result, ensure};
 
 use crate::book::Book;
-use crate::event::{Event, FORMAT_VERSION, ORDER_FORMAT_VERSION, Record};
+use crate::event::{
+    Event, FORMAT_VERSION, ORDER_FORMAT_VERSION, REACTOR_FORMAT_VERSION, Record, TimerKind,
+};
 use crate::hyperliquid::TESTNET_ENDPOINT;
 use crate::intent::Intent;
-use crate::journal::JournalReader;
-use crate::order_test::{Command, Lifecycle, Outcome};
-
-const FILE_POLL_INTERVAL: Duration = Duration::from_millis(5);
+use crate::order_test::{Command, Input, Lifecycle, Outcome};
+use crate::queue::{CommandsOut, RecordSource};
 
 pub fn run(
-    reader: JournalReader,
+    reader: RecordSource,
     writer_is_done: impl Fn() -> bool,
     output: impl Write,
 ) -> Result<()> {
@@ -24,28 +21,25 @@ pub fn run(
 }
 
 pub fn run_order_test(
-    reader: JournalReader,
+    reader: RecordSource,
     writer_is_done: impl Fn() -> bool,
     output: impl Write,
-    commands: SyncSender<Command>,
+    commands: CommandsOut<Command>,
 ) -> Result<Outcome> {
     follow(reader, writer_is_done, output, Some(commands))?
         .context("expected an order-test outcome")
 }
 
 fn follow(
-    mut reader: JournalReader,
+    mut reader: RecordSource,
     writer_is_done: impl Fn() -> bool,
     mut output: impl Write,
-    commands: Option<SyncSender<Command>>,
+    commands: Option<CommandsOut<Command>>,
 ) -> Result<Option<Outcome>> {
     let mut session = None;
-    loop {
-        // If the writer is done before this read, EOF is final. Checking after
-        // a read could miss a record appended between that read and the check.
-        let done = writer_is_done();
-        match reader.next_record()? {
-            Some(Record {
+    while let Some(record) = reader.next(&writer_is_done)? {
+        match record {
+            Record {
                 event:
                     Event::SessionStart {
                         version,
@@ -56,18 +50,20 @@ fn follow(
                 seq,
                 connection_id,
                 ..
-            }) => {
+            } => {
                 ensure!(seq == 0 && connection_id.is_none(), "invalid session start");
                 ensure!(!coin.is_empty(), "empty instrument in session start");
                 session = Some(match version {
-                    FORMAT_VERSION => {
+                    FORMAT_VERSION | REACTOR_FORMAT_VERSION
+                        if version == FORMAT_VERSION || order_test.is_none() =>
+                    {
                         ensure!(
                             order_test.is_none() && commands.is_none(),
                             "unexpected order configuration in a capture journal"
                         );
                         Session::Book(Book::new(coin))
                     }
-                    ORDER_FORMAT_VERSION => {
+                    ORDER_FORMAT_VERSION | REACTOR_FORMAT_VERSION => {
                         let config = order_test.context("missing order-test configuration")?;
                         ensure!(
                             endpoint == TESTNET_ENDPOINT && coin == config.coin,
@@ -79,7 +75,7 @@ fn follow(
                     _ => anyhow::bail!("unsupported journal format {version}"),
                 });
             }
-            Some(record) => {
+            record => {
                 let seq = record.seq;
                 let session = session
                     .as_mut()
@@ -88,11 +84,8 @@ fn follow(
                     .apply(record, &mut output, commands.as_ref())
                     .with_context(|| format!("apply journal record {seq}"))?;
             }
-            None if done => break,
-            None => thread::sleep(FILE_POLL_INTERVAL),
         }
     }
-    reader.finish()?;
     let session = session.context("journal is missing session_start")?;
     output.flush().context("flush session output")?;
     match session {
@@ -111,7 +104,7 @@ impl Session {
         &mut self,
         record: Record,
         output: &mut impl Write,
-        commands: Option<&SyncSender<Command>>,
+        commands: Option<&CommandsOut<Command>>,
     ) -> Result<()> {
         match self {
             Self::Book(book) => {
@@ -157,25 +150,24 @@ impl OrderReplay {
         &mut self,
         record: Record,
         output: &mut impl Write,
-        commands: Option<&SyncSender<Command>>,
+        commands: Option<&CommandsOut<Command>>,
     ) -> Result<()> {
         match record.event {
             Event::OrderInput { elapsed_ms, input } => {
-                if let Some(command) = self.lifecycle.update(record.seq, elapsed_ms, input)? {
-                    match &command {
-                        Command::Trade(intent) => {
-                            self.generated.push_back(intent.clone());
-                            writeln!(output, "intent {}", serde_json::to_string(intent)?)?;
-                        }
-                        Command::Finish(outcome) => self.expected_outcome = Some(outcome.clone()),
-                        _ => {}
-                    }
-                    if let Some(commands) = commands {
-                        commands
-                            .try_send(command)
-                            .context("deliver order-test command")?;
-                    }
-                }
+                self.input(record.seq, elapsed_ms, input, output, commands)?;
+            }
+            Event::Timer {
+                kind: TimerKind::StrategySecond | TimerKind::OrderDeadlineCheck,
+                fired_elapsed_ns,
+                ..
+            } => {
+                self.input(
+                    record.seq,
+                    fired_elapsed_ns / 1_000_000,
+                    Input::Tick,
+                    output,
+                    commands,
+                )?;
             }
             Event::IntentQueued { intent } => {
                 let generated = self.generated.pop_front().with_context(|| {
@@ -211,6 +203,30 @@ impl OrderReplay {
                 self.verified_outcome = Some(outcome);
             }
             _ => {}
+        }
+        Ok(())
+    }
+
+    fn input(
+        &mut self,
+        seq: u64,
+        elapsed_ms: u64,
+        input: Input,
+        output: &mut impl Write,
+        commands: Option<&CommandsOut<Command>>,
+    ) -> Result<()> {
+        if let Some(command) = self.lifecycle.update(seq, elapsed_ms, input)? {
+            match &command {
+                Command::Trade(intent) => {
+                    self.generated.push_back(intent.clone());
+                    writeln!(output, "intent {}", serde_json::to_string(intent)?)?;
+                }
+                Command::Finish(outcome) => self.expected_outcome = Some(outcome.clone()),
+                _ => {}
+            }
+            if let Some(commands) = commands {
+                commands.enqueue(command)?;
+            }
         }
         Ok(())
     }

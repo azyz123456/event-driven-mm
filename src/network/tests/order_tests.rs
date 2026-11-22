@@ -1,6 +1,5 @@
+use crate::queue::command_queue;
 use std::collections::VecDeque;
-use std::io::Read;
-use std::sync::mpsc::sync_channel;
 
 use hypersdk::hypercore::{Chain, PrivateKeySigner, api::ActionRequest};
 use serde_json::{Value, json};
@@ -71,6 +70,15 @@ fn normal_lifecycle(update_first: bool, lose_cancel_reply: bool) -> Result<()> {
         complete_verification(peer, cloid)
     })?;
     assert_verified(&test)?;
+    if lose_cancel_reply {
+        assert!(test.records.iter().any(|record| matches!(
+            record.event,
+            Event::Timer {
+                kind: TimerKind::OrderDeadlineCheck,
+                ..
+            }
+        )));
+    }
     Ok(())
 }
 
@@ -173,7 +181,9 @@ fn run_order_peers(
     let mut sockets = VecDeque::new();
     let mut peers = Vec::new();
     for _ in 0..count {
-        sockets.push_back(TcpStream::connect(listener.local_addr()?)?);
+        let client = StdTcpStream::connect(listener.local_addr()?)?;
+        client.set_nonblocking(true)?;
+        sockets.push_back(TcpStream::from_std(client));
         let (socket, _) = listener.accept()?;
         socket.set_nodelay(true)?;
         socket.set_read_timeout(Some(SOCKET_TIMEOUT))?;
@@ -194,21 +204,22 @@ fn run_order_peers(
     config.timings.ack_ms = 500;
     config.timings.probe_interval_ms = 100;
     let file = tempfile::NamedTempFile::new()?;
-    let writer = JournalWriter::new(file.reopen()?);
+    let (writer, reader) = file_queue(file.reopen()?, file.reopen()?, Arc::new(Latency::new()));
+    let reactor = Reactor::new()?;
     let peer_reader = JournalReader::new(file.reopen()?);
-    let reader = JournalReader::new(file.reopen()?);
-    let (sender, receiver) = sync_channel(8);
+    let (sender, receiver) = command_queue(8, reactor.waker());
     let signer = Signer::new(TEST_KEY)?;
     let mut live = Vec::new();
     let outcome = thread::scope(|scope| -> Result<Outcome> {
         let server = scope.spawn(move || serve(peers, peer_reader));
         let worker = scope.spawn(move || {
             trading::run_with(
+                reactor,
                 writer,
                 config,
                 signer,
                 receiver,
-                || sockets.pop_front().context("unexpected connection attempt"),
+                |_, _| sockets.pop_front().context("unexpected connection attempt"),
                 client_config(roots),
             )
         });
@@ -218,7 +229,7 @@ fn run_order_peers(
         result
     })?;
     let mut replay = Vec::new();
-    engine::run(JournalReader::new(file.reopen()?), || true, &mut replay)?;
+    engine::run(RecordSource::replay(file.reopen()?), || true, &mut replay)?;
     let mut reader = JournalReader::new(file.reopen()?);
     let mut records = Vec::new();
     while let Some(record) = reader.next_record()? {
@@ -238,6 +249,13 @@ fn run_order_peers(
 fn assert_verified(test: &LocalOrder) -> Result<()> {
     assert_eq!(test.outcome, Outcome::VerifiedCanceled { oid: OID });
     assert_eq!(test.live, test.replay);
+    assert!(matches!(
+        test.records[0].event,
+        Event::SessionStart {
+            version: REACTOR_FORMAT_VERSION,
+            ..
+        }
+    ));
     let intents: Vec<_> = test
         .records
         .iter()
@@ -252,6 +270,29 @@ fn assert_verified(test: &LocalOrder) -> Result<()> {
     assert!(!test.journal_text.contains(TEST_KEY));
     assert!(!test.journal_text.contains("\"signature\""));
     assert!(!test.journal_text.contains("\\\"signature\\\""));
+    let writes: Vec<_> = test
+        .records
+        .iter()
+        .filter_map(|record| match record.event {
+            Event::TxFirstWrite {
+                intent_id,
+                enqueued_elapsed_ns,
+                first_write_elapsed_ns,
+            } => Some((
+                intent_id,
+                record.seq,
+                enqueued_elapsed_ns,
+                first_write_elapsed_ns,
+            )),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(writes.len(), 2);
+    for (id, seq, enqueued, written) in writes {
+        assert!(enqueued <= written);
+        assert!(test.records.iter().any(|record| record.seq < seq
+            && matches!(record.event, Event::ActionPrepared { intent_id, .. } if intent_id == id)));
+    }
     Ok(())
 }
 

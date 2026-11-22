@@ -2357,6 +2357,8 @@ dependencies = [
  "getrandom 0.3.4",
  "httparse",
  "hypersdk",
+ "libc",
+ "mio",
  "rcgen",
  "rust_decimal",
  "rustls",

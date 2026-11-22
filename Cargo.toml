@@ -11,6 +11,7 @@ clap = { version = "4", features = ["derive"] }
 getrandom = "0.3"
 httparse = "1"
 hypersdk = { version = "0.3.1", default-features = false }
+mio = { version = "1", default-features = false, features = ["net", "os-poll"] }
 rust_decimal = { version = "1", default-features = false, features = ["std", "serde-with-str"] }
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
 serde = { version = "1", features = ["derive"] }
@@ -18,6 +19,9 @@ serde_json = { version = "1", features = ["raw_value"] }
 sha1 = "0.10"
 webpki-roots = "1"
 websocket-sans-io = "0.1"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
 
 [dev-dependencies]
 rcgen = { version = "0.14", default-features = false, features = ["ring"] }

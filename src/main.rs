@@ -4,8 +4,10 @@ mod event;
 mod hyperliquid;
 mod intent;
 mod journal;
+mod latency;
 mod network;
 mod order_test;
+mod queue;
 mod signing;
 mod websocket;
 
@@ -15,7 +17,6 @@ use std::num::NonZeroU64;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc::sync_channel;
 use std::thread;
 use std::time::Duration;
 
@@ -23,7 +24,9 @@ use anyhow::{Context, Result, anyhow, ensure};
 use clap::{Parser, Subcommand, builder::NonEmptyStringValueParser};
 use rust_decimal::Decimal;
 
-use crate::journal::{JournalReader, JournalWriter};
+use crate::latency::Latency;
+use crate::network::reactor::Reactor;
+use crate::queue::{RecordSource, command_queue, file_queue};
 
 #[derive(Parser)]
 #[command(about = "Record a Hyperliquid book and replay its midpoints")]
@@ -42,6 +45,9 @@ enum Command {
         duration_secs: NonZeroU64,
         #[arg(long)]
         log: PathBuf,
+        /// Print latency sample counts and percentiles to stderr.
+        #[arg(long)]
+        latency: bool,
     },
     /// Place and cancel one post-only order on Hyperliquid testnet.
     OrderTest {
@@ -57,6 +63,9 @@ enum Command {
         max_notional: Decimal,
         #[arg(long)]
         log: PathBuf,
+        /// Print latency sample counts and percentiles to stderr.
+        #[arg(long)]
+        latency: bool,
     },
     /// Replay a finished journal offline and verify any recorded order intents.
     Replay {
@@ -71,16 +80,21 @@ fn main() -> Result<()> {
             coin,
             duration_secs,
             log,
+            latency,
         } => {
             let file = create_journal(&log)?;
-            let reader = open_journal(&log)?;
+            let clock = Arc::new(Latency::new());
+            let (journal, reader) = file_queue(file, read_journal(&log)?, Arc::clone(&clock));
+            let reactor = Reactor::new()?;
+            let waker = reactor.waker();
             let stop = Arc::new(AtomicBool::new(false));
             let worker_stop = Arc::clone(&stop);
             let worker = thread::Builder::new()
                 .name("hyperliquid-network".into())
                 .spawn(move || {
                     network::capture(
-                        JournalWriter::new(file),
+                        reactor,
+                        journal,
                         &coin,
                         Duration::from_secs(duration_secs.get()),
                         &worker_stop,
@@ -91,10 +105,14 @@ fn main() -> Result<()> {
             let result = engine::run(reader, || worker.is_finished(), io::stdout().lock());
             if result.is_err() {
                 stop.store(true, Ordering::Relaxed);
+                let _ = waker.wake();
             }
             let worker_result = worker
                 .join()
                 .map_err(|_| anyhow!("network worker panicked"))?;
+            if latency {
+                clock.write_summary(io::stderr().lock())?;
+            }
             result.and(worker_result)
         }
         Command::OrderTest {
@@ -104,24 +122,31 @@ fn main() -> Result<()> {
             size,
             max_notional,
             log,
+            latency,
         } => {
             let config = order_test::Config::new(account, coin, price, size, max_notional)?;
-            run_order_test(config, &log)
+            run_order_test(config, &log, latency)
         }
-        Command::Replay { log } => engine::run(open_journal(&log)?, || true, io::stdout().lock()),
+        Command::Replay { log } => engine::run(
+            RecordSource::replay(read_journal(&log)?),
+            || true,
+            io::stdout().lock(),
+        ),
     }
 }
 
-fn run_order_test(config: order_test::Config, log: &std::path::Path) -> Result<()> {
+fn run_order_test(config: order_test::Config, log: &std::path::Path, latency: bool) -> Result<()> {
     let signer = signing::Signer::from_env(&config.account)?;
     let file = create_journal(log)?;
-    let reader = open_journal(log)?;
+    let clock = Arc::new(Latency::new());
+    let (journal, reader) = file_queue(file, read_journal(log)?, Arc::clone(&clock));
+    let reactor = Reactor::new()?;
     let cloid = config.cloid.clone();
     eprintln!("Hyperliquid testnet client order ID {cloid}");
-    let (sender, receiver) = sync_channel(8);
+    let (sender, receiver) = command_queue(8, reactor.waker());
     let worker = thread::Builder::new()
         .name("hyperliquid-network".into())
-        .spawn(move || network::trading::run(JournalWriter::new(file), config, signer, receiver))
+        .spawn(move || network::trading::run(reactor, journal, config, signer, receiver))
         .context("start testnet network worker")?;
 
     // A closed stdout must never interrupt order reconciliation.
@@ -133,6 +158,9 @@ fn run_order_test(config: order_test::Config, log: &std::path::Path) -> Result<(
     io::stdout()
         .write_all(&output)
         .context("write order-test output")?;
+    if latency {
+        clock.write_summary(io::stderr().lock())?;
+    }
     worker_result?;
     let outcome = result?;
     ensure!(
@@ -150,7 +178,6 @@ fn create_journal(path: &std::path::Path) -> Result<File> {
         .with_context(|| format!("create journal {}", path.display()))
 }
 
-fn open_journal(path: &std::path::Path) -> Result<JournalReader> {
-    let file = File::open(path).with_context(|| format!("open journal {}", path.display()))?;
-    Ok(JournalReader::new(file))
+fn read_journal(path: &std::path::Path) -> Result<File> {
+    File::open(path).with_context(|| format!("open journal {}", path.display()))
 }

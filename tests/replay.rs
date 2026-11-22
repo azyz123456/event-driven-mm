@@ -50,8 +50,8 @@ fn replay_rejects_bad_journal_metadata_and_sequence() -> std::io::Result<()> {
         (String::new(), "journal is missing session_start"),
         ("{\"seq\":0}\n".into(), "decode journal line 1"),
         (
-            format!("{}\n", header.replace("\"version\":1", "\"version\":3")),
-            "unsupported journal format 3",
+            format!("{}\n", header.replace("\"version\":1", "\"version\":4")),
+            "unsupported journal format 4",
         ),
         (
             format!("{}\n", header.replace("\"version\":1", "\"version\":2")),

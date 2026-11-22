@@ -1,6 +1,8 @@
-use std::net::TcpListener;
+use std::io::{Read, Write};
+use std::net::{TcpListener, TcpStream as StdTcpStream};
 use std::thread;
 
+use anyhow::ensure;
 use base64::{Engine, engine::general_purpose::STANDARD};
 use rustls::pki_types::PrivatePkcs8KeyDer;
 use rustls::{ServerConfig, ServerConnection, StreamOwned};
@@ -10,8 +12,10 @@ use super::*;
 use crate::engine;
 use crate::event::{HttpBytes, Record};
 use crate::journal::JournalReader;
+use crate::latency::Latency;
+use crate::queue::{RecordSource, file_queue};
 
-type PeerStream = StreamOwned<ServerConnection, TcpStream>;
+type PeerStream = StreamOwned<ServerConnection, StdTcpStream>;
 const SOCKET_TIMEOUT: Duration = Duration::from_secs(5);
 const NORMAL_CLOSE: [u8; 2] = 1000_u16.to_be_bytes();
 const BOOK: &[u8] = br#"{"channel":"l2Book","data":{"coin":"BTC","levels":[[{"px":"99","sz":"1"}],[{"px":"101.005","sz":"2"}]]}}"#;
@@ -83,6 +87,38 @@ fn records_a_loopback_tls_session_and_replays_its_exact_output() -> Result<()> {
         format!("{},100.0025\n", book_record.local_time_unix_ms).as_bytes()
     );
     assert_eq!(session.replayed, session.live);
+    let timing = |predicate: fn(&Event) -> bool| {
+        session
+            .records
+            .iter()
+            .find(|record| predicate(&record.event))
+            .and_then(|record| record.receive_timing)
+            .context("missing receive batch timing")
+    };
+    let upgrade = timing(|event| matches!(event, Event::HttpResponse { .. }))?;
+    let read_ahead = timing(
+        |event| matches!(event, Event::WsIn { message: Message::Ping(bytes) } if bytes == b"upgrade read-ahead"),
+    )?;
+    let interleaved = timing(
+        |event| matches!(event, Event::WsIn { message: Message::Ping(bytes) } if bytes == b"inside fragmented message"),
+    )?;
+    let book_timing = book_record
+        .receive_timing
+        .context("missing book receive timing")?;
+    assert_eq!(upgrade.batch_id, read_ahead.batch_id);
+    assert!(book_timing.batch_id > interleaved.batch_id);
+    for stamp in [upgrade, read_ahead, interleaved, book_timing] {
+        assert!(stamp.decoded_elapsed_ns >= stamp.read_elapsed_ns);
+        assert!(stamp.read_unix_ns.is_some());
+        #[cfg(target_os = "linux")]
+        assert!(
+            stamp.kernel_rx_unix_ns.is_some(),
+            "Linux loopback timestamp missing for batch {}",
+            stamp.batch_id
+        );
+        #[cfg(not(target_os = "linux"))]
+        assert!(stamp.kernel_rx_unix_ns.is_none());
+    }
     assert!(matches!(
         session.records.last().map(|record| &record.event),
         Some(Event::TcpClose { reason }) if reason == "peer_closed"
@@ -151,6 +187,37 @@ fn replies_to_ping_during_shutdown_and_rejects_a_truncated_frame_at_tls_eof() ->
     Ok(())
 }
 
+#[test]
+fn records_a_strategy_timer_on_an_idle_connection() -> Result<()> {
+    let session = run_local(Duration::from_millis(1100), |mut peer, _| {
+        let request = read_upgrade_request(&mut peer)?;
+        peer.write_all(&upgrade_response(&request)?)?;
+        assert_eq!(read_client_frame(&mut peer)?.0, 0x81);
+        assert_eq!(read_client_frame(&mut peer)?, (0x88, NORMAL_CLOSE.to_vec()));
+        peer.write_all(&server_frame(0x88, &NORMAL_CLOSE))?;
+        Ok(())
+    })?;
+    session.capture_result?;
+    let strategy_ticks: Vec<_> = session
+        .records
+        .iter()
+        .filter_map(|record| match record.event {
+            Event::Timer {
+                kind: TimerKind::StrategySecond,
+                scheduled_elapsed_ns,
+                fired_elapsed_ns,
+                missed_intervals,
+            } => Some((scheduled_elapsed_ns, fired_elapsed_ns, missed_intervals)),
+            _ => None,
+        })
+        .collect();
+    assert!(
+        matches!(strategy_ticks.as_slice(), [(scheduled, fired, 0)] if *scheduled >= 1_000_000_000 && fired >= scheduled)
+    );
+    assert!(session.live.is_empty() && session.replayed.is_empty());
+    Ok(())
+}
+
 struct LocalCapture {
     capture_result: Result<()>,
     records: Vec<Record>,
@@ -163,7 +230,9 @@ fn run_local(
     serve: impl FnOnce(PeerStream, JournalReader) -> Result<()> + Send,
 ) -> Result<LocalCapture> {
     let listener = TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, 0))?;
-    let client = TcpStream::connect(listener.local_addr()?)?;
+    let client = StdTcpStream::connect(listener.local_addr()?)?;
+    client.set_nonblocking(true)?;
+    let client = TcpStream::from_std(client);
     let (peer_socket, _) = listener.accept()?;
     peer_socket.set_nodelay(true)?;
     peer_socket.set_read_timeout(Some(SOCKET_TIMEOUT))?;
@@ -182,20 +251,22 @@ fn run_local(
     let peer = StreamOwned::new(ServerConnection::new(Arc::new(server_config))?, peer_socket);
 
     let file = tempfile::NamedTempFile::new()?;
-    let writer = JournalWriter::new(file.reopen()?);
+    let (writer, live_reader) =
+        file_queue(file.reopen()?, file.reopen()?, Arc::new(Latency::new()));
+    let reactor = Reactor::new()?;
     let peer_reader = JournalReader::new(file.reopen()?);
-    let live_reader = JournalReader::new(file.reopen()?);
     let stop = AtomicBool::new(false);
     let mut live = Vec::new();
     let capture_result = thread::scope(|scope| -> Result<_> {
         let mock = scope.spawn(move || serve(peer, peer_reader));
         let worker = scope.spawn(|| {
             capture_session(
+                reactor,
                 writer,
                 "BTC",
                 duration,
                 &stop,
-                || Ok(client),
+                |_, _| Ok(client),
                 client_config(roots),
             )
         });
@@ -208,7 +279,7 @@ fn run_local(
     })?;
 
     let mut replayed = Vec::new();
-    engine::run(JournalReader::new(file.reopen()?), || true, &mut replayed)?;
+    engine::run(RecordSource::replay(file.reopen()?), || true, &mut replayed)?;
     let mut reader = JournalReader::new(file.reopen()?);
     let mut records = Vec::new();
     while let Some(record) = reader.next_record()? {

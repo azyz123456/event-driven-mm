@@ -4,7 +4,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result, ensure};
 
-use crate::event::{Event, Record};
+use crate::event::{Event, ReceiveTiming, Record};
 
 pub struct JournalWriter {
     file: File,
@@ -23,8 +23,9 @@ impl JournalWriter {
         }
     }
 
-    pub fn append(&mut self, connection_id: Option<u64>, event: Event) -> Result<()> {
-        self.append_at(SystemTime::now(), connection_id, event)
+    #[cfg(test)]
+    fn append(&mut self, connection_id: Option<u64>, event: Event) -> Result<u64> {
+        self.append_at(SystemTime::now(), connection_id, None, event)
     }
 
     pub fn sync(&self) -> Result<()> {
@@ -37,14 +38,16 @@ impl JournalWriter {
         &mut self,
         time: SystemTime,
         connection_id: Option<u64>,
+        receive_timing: Option<ReceiveTiming>,
         event: Event,
-    ) -> Result<()> {
+    ) -> Result<u64> {
         ensure!(!self.write_failed, "a journal write already failed");
         let local_time_unix_ms = time.duration_since(UNIX_EPOCH)?.as_millis().try_into()?;
         let record = Record {
             seq: self.next_seq,
             local_time_unix_ms,
             connection_id,
+            receive_timing,
             event,
         };
 
@@ -56,7 +59,7 @@ impl JournalWriter {
             return Err(error).with_context(|| format!("append journal record {}", self.next_seq));
         }
         self.next_seq += 1;
-        Ok(())
+        Ok(record.seq)
     }
 }
 

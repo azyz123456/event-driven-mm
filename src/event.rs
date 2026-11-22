@@ -8,6 +8,7 @@ use crate::order_test::{Config, Input, Outcome};
 
 pub const FORMAT_VERSION: u32 = 1;
 pub const ORDER_FORMAT_VERSION: u32 = 2;
+pub const REACTOR_FORMAT_VERSION: u32 = 3;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Record {
@@ -15,6 +16,8 @@ pub struct Record {
     pub local_time_unix_ms: u64,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub connection_id: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub receive_timing: Option<ReceiveTiming>,
     #[serde(flatten)]
     pub event: Event,
 }
@@ -68,6 +71,35 @@ pub enum Event {
     OrderOutcome {
         outcome: Outcome,
     },
+    Timer {
+        kind: TimerKind,
+        scheduled_elapsed_ns: u64,
+        fired_elapsed_ns: u64,
+        missed_intervals: u64,
+    },
+    TxFirstWrite {
+        intent_id: u64,
+        enqueued_elapsed_ns: u64,
+        first_write_elapsed_ns: u64,
+    },
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TimerKind {
+    StrategySecond,
+    OrderDeadlineCheck,
+    Heartbeat,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
+pub struct ReceiveTiming {
+    pub batch_id: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kernel_rx_unix_ns: Option<u64>,
+    pub read_unix_ns: Option<u64>,
+    pub read_elapsed_ns: u64,
+    pub decoded_elapsed_ns: u64,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

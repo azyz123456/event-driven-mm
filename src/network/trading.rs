@@ -1,49 +1,60 @@
 use std::collections::BTreeMap;
-use std::sync::mpsc::{Receiver, TryRecvError};
+use std::sync::mpsc::TryRecvError;
 
+use anyhow::ensure;
 use rust_decimal::Decimal;
 
-use crate::event::ORDER_FORMAT_VERSION;
 use crate::hyperliquid::trading::{self as protocol, Request};
 use crate::hyperliquid::{TESTNET_ENDPOINT, TESTNET_HOST};
 use crate::intent::{Action, Intent};
 use crate::order_test::{Command, Config, Input, Stream};
+use crate::queue::{CommandsIn, Queued};
 use crate::signing::Signer;
 
+use super::connection::{Incoming, TxTicket};
 use super::*;
+use crate::websocket;
 
-const DISPATCH_POLL: Duration = Duration::from_millis(25);
 const CLOCK_INTERVAL: Duration = Duration::from_millis(100);
 const RESPONSE_TO_DISCONNECT: Duration = Duration::from_secs(3);
 
 pub fn run(
-    journal: JournalWriter,
+    reactor: Reactor,
+    journal: RecordSink,
     config: Config,
     signer: Signer,
-    commands: Receiver<Command>,
+    commands: CommandsIn<Command>,
 ) -> Result<()> {
+    let addresses = resolve(TESTNET_HOST);
     run_with(
+        reactor,
         journal,
         config,
         signer,
         commands,
-        || connect_to(TESTNET_HOST),
+        |reactor, deadline| {
+            let addresses = addresses
+                .as_ref()
+                .map_err(|error| anyhow::anyhow!("{error:#}"))?;
+            reactor.connect(addresses, deadline)
+        },
         public_tls_config(),
     )
 }
 
 pub(super) fn run_with(
-    mut journal: JournalWriter,
+    mut reactor: Reactor,
+    mut journal: RecordSink,
     config: Config,
     signer: Signer,
-    commands: Receiver<Command>,
-    mut connect: impl FnMut() -> Result<TcpStream>,
+    commands: CommandsIn<Command>,
+    mut connect: impl FnMut(&mut Reactor, Instant) -> Result<TcpStream>,
     tls_config: Arc<ClientConfig>,
 ) -> Result<()> {
     journal.append(
         None,
         Event::SessionStart {
-            version: ORDER_FORMAT_VERSION,
+            version: REACTOR_FORMAT_VERSION,
             endpoint: TESTNET_ENDPOINT.into(),
             coin: config.coin.clone(),
             order_test: Some(config.clone()),
@@ -57,7 +68,6 @@ pub(super) fn run_with(
         commands,
         pending: BTreeMap::new(),
         next_request_id: 1,
-        started: Instant::now(),
         connection: 1,
         latest_bid: None,
         last_status_response: 0,
@@ -66,8 +76,8 @@ pub(super) fn run_with(
     };
 
     loop {
-        let result = match connect() {
-            Ok(socket) => worker.connected(socket, Arc::clone(&tls_config)),
+        let result = match connect(&mut reactor, Instant::now() + SETUP_TIMEOUT) {
+            Ok(socket) => worker.connected(&mut reactor, socket, Arc::clone(&tls_config)),
             Err(error) => {
                 worker.record(Event::TcpConnectFailed {
                     error: format!("{error:#}"),
@@ -87,7 +97,7 @@ pub(super) fn run_with(
         if !may_reconnect {
             worker.input(Input::RecoveryUnavailable { reason })?;
         }
-        if !worker.await_recovery(may_reconnect)? {
+        if !worker.await_recovery(&mut reactor, may_reconnect)? {
             return Ok(());
         }
         worker.connection += 1;
@@ -98,13 +108,12 @@ pub(super) fn run_with(
 }
 
 struct Worker {
-    journal: JournalWriter,
+    journal: RecordSink,
     config: Config,
     signer: Signer,
-    commands: Receiver<Command>,
+    commands: CommandsIn<Command>,
     pending: BTreeMap<u64, Request>,
     next_request_id: u64,
-    started: Instant,
     connection: u64,
     latest_bid: Option<Decimal>,
     last_status_response: u64,
@@ -113,72 +122,94 @@ struct Worker {
 }
 
 impl Worker {
-    fn connected(&mut self, mut socket: TcpStream, tls_config: Arc<ClientConfig>) -> Result<()> {
-        let open = Event::TcpOpen {
-            local_addr: socket.local_addr()?,
-            peer_addr: socket.peer_addr()?,
-        };
-        self.record(open)?;
-        let result = self.session(&mut socket, tls_config);
-        let _ = socket.shutdown(Shutdown::Both);
-        drop(socket);
+    fn connected(
+        &mut self,
+        reactor: &mut Reactor,
+        socket: TcpStream,
+        config: Arc<ClientConfig>,
+    ) -> Result<()> {
+        let mut connection = Connection::open(
+            socket,
+            reactor,
+            self.connection,
+            TESTNET_HOST,
+            config,
+            &mut self.journal,
+            Instant::now() + SETUP_TIMEOUT,
+        )?;
+        let result = self.session(reactor, &mut connection);
         let reason = match &result {
             Ok(()) => "order_test_finished".into(),
             Err(error) => format!("{error:#}"),
         };
-        self.record(Event::TcpClose { reason })?;
-        result
+        let shutdown = if result.is_ok() {
+            flush_close(reactor, &mut connection, &mut self.journal)
+        } else {
+            Ok(())
+        };
+        let closed = connection.close(reactor, &mut self.journal, reason);
+        result.and(shutdown).and(closed)
     }
 
-    fn session(&mut self, socket: &mut TcpStream, config: Arc<ClientConfig>) -> Result<()> {
-        socket.set_nodelay(true)?;
-        socket.set_write_timeout(Some(WRITE_TIMEOUT))?;
-        let mut tls = TlsSocket::new(socket, config, TESTNET_HOST)?;
-        let deadline = Instant::now() + SETUP_TIMEOUT;
-        tls.handshake(deadline)?;
-        let mut messages = IncomingMessages::new(upgrade(
-            &mut tls,
-            &mut self.journal,
-            deadline,
-            TESTNET_HOST,
-            Some(self.connection),
-        )?);
+    fn session(&mut self, reactor: &mut Reactor, connection: &mut Connection) -> Result<()> {
+        self.bootstrap(connection)?;
+        let start = Instant::now();
+        let mut clock = Periodic::new(TimerKind::OrderDeadlineCheck, CLOCK_INTERVAL, start);
+        let mut second = Periodic::new(TimerKind::StrategySecond, STRATEGY_INTERVAL, start);
+        let mut heartbeat = Periodic::new(TimerKind::Heartbeat, HEARTBEAT_INTERVAL, start);
 
-        self.bootstrap(&mut tls)?;
-        let mut next_tick = Instant::now();
-        let mut next_heartbeat = next_tick + HEARTBEAT_INTERVAL;
         loop {
-            match self.commands.try_recv() {
-                Ok(Command::Finish(outcome)) => {
-                    self.record(Event::OrderOutcome { outcome })?;
-                    let _ = self.send(&mut tls, Message::Close(1000_u16.to_be_bytes().to_vec()));
-                    tls.connection.send_close_notify();
-                    let _ = tls.flush_records();
-                    return Ok(());
-                }
-                Ok(command) => self.dispatch(&mut tls, command)?,
-                Err(TryRecvError::Empty) => {}
-                Err(TryRecvError::Disconnected) => bail!("order engine closed its command channel"),
+            for _ in 0..MESSAGE_BUDGET {
+                let Some(incoming) = connection.next_message()? else {
+                    break;
+                };
+                self.received(connection, incoming)?;
+            }
+            if connection.eof() {
+                bail!("TLS stream ended during order test");
             }
 
             let now = Instant::now();
-            if now >= next_tick {
-                self.input(Input::Tick)?;
-                next_tick = now + CLOCK_INTERVAL;
+            for timer in [&mut clock, &mut second] {
+                if let Some(tick) = timer.fire(now, self.journal.latency()) {
+                    self.record(tick)?;
+                }
             }
-            if now >= next_heartbeat {
-                self.send(&mut tls, Message::Text(r#"{"method":"ping"}"#.into()))?;
-                next_heartbeat = now + HEARTBEAT_INTERVAL;
+            if let Some(tick) = heartbeat.fire(now, self.journal.latency()) {
+                self.record(tick)?;
+                self.send(connection, Message::Text(r#"{"method":"ping"}"#.into()))?;
             }
-            match messages.receive(&mut tls, (now + DISPATCH_POLL).min(next_tick))? {
-                Receive::Message(message) => self.received(&mut tls, message)?,
-                Receive::Eof => bail!("TLS stream ended during order test"),
-                Receive::Timeout => {}
+
+            let mut until = clock
+                .deadline()
+                .min(second.deadline())
+                .min(heartbeat.deadline());
+            for i in 0..MESSAGE_BUDGET {
+                match self.commands.try_recv() {
+                    Ok(Queued {
+                        value: Command::Finish(outcome),
+                        ..
+                    }) => {
+                        self.record(Event::OrderOutcome { outcome })?;
+                        let _ =
+                            self.send(connection, Message::Close(1000_u16.to_be_bytes().to_vec()));
+                        return Ok(());
+                    }
+                    Ok(command) => self.dispatch(connection, command)?,
+                    Err(TryRecvError::Empty) => break,
+                    Err(TryRecvError::Disconnected) => {
+                        bail!("order engine closed its command channel")
+                    }
+                }
+                if i + 1 == MESSAGE_BUDGET {
+                    until = Instant::now();
+                }
             }
+            reactor.service(connection, until, &mut self.journal)?;
         }
     }
 
-    fn bootstrap(&mut self, tls: &mut TlsSocket<'_>) -> Result<()> {
+    fn bootstrap(&mut self, tls: &mut Connection) -> Result<()> {
         if self.connection == 1 {
             self.send(
                 tls,
@@ -200,13 +231,17 @@ impl Worker {
         Ok(())
     }
 
-    fn await_recovery(&mut self, may_reconnect: bool) -> Result<bool> {
+    fn await_recovery(&mut self, reactor: &mut Reactor, may_reconnect: bool) -> Result<bool> {
         let deadline = Instant::now() + RESPONSE_TO_DISCONNECT;
         loop {
-            let command = self
-                .commands
-                .recv_timeout(deadline.saturating_duration_since(Instant::now()))
-                .context("await order engine after disconnect")?;
+            let command = match self.commands.try_recv() {
+                Ok(queued) => queued.value,
+                Err(TryRecvError::Empty) if Instant::now() < deadline => {
+                    reactor.park(deadline)?;
+                    continue;
+                }
+                Err(error) => return Err(error).context("await order engine after disconnect"),
+            };
             match command {
                 Command::Finish(outcome) => {
                     self.record(Event::OrderOutcome { outcome })?;
@@ -227,9 +262,9 @@ impl Worker {
         }
     }
 
-    fn dispatch(&mut self, tls: &mut TlsSocket<'_>, command: Command) -> Result<()> {
-        match command {
-            Command::Trade(intent) => self.trade(tls, intent),
+    fn dispatch(&mut self, tls: &mut Connection, command: Queued<Command>) -> Result<()> {
+        match command.value {
+            Command::Trade(intent) => self.trade(tls, intent, command.enqueued_at),
             Command::QueryStatus if self.agent_verified => self.info(tls, Request::Status),
             Command::QueryStatus => Ok(()),
             Command::VerifyAccount => {
@@ -243,7 +278,7 @@ impl Worker {
         }
     }
 
-    fn info(&mut self, tls: &mut TlsSocket<'_>, request: Request) -> Result<()> {
+    fn info(&mut self, tls: &mut Connection, request: Request) -> Result<()> {
         let id = self.assign_request(request);
         self.send(
             tls,
@@ -251,7 +286,7 @@ impl Worker {
         )
     }
 
-    fn trade(&mut self, tls: &mut TlsSocket<'_>, intent: Intent) -> Result<()> {
+    fn trade(&mut self, tls: &mut Connection, intent: Intent, enqueued_at: Instant) -> Result<()> {
         let intent_id = intent.id;
         let action = intent.action.clone();
         self.record(Event::IntentQueued {
@@ -310,11 +345,30 @@ impl Worker {
             action: signed.action,
         })?;
         self.journal.sync()?;
-        tls.write(&bytes).context("send signed testnet action")
+        if let Action::Place { book_at_ms, .. } = intent.action
+            && self.elapsed_ms().saturating_sub(book_at_ms) > self.config.timings.max_book_age_ms
+        {
+            self.pending.remove(&request_id);
+            return self.input(Input::PlaceNotSent {
+                reason: "place intent expired during journal sync".into(),
+            });
+        }
+        tls.queue_bytes(
+            &bytes,
+            Some(TxTicket {
+                intent_id,
+                enqueued_at,
+            }),
+        )
+        .context("queue signed testnet action")
     }
 
-    fn received(&mut self, tls: &mut TlsSocket<'_>, message: Message) -> Result<()> {
-        let received_at = SystemTime::now();
+    fn received(&mut self, tls: &mut Connection, incoming: Incoming) -> Result<()> {
+        let Incoming {
+            message,
+            wall,
+            timing,
+        } = incoming;
         let connection = Some(self.connection);
         let message = match message {
             Message::Text(text) => {
@@ -323,7 +377,7 @@ impl Worker {
                 protocol::redact(&mut value);
                 let message = Message::Text(value.to_string());
                 self.journal
-                    .append_at(received_at, connection, Event::WsIn { message })?;
+                    .append_at(wall, connection, Some(timing), Event::WsIn { message })?;
                 let request = protocol::response_id(&value)?.and_then(|id| self.take_request(id));
                 for observation in protocol::observations(&value, request, &self.config)? {
                     if matches!(observation, Input::AgentVerified) {
@@ -353,7 +407,7 @@ impl Worker {
         };
         let closed = matches!(message, Message::Close(_));
         self.journal
-            .append_at(received_at, connection, Event::WsIn { message })?;
+            .append_at(wall, connection, Some(timing), Event::WsIn { message })?;
         if let Some(reply) = reply {
             self.send(tls, reply)?;
         }
@@ -387,16 +441,12 @@ impl Worker {
         Some(request)
     }
 
-    fn send(&mut self, tls: &mut TlsSocket<'_>, message: Message) -> Result<()> {
-        send_on(tls, &mut self.journal, Some(self.connection), message)
+    fn send(&mut self, tls: &mut Connection, message: Message) -> Result<()> {
+        tls.send(&mut self.journal, message)
     }
 
     fn elapsed_ms(&self) -> u64 {
-        self.started
-            .elapsed()
-            .as_millis()
-            .try_into()
-            .unwrap_or(u64::MAX)
+        self.journal.latency().elapsed_ns(Instant::now()) / 1_000_000
     }
 
     fn input(&mut self, input: Input) -> Result<()> {
