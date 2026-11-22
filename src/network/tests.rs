@@ -231,6 +231,10 @@ fn next_event(reader: &mut JournalReader) -> Result<Event> {
 }
 
 fn read_upgrade_request(peer: &mut PeerStream) -> Result<String> {
+    read_upgrade_request_for_host(peer, HOST)
+}
+
+fn read_upgrade_request_for_host(peer: &mut PeerStream, host: &str) -> Result<String> {
     let mut request = Vec::new();
     while !request.ends_with(b"\r\n\r\n") {
         ensure!(request.len() < 4096, "test upgrade request is too long");
@@ -239,7 +243,7 @@ fn read_upgrade_request(peer: &mut PeerStream) -> Result<String> {
         request.push(byte[0]);
     }
     let request = String::from_utf8(request)?;
-    assert!(request.starts_with("GET /ws HTTP/1.1\r\nHost: api.hyperliquid.xyz\r\n"));
+    assert!(request.starts_with(&format!("GET /ws HTTP/1.1\r\nHost: {host}\r\n")));
     Ok(request)
 }
 
@@ -273,17 +277,24 @@ fn server_frame(flags_and_opcode: u8, payload: &[u8]) -> Vec<u8> {
 fn read_client_frame(peer: &mut PeerStream) -> Result<(u8, Vec<u8>)> {
     let mut header = [0; 2];
     peer.read_exact(&mut header)?;
-    let length = header[1] & 0x7f;
-    ensure!(
-        header[1] & 0x80 != 0 && length <= 125,
-        "expected a short masked client frame"
-    );
+    ensure!(header[1] & 0x80 != 0, "expected a masked client frame");
+    let length = match header[1] & 0x7f {
+        126 => {
+            let mut length = [0; 2];
+            peer.read_exact(&mut length)?;
+            usize::from(u16::from_be_bytes(length))
+        }
+        127 => bail!("test client sent a long frame"),
+        length => usize::from(length),
+    };
     let mut key = [0; 4];
     peer.read_exact(&mut key)?;
-    let mut payload = vec![0; usize::from(length)];
+    let mut payload = vec![0; length];
     peer.read_exact(&mut payload)?;
     for (byte, mask) in payload.iter_mut().zip(key.into_iter().cycle()) {
         *byte ^= mask;
     }
     Ok((header[0], payload))
 }
+
+mod order_tests;

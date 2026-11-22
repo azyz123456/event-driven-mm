@@ -5,7 +5,10 @@ use serde_json::{json, value::RawValue};
 
 pub const HOST: &str = "api.hyperliquid.xyz";
 pub const ENDPOINT: &str = "wss://api.hyperliquid.xyz/ws";
+pub const TESTNET_HOST: &str = "api.hyperliquid-testnet.xyz";
+pub const TESTNET_ENDPOINT: &str = "wss://api.hyperliquid-testnet.xyz/ws";
 pub const PATH: &str = "/ws";
+pub mod trading;
 const BOOK_CHANNEL: &str = "l2Book";
 
 #[derive(Debug, Deserialize)]

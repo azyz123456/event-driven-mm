@@ -64,21 +64,23 @@ impl Book {
     }
 }
 
-fn midpoint(snapshot: &Snapshot) -> Result<Option<Decimal>> {
+pub fn best_prices(snapshot: &Snapshot) -> Option<(Decimal, Decimal)> {
     let [bids, asks] = &snapshot.levels;
     let level_price = |level: &hyperliquid::Level| {
         (level.sz > Decimal::ZERO && level.px > Decimal::ZERO).then_some(level.px)
     };
     let best_bid = bids.iter().filter_map(level_price).max();
     let best_ask = asks.iter().filter_map(level_price).min();
-    match (best_bid, best_ask) {
-        (Some(bid), Some(ask)) if bid < ask => {
-            let price = bid
-                .checked_add(ask)
-                .and_then(|sum| sum.checked_div(Decimal::TWO))
-                .context("midpoint exceeds decimal range")?;
-            Ok(Some(price.normalize()))
-        }
-        _ => Ok(None),
-    }
+    best_bid.zip(best_ask).filter(|(bid, ask)| bid < ask)
+}
+
+fn midpoint(snapshot: &Snapshot) -> Result<Option<Decimal>> {
+    let Some((bid, ask)) = best_prices(snapshot) else {
+        return Ok(None);
+    };
+    let price = bid
+        .checked_add(ask)
+        .and_then(|sum| sum.checked_div(Decimal::TWO))
+        .context("midpoint exceeds decimal range")?;
+    Ok(Some(price.normalize()))
 }

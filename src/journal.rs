@@ -27,6 +27,12 @@ impl JournalWriter {
         self.append_at(SystemTime::now(), connection_id, event)
     }
 
+    pub fn sync(&self) -> Result<()> {
+        self.file
+            .sync_data()
+            .context("sync order journal before sending action")
+    }
+
     pub fn append_at(
         &mut self,
         time: SystemTime,

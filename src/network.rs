@@ -13,6 +13,8 @@ use crate::hyperliquid::{self, ENDPOINT, HOST, PATH};
 use crate::journal::JournalWriter;
 use crate::websocket::{self, MessageDecoder};
 
+pub mod trading;
+
 const CONNECTION: Option<u64> = Some(1);
 const SETUP_TIMEOUT: Duration = Duration::from_secs(10);
 const WRITE_TIMEOUT: Duration = Duration::from_secs(2);
@@ -28,12 +30,21 @@ pub fn capture(
     duration: Duration,
     stop: &AtomicBool,
 ) -> Result<()> {
-    let roots = RootCertStore {
-        roots: webpki_roots::TLS_SERVER_ROOTS.to_vec(),
-    };
-    capture_session(journal, coin, duration, stop, connect, client_config(roots))
+    capture_session(
+        journal,
+        coin,
+        duration,
+        stop,
+        || connect_to(HOST),
+        public_tls_config(),
+    )
 }
 
+fn public_tls_config() -> Arc<ClientConfig> {
+    client_config(RootCertStore {
+        roots: webpki_roots::TLS_SERVER_ROOTS.to_vec(),
+    })
+}
 fn client_config(roots: RootCertStore) -> Arc<ClientConfig> {
     Arc::new(
         ClientConfig::builder()
@@ -56,6 +67,7 @@ fn capture_session(
             version: FORMAT_VERSION,
             endpoint: ENDPOINT.into(),
             coin: coin.into(),
+            order_test: None,
         },
     )?;
 
@@ -94,10 +106,10 @@ fn capture_session(
     result.and(close_record)
 }
 
-fn connect() -> Result<TcpStream> {
+fn connect_to(host: &str) -> Result<TcpStream> {
     let deadline = Instant::now() + SETUP_TIMEOUT;
     let mut last_error = None;
-    for address in (HOST, 443)
+    for address in (host, 443)
         .to_socket_addrs()
         .context("resolve Hyperliquid address")?
     {
@@ -109,7 +121,7 @@ fn connect() -> Result<TcpStream> {
         }
     }
     Err(last_error.map_or_else(
-        || anyhow!("no socket address for {HOST}"),
+        || anyhow!("no socket address for {host}"),
         anyhow::Error::from,
     ))
     .context("connect to Hyperliquid")
@@ -125,10 +137,10 @@ fn run_session(
 ) -> Result<&'static str> {
     socket.set_nodelay(true)?;
     socket.set_write_timeout(Some(WRITE_TIMEOUT))?;
-    let mut tls = TlsSocket::new(socket, config)?;
+    let mut tls = TlsSocket::new(socket, config, HOST)?;
     let deadline = Instant::now() + SETUP_TIMEOUT;
     tls.handshake(deadline)?;
-    let unread = upgrade(&mut tls, journal, deadline)?;
+    let unread = upgrade(&mut tls, journal, deadline, HOST, CONNECTION)?;
     let reason = capture_messages(&mut tls, journal, unread, coin, duration, stop)?;
     tls.connection.send_close_notify();
     let _ = tls.flush_records();
@@ -139,10 +151,12 @@ fn upgrade(
     tls: &mut TlsSocket<'_>,
     journal: &mut JournalWriter,
     deadline: Instant,
+    host: &str,
+    connection: Option<u64>,
 ) -> Result<Vec<u8>> {
-    let (request, key) = websocket::upgrade_request(HOST, PATH)?;
+    let (request, key) = websocket::upgrade_request(host, PATH)?;
     journal.append(
-        CONNECTION,
+        connection,
         Event::HttpRequest {
             raw: request.as_bytes().to_vec().into(),
         },
@@ -171,7 +185,7 @@ fn upgrade(
             );
             journal.append_at(
                 received_at,
-                CONNECTION,
+                connection,
                 Event::HttpResponse {
                     raw: response[..end].to_vec().into(),
                 },
@@ -259,8 +273,17 @@ fn capture_messages(
 }
 
 fn send(tls: &mut TlsSocket<'_>, journal: &mut JournalWriter, message: Message) -> Result<()> {
+    send_on(tls, journal, CONNECTION, message)
+}
+
+fn send_on(
+    tls: &mut TlsSocket<'_>,
+    journal: &mut JournalWriter,
+    connection: Option<u64>,
+    message: Message,
+) -> Result<()> {
     let bytes = websocket::encode(&message)?;
-    journal.append(CONNECTION, Event::WsOut { message })?;
+    journal.append(connection, Event::WsOut { message })?;
     tls.write(&bytes).context("send WebSocket message")
 }
 
@@ -331,8 +354,12 @@ enum ReadResult {
 }
 
 impl<'a> TlsSocket<'a> {
-    fn new(socket: &'a mut TcpStream, config: Arc<ClientConfig>) -> Result<Self> {
-        let connection = ClientConnection::new(config, ServerName::try_from(HOST)?)?;
+    fn new(
+        socket: &'a mut TcpStream,
+        config: Arc<ClientConfig>,
+        host: &'static str,
+    ) -> Result<Self> {
+        let connection = ClientConnection::new(config, ServerName::try_from(host)?)?;
         Ok(Self {
             socket,
             connection,

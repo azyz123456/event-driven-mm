@@ -3,7 +3,11 @@ use std::net::SocketAddr;
 use base64::{Engine, engine::general_purpose::STANDARD};
 use serde::{Deserialize, Serialize};
 
+use crate::intent::Intent;
+use crate::order_test::{Config, Input, Outcome};
+
 pub const FORMAT_VERSION: u32 = 1;
+pub const ORDER_FORMAT_VERSION: u32 = 2;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Record {
@@ -22,6 +26,8 @@ pub enum Event {
         version: u32,
         endpoint: String,
         coin: String,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        order_test: Option<Config>,
     },
     TcpConnectFailed {
         error: String,
@@ -44,6 +50,23 @@ pub enum Event {
     },
     WsOut {
         message: Message,
+    },
+    OrderInput {
+        elapsed_ms: u64,
+        input: Input,
+    },
+    IntentQueued {
+        intent: Intent,
+    },
+    ActionPrepared {
+        intent_id: u64,
+        request_id: u64,
+        nonce: u64,
+        expires_after: u64,
+        action: serde_json::Value,
+    },
+    OrderOutcome {
+        outcome: Outcome,
     },
 }
 
