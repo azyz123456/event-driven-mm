@@ -283,3 +283,128 @@ fn research_export_uses_monotonic_times_and_journal_sequences() -> Result<()> {
     );
     Ok(())
 }
+
+#[test]
+fn value_signal_widens_only_selected_side_without_looking_ahead() -> anyhow::Result<()> {
+    use std::io::Write;
+    let tmp = tempfile::tempdir()?;
+    let model_path = tmp.path().join("model.json");
+    let signal_path = tmp.path().join("signal.csv");
+    let trace_path = tmp.path().join("trace.jsonl");
+    let mut config: serde_json::Value =
+        serde_json::from_str(include_str!("../examples/simulation.json"))?;
+    let mut wider = config["scenarios"][0].clone();
+    wider["name"] = "wider".into();
+    wider["value_signal_max_age_ms"] = 250.into();
+    config["scenarios"] = serde_json::json!([config["scenarios"][0].clone(), wider]);
+    std::fs::write(&model_path, serde_json::to_string(&config)?)?;
+    writeln!(
+        std::fs::File::create(&signal_path)?,
+        "available_us,bid_widen_bps,ask_widen_bps\n40000,10,0"
+    )?;
+    let result = std::process::Command::new(env!("CARGO_BIN_EXE_event-driven-mm"))
+        .args([
+            "simulate",
+            "--mode",
+            "closed-loop",
+            "--log",
+            "tests/fixtures/sim-public.jsonl",
+            "--config",
+        ])
+        .arg(model_path)
+        .arg("--quote-signal")
+        .arg(signal_path)
+        .arg("--trace")
+        .arg(&trace_path)
+        .output()?;
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let trace = std::fs::read_to_string(trace_path)?;
+    let first = trace
+        .lines()
+        .map(serde_json::from_str::<serde_json::Value>)
+        .collect::<Result<Vec<_>, _>>()?;
+    for row in first
+        .iter()
+        .filter(|row| row["event"] == "quote_opportunity" && row["scenario"] == "wider")
+    {
+        let at = row["at_us"].as_u64().unwrap();
+        let bps = row["data"]["widen_bps"]
+            .as_str()
+            .unwrap()
+            .parse::<rust_decimal::Decimal>()?;
+        if at < 40_000 || row["data"]["side"] == "sell" || at > 290_000 {
+            assert_eq!(bps, rust_decimal::Decimal::ZERO);
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn timely_value_signal_changes_the_placement_price_without_suppressing_either_side()
+-> anyhow::Result<()> {
+    let tmp = tempfile::tempdir()?;
+    let model_path = tmp.path().join("model.json");
+    let signal_path = tmp.path().join("signal.csv");
+    let trace_path = tmp.path().join("trace.jsonl");
+    let mut config: serde_json::Value =
+        serde_json::from_str(include_str!("../examples/simulation.json"))?;
+    let mut wider = config["scenarios"][0].clone();
+    wider["name"] = "wider".into();
+    wider["value_signal_max_age_ms"] = 250.into();
+    config["scenarios"] = serde_json::json!([config["scenarios"][0].clone(), wider]);
+    std::fs::write(&model_path, serde_json::to_string(&config)?)?;
+    std::fs::write(
+        &signal_path,
+        "available_us,bid_widen_bps,ask_widen_bps\n0,10,0\n",
+    )?;
+    let result = std::process::Command::new(env!("CARGO_BIN_EXE_event-driven-mm"))
+        .args([
+            "simulate",
+            "--mode",
+            "closed-loop",
+            "--log",
+            "tests/fixtures/sim-public.jsonl",
+            "--config",
+        ])
+        .arg(model_path)
+        .arg("--quote-signal")
+        .arg(signal_path)
+        .arg("--trace")
+        .arg(&trace_path)
+        .output()?;
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let trace = std::fs::read_to_string(trace_path)?;
+    let mut prices = std::collections::BTreeMap::new();
+    for row in trace.lines().map(serde_json::from_str::<serde_json::Value>) {
+        let row = row?;
+        if row["event"] == "intent"
+            && row["data"]["venue"] == "lighter"
+            && row["data"]["action"] == "place"
+        {
+            let key = (
+                row["scenario"].as_str().unwrap().to_owned(),
+                row["data"]["side"].as_str().unwrap().to_owned(),
+            );
+            prices.entry(key).or_insert(
+                row["data"]["price"]
+                    .as_str()
+                    .unwrap()
+                    .parse::<rust_decimal::Decimal>()?,
+            );
+        }
+    }
+    assert!(prices[&("wider".into(), "buy".into())] < prices[&("ioc".into(), "buy".into())]);
+    assert_eq!(
+        prices[&("wider".into(), "sell".into())],
+        prices[&("ioc".into(), "sell".into())]
+    );
+    Ok(())
+}

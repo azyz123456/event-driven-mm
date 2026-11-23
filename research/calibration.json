@@ -1,0 +1,23 @@
+{
+  "fees_bps": null,
+  "scenarios": [
+    {
+      "name": "ioc_12ms_each_way",
+      "hedge": {"kind": "ioc"},
+      "outbound_us": 12000,
+      "inbound_us": 12000,
+      "jitter_us": 2000,
+      "cancel_ahead": "0",
+      "extra_taker_fee_bps": "0"
+    },
+    {
+      "name": "ioc_150ms_each_way",
+      "hedge": {"kind": "ioc"},
+      "outbound_us": 150000,
+      "inbound_us": 150000,
+      "jitter_us": 2000,
+      "cancel_ahead": "0",
+      "extra_taker_fee_bps": "0"
+    }
+  ]
+}

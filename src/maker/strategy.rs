@@ -60,9 +60,20 @@ pub fn desired(config: &Config, state: &State) -> [Option<Quote>; 2] {
             .sum::<Decimal>()
     };
 
+    let dust = (config.mode == Mode::Hedged)
+        .then(|| dust_mode(config, state))
+        .flatten();
     SIDES.map(|side| {
         let room = config.max_inventory - side.signed(maker.position);
-        let mut size = lot_down(config.size.min(room).min(config.max_order_notional / ask));
+        let mut size = config.size.min(room).min(config.max_order_notional / ask);
+        if dust == Some(true) {
+            let residual = state.residual();
+            if side.signed(residual) >= Decimal::ZERO {
+                return None;
+            }
+            size = size.min(residual.abs() * Decimal::TWO);
+        }
+        size = lot_down(size);
         if size < instrument.min_size {
             return None;
         }
@@ -143,15 +154,47 @@ fn hedge_ready(config: &Config, state: &State) -> bool {
     state.account_verified(Venue::Hyperliquid, config)
         && state.book_fresh(Venue::Hyperliquid, config)
         && state.residual().abs() < config.max_residual
-        && state
+        && (state
             .residual_since_ms
             .is_none_or(|since| state.now_ms - since < config.max_residual_ms)
+            || dust_mode(config, state).is_some())
         && !state.active_orders().any(|(_, order)| {
             order.role == super::OrderRole::Hedge
                 && !order.done()
                 && (state.now_ms - order.sent_ms >= config.action_timeout_ms
                     || Some(order.generation) != state.venue(Venue::Hyperliquid).generation)
         })
+}
+
+// Some(true) allows only quantity-bounded quotes opposite the residual. Some(false)
+// permits aggregation within the ordinary per-side worst-case exposure limits.
+fn dust_mode(config: &Config, state: &State) -> Option<bool> {
+    let (max_base, max_age_ms, reduce) = config.residual_policy.limits()?;
+    let age = state.now_ms - state.residual_since_ms?;
+    let residual = state.residual();
+    if age < config.max_residual_ms
+        || age >= max_age_ms
+        || residual.abs() > max_base
+        || state
+            .active_orders()
+            .any(|(_, order)| order.role == super::OrderRole::Hedge)
+    {
+        return None;
+    }
+    let hedge = state.venue(Venue::Hyperliquid);
+    let instrument = hedge.instrument.as_ref()?;
+    let side = if residual > Decimal::ZERO {
+        Side::Sell
+    } else {
+        Side::Buy
+    };
+    let limit = super::hedge::ioc_limit(config, instrument, &hedge.book, side)?;
+    // Require a quantity/notional shortfall at both touch and limit. A wider sell
+    // limit can fall below minimum even when the observed touch can hedge the lot.
+    let (bid, ask) = hedge.book.touch()?;
+    let touch = if side == Side::Sell { bid } else { ask };
+    let size = instrument.size_down(residual.abs());
+    (!instrument.valid_size(limit.max(touch), size)).then_some(reduce)
 }
 
 fn skewed(mid: Decimal, side: Side, position: Decimal, config: &Config) -> Option<Decimal> {

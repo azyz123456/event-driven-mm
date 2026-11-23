@@ -1,0 +1,469 @@
+{
+  "start": {
+    "type": "start",
+    "utc_us": 1795470677734156,
+    "endpoints": {
+      "hyperliquid": "wss://api.hyperliquid.xyz/ws",
+      "lighter": "wss://mainnet.zklighter.elliot.ai/stream?readonly=true"
+    },
+    "duration_s": 900.0
+  },
+  "duration_s": 900.194619,
+  "audit": {
+    "bbo": {
+      "events": 7240,
+      "apparent_age_ms_p50_p95": [
+        232.5495,
+        384.9730999999996
+      ],
+      "cadence_ms_p50_p95": [
+        90.148,
+        368.6142999999997
+      ]
+    },
+    "l2Book": {
+      "events": 74,
+      "apparent_age_ms_p50_p95": [
+        321.8425,
+        500.5578999999999
+      ],
+      "cadence_ms_p50_p95": [
+        12363.332,
+        12582.479800000001
+      ]
+    },
+    "ticker": {
+      "events": 44659,
+      "apparent_age_ms_p50_p95": [
+        6.292,
+        59.665399999999984
+      ],
+      "cadence_ms_p50_p95": [
+        7.118,
+        87.63560000000004
+      ]
+    }
+  },
+  "disconnects": [],
+  "fee_bps_per_leg": 4.5,
+  "scores": [
+    {
+      "channel": "bbo",
+      "horizon_ms": 500,
+      "train_rows": 4440,
+      "holdout_rows": 4419,
+      "metrics": {
+        "hl_only": {
+          "rows": 4419,
+          "r2_zero": 0.12553518433798994,
+          "rmse_bps": 0.3221361494940769,
+          "mae_bps": 0.1729104828387043,
+          "direction_hit": 0.8870523415977961,
+          "nonzero_return_share": 0.16429056347589951
+        },
+        "lighter_only": {
+          "rows": 4419,
+          "r2_zero": 0.26230801923316593,
+          "rmse_bps": 0.29587333318961084,
+          "mae_bps": 0.1440332000304878,
+          "direction_hit": 0.7796143250688705,
+          "nonzero_return_share": 0.16429056347589951
+        },
+        "both": {
+          "rows": 4419,
+          "r2_zero": 0.4230789934636424,
+          "rmse_bps": 0.26165345238374743,
+          "mae_bps": 0.1571233161832871,
+          "direction_hit": 0.9573002754820936,
+          "nonzero_return_share": 0.16429056347589951
+        }
+      },
+      "both_vs_hl": {
+        "blocks": 8,
+        "estimate": 0.29754380912565254,
+        "ci95": [
+          0.19957572321843378,
+          0.38047539319398493
+        ]
+      }
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 2000,
+      "train_rows": 4425,
+      "holdout_rows": 4419,
+      "metrics": {
+        "hl_only": {
+          "rows": 4419,
+          "r2_zero": 0.14728760315738343,
+          "rmse_bps": 0.7335715661962622,
+          "mae_bps": 0.476600890495815,
+          "direction_hit": 0.7425635478637101,
+          "nonzero_return_share": 0.41842045711699477
+        },
+        "lighter_only": {
+          "rows": 4419,
+          "r2_zero": 0.22615306908885857,
+          "rmse_bps": 0.6988254827944047,
+          "mae_bps": 0.4369048011259792,
+          "direction_hit": 0.6565711195240671,
+          "nonzero_return_share": 0.41842045711699477
+        },
+        "both": {
+          "rows": 4419,
+          "r2_zero": 0.3879615100906455,
+          "rmse_bps": 0.6214848817280112,
+          "mae_bps": 0.4135903826495776,
+          "direction_hit": 0.8080043266630611,
+          "nonzero_return_share": 0.41842045711699477
+        }
+      },
+      "both_vs_hl": {
+        "blocks": 8,
+        "estimate": 0.2406739069332614,
+        "ci95": [
+          0.17835775980332047,
+          0.27936542007175746
+        ]
+      }
+    }
+  ],
+  "common_clock_scores": [
+    {
+      "channel": "bbo",
+      "horizon_ms": 500,
+      "clock": "receive",
+      "train_rows": 4434,
+      "holdout_rows": 4410,
+      "metrics": {
+        "hl_only": {
+          "rows": 4410,
+          "r2_zero": 0.12569121368946234,
+          "rmse_bps": 0.32243592260049625,
+          "mae_bps": 0.17322767186365468,
+          "direction_hit": 0.8870523415977961,
+          "nonzero_return_share": 0.16462585034013605
+        },
+        "lighter_only": {
+          "rows": 4410,
+          "r2_zero": 0.2623358209224842,
+          "rmse_bps": 0.296169509788103,
+          "mae_bps": 0.14428775827577625,
+          "direction_hit": 0.7796143250688705,
+          "nonzero_return_share": 0.16462585034013605
+        },
+        "both": {
+          "rows": 4410,
+          "r2_zero": 0.423150954265211,
+          "rmse_bps": 0.2619039741228504,
+          "mae_bps": 0.15742391957503687,
+          "direction_hit": 0.9573002754820936,
+          "nonzero_return_share": 0.16462585034013605
+        }
+      },
+      "both_vs_hl": {
+        "blocks": 8,
+        "estimate": 0.2974597405757486,
+        "ci95": [
+          0.1993765309479698,
+          0.3805134964266106
+        ]
+      }
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 500,
+      "clock": "exchange",
+      "train_rows": 4434,
+      "holdout_rows": 4410,
+      "metrics": {
+        "hl_only": {
+          "rows": 4410,
+          "r2_zero": 0.07350704391292506,
+          "rmse_bps": 0.3307408344846133,
+          "mae_bps": 0.16219880549799143,
+          "direction_hit": 0.8211382113821138,
+          "nonzero_return_share": 0.1673469387755102
+        },
+        "lighter_only": {
+          "rows": 4410,
+          "r2_zero": 0.32082782681588506,
+          "rmse_bps": 0.2831761669122938,
+          "mae_bps": 0.14372127565577694,
+          "direction_hit": 0.8306233062330624,
+          "nonzero_return_share": 0.1673469387755102
+        },
+        "both": {
+          "rows": 4410,
+          "r2_zero": 0.3935519177570662,
+          "rmse_bps": 0.26758611266893034,
+          "mae_bps": 0.15239786019679233,
+          "direction_hit": 0.9498644986449865,
+          "nonzero_return_share": 0.1673469387755102
+        }
+      },
+      "both_vs_hl": {
+        "blocks": 8,
+        "estimate": 0.3200448738441412,
+        "ci95": [
+          0.2420546142937568,
+          0.3789688987004831
+        ]
+      }
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 2000,
+      "clock": "receive",
+      "train_rows": 4419,
+      "holdout_rows": 4409,
+      "metrics": {
+        "hl_only": {
+          "rows": 4409,
+          "r2_zero": 0.14721851788976237,
+          "rmse_bps": 0.7344327468782508,
+          "mae_bps": 0.4772212869187787,
+          "direction_hit": 0.7425635478637101,
+          "nonzero_return_share": 0.4193694715354956
+        },
+        "lighter_only": {
+          "rows": 4409,
+          "r2_zero": 0.2265861169534189,
+          "rmse_bps": 0.6994217509945939,
+          "mae_bps": 0.43718370807358997,
+          "direction_hit": 0.6554894537587885,
+          "nonzero_return_share": 0.4193694715354956
+        },
+        "both": {
+          "rows": 4409,
+          "r2_zero": 0.38802016416267127,
+          "rmse_bps": 0.6221594596049942,
+          "mae_bps": 0.414089321354872,
+          "direction_hit": 0.8080043266630611,
+          "nonzero_return_share": 0.4193694715354956
+        }
+      },
+      "both_vs_hl": {
+        "blocks": 8,
+        "estimate": 0.24080164627290965,
+        "ci95": [
+          0.17827855339464854,
+          0.2794917192677169
+        ]
+      }
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 2000,
+      "clock": "exchange",
+      "train_rows": 4419,
+      "holdout_rows": 4409,
+      "metrics": {
+        "hl_only": {
+          "rows": 4409,
+          "r2_zero": 0.10091183233544077,
+          "rmse_bps": 0.7481888292539549,
+          "mae_bps": 0.47007543984664035,
+          "direction_hit": 0.71397616468039,
+          "nonzero_return_share": 0.41868904513495125
+        },
+        "lighter_only": {
+          "rows": 4409,
+          "r2_zero": 0.1474682397664876,
+          "rmse_bps": 0.7285600648164148,
+          "mae_bps": 0.4490311551699075,
+          "direction_hit": 0.6435536294691224,
+          "nonzero_return_share": 0.41868904513495125
+        },
+        "both": {
+          "rows": 4409,
+          "r2_zero": 0.25145244376112996,
+          "rmse_bps": 0.6826840826807175,
+          "mae_bps": 0.43819512084055073,
+          "direction_hit": 0.7627302275189599,
+          "nonzero_return_share": 0.41868904513495125
+        }
+      },
+      "both_vs_hl": {
+        "blocks": 8,
+        "estimate": 0.15054061142568947,
+        "ci95": [
+          0.09604875123170559,
+          0.187346891855428
+        ]
+      }
+    }
+  ],
+  "paired_executable": [
+    {
+      "channel": "bbo",
+      "horizon_ms": 500,
+      "delay_ms": 0,
+      "n": 423,
+      "gross_bps": 0.44206508697465874,
+      "net_bps": -8.557977627051365,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 500,
+      "delay_ms": 25,
+      "n": 423,
+      "gross_bps": 0.4216187593957412,
+      "net_bps": -8.578418572380835,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 500,
+      "delay_ms": 100,
+      "n": 423,
+      "gross_bps": 0.3221006762731599,
+      "net_bps": -8.677926584675177,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 500,
+      "delay_ms": 250,
+      "n": 423,
+      "gross_bps": 0.11688912241862083,
+      "net_bps": -8.883114871935758,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 2000,
+      "delay_ms": 0,
+      "n": 420,
+      "gross_bps": 1.0986811591337793,
+      "net_bps": -7.901478314493935,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 2000,
+      "delay_ms": 25,
+      "n": 420,
+      "gross_bps": 1.0780874360680373,
+      "net_bps": -7.922066616189477,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 2000,
+      "delay_ms": 100,
+      "n": 420,
+      "gross_bps": 0.9809642930390741,
+      "net_bps": -8.019176119762871,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 2000,
+      "delay_ms": 250,
+      "n": 420,
+      "gross_bps": 0.7770003092587567,
+      "net_bps": -8.223110898536692,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 2000,
+      "delay_ms": 500,
+      "n": 420,
+      "gross_bps": 0.4343346441405288,
+      "net_bps": -8.565751729409644,
+      "positive_net_fraction": 0.0
+    }
+  ],
+  "exchange_paired_executable": [
+    {
+      "channel": "bbo",
+      "horizon_ms": 500,
+      "delay_ms": 0,
+      "n": 423,
+      "gross_bps": 0.37187181792966784,
+      "net_bps": -8.628155963794008,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 500,
+      "delay_ms": 25,
+      "n": 423,
+      "gross_bps": 0.3221125311605254,
+      "net_bps": -8.677916462902195,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 500,
+      "delay_ms": 100,
+      "n": 423,
+      "gross_bps": 0.22683350111975184,
+      "net_bps": -8.77318698705655,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 500,
+      "delay_ms": 250,
+      "n": 423,
+      "gross_bps": 0.015447180758097888,
+      "net_bps": -8.984565665600051,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 2000,
+      "delay_ms": 0,
+      "n": 420,
+      "gross_bps": 0.7956446290328945,
+      "net_bps": -8.204475322482052,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 2000,
+      "delay_ms": 25,
+      "n": 420,
+      "gross_bps": 0.7455300452528355,
+      "net_bps": -8.254591127534605,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 2000,
+      "delay_ms": 100,
+      "n": 420,
+      "gross_bps": 0.6522849959619005,
+      "net_bps": -8.34782288728349,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 2000,
+      "delay_ms": 250,
+      "n": 420,
+      "gross_bps": 0.4393840629191053,
+      "net_bps": -8.560713674274218,
+      "positive_net_fraction": 0.0
+    },
+    {
+      "channel": "bbo",
+      "horizon_ms": 2000,
+      "delay_ms": 500,
+      "n": 420,
+      "gross_bps": 0.19850304871103538,
+      "net_bps": -8.8015604196232,
+      "positive_net_fraction": 0.0
+    }
+  ],
+  "host_wall_minus_monotonic_ms_p05_p50_p95": [
+    -73.509,
+    -6.168,
+    -0.921
+  ],
+  "capture_sha256": "201380160d02b229c4544fae77fa771a1b16fa0260dd6eac56e574e30dec369d"
+}

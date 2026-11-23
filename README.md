@@ -87,6 +87,29 @@ Duration expiry, Ctrl-C, and SIGTERM start cancellation and reconciliation. A he
 
 For a soak test, run an observe session with `--duration-secs 86400`, check the journal with `replay` and `inspect-maker`, then repeat with dedicated testnet accounts. Check both venue fill totals, residual size and age, and any unresolved orders. The offline signer ABI test can be run with `LIGHTER_TESTNET_SIGNER_LIB` set using `cargo test --locked signs_with_the_official_lighter_library -- --ignored`.
 
+### Step 10 · Inventory skew
+
+Let `m` be the midpoint of the maker venue's best bid and ask, `q` the signed position on that venue, and `I` the configured `max_inventory`. The flat distance from midpoint to either quote is the **half-spread** `s = m × half_spread_bps / 10,000`. The inventory fraction is `x = min(|q| / I, 1)`.
+
+| Quote side | Change to the flat distance | Distance used by the skew function |
+|---|---|---|
+| Increases inventory in the current direction | Widen by `s × x / (1 − x)` | `min(s + s × x / (1 − x), m / 2)` for `x < 1` |
+| Reduces inventory | Tighten by `s × x` | `s − s × x` |
+
+The bid subtracts its distance from `m`. The ask adds its distance to `m`. A long position widens the bid and tightens the ask. A short position tightens the bid and widens the ask. At `x = 0` both distances equal `s`. At or beyond the inventory cap, the increasing quote is suppressed before division and the reducing quote's raw distance is zero. For example, at `m = 100`, `s = 1`, and half the inventory cap, a long position gives a raw bid of `98` and ask of `100.50`. A short position gives a raw bid of `99.50` and ask of `102`.
+
+In single-venue mode the skewed midpoint prices are the raw quotes. In hedged mode `q` is the Lighter position. The strategy applies the difference between the skewed and flat midpoint prices to a flat quote first bounded by the executable Hyperliquid hedge price, fees, required edge, and slippage allowance. The final price still respects the hedge and post-only bounds, with bids rounded down and asks up to valid prices. Size also respects inventory, venue lot, and notional limits. [Skew and quote calculation](src/maker/strategy.rs)
+
+### Step 11 · Maker state-machine separation
+
+| Component | Input and responsibility | Output |
+|---|---|---|
+| Market-state tracking | `State::apply` consumes normalized books, account snapshots, order updates, fills, connection events, and ticks. `State::sent` tracks an emitted intent as pending. | Observed books, positions, available collateral, and tracked order state, including pending actions. [Market-state reducer](src/maker/state.rs) |
+| Strategy decision-making | `strategy::desired` reads the state and configuration, then applies freshness and risk checks, pricing, and inventory skew. | Desired bid and ask prices and sizes, or an absent quote on either side. [Quote strategy](src/maker/strategy.rs) |
+| Order reconciliation | `execution::reconcile` compares the desired quotes with tracked orders, including pending placement, working orders, pending cancellation, and terminal orders still awaiting reported fills. | Place or cancel actions. Replacement waits until the previous order on that side is terminal and its reported fills are accounted for. [Order reconciliation](src/maker/execution.rs) |
+
+`Engine::apply` applies the recorded input, evaluates eligible hedge actions, computes desired quotes, and reconciles them against tracked orders. Emitted intents carry the triggering journal sequence and an ordinal within that input, and immediately update the pending state. Replay runs the same engine and compares the full ordered intent stream and final result against the journal. [Engine orchestration](src/maker.rs) · [Replay verification](src/maker/diagnostics.rs) · [Inventory and order lifecycle tests](src/maker/tests.rs)
+
 ## Execution simulator
 
 Run `simulate` against a finished hedged maker journal. It verifies the original intents before comparing policies. Version 5 captures include price, size, and aggressor side for public trades. Version 4 remains replayable and can drive a fixed-fill IOC comparison when the signed journal contains Lighter maker fills. Passive hedging needs detailed Hyperliquid trades, and closed-loop quoting also needs detailed Lighter trades.
@@ -173,3 +196,116 @@ The markout is the side-signed Hyperliquid mid move from the modeled Lighter fil
 Residual inventory dominated several paths. The October filter left **0.00010 BTC** unhedged for **23.85 hours**, and the November baseline left **0.00009 BTC** for **10.38 hours**. Those amounts were below the modeled $10 Hyperliquid minimum. The residual-age guard stopped new maker exposure, which explains much of the difference in quoting activity. The November filter finished flat and sent **9,170** cancels against **4,470** for the baseline in the primary case.
 
 **Decision.** Keep the filter out of live quoting. Lighter adds short-horizon predictive information on this archive, but the fixed filter reduced primary holdout PnL, increased cancellation churn, and failed to consistently separate adverse fills. The holdout sample of strategy fills is small. The archive also showed median exchange-to-receipt book lags of about **274 ms** on Hyperliquid and **2.6 ms** on Lighter, so archive predictability is sensitive to routing and feed construction. Signed fill and hedge calibration remains open. These replays use aggregate public depth and assumptions about queue position, fee rates, latency, collateral, and small-order market impact. The study covers four first-of-month days and one instrument.
+
+## Follow-up · Timing, hedge residuals, and quote value
+
+The follow-up uses three separate comparisons. Direct public feeds test the age of information on one host. Matched quote opportunities test selection while holding time, side, and offered size fixed. Closed-loop replays allow fills, cancellations, and residual inventory to change later decisions. Each comparison uses its own outcome and sample.
+
+### Direct feed timing
+
+`research.timing` subscribes to Hyperliquid BTC BBO and L2 and Lighter BTC ticker from one process on one host. It records a monotonic receive timestamp and a wall-clock reading immediately after each message is returned. The apparent exchange-to-receipt age includes exchange timestamp semantics, batching, network transit, and local scheduling. The monotonic timestamp determines when quotes become available to the analysis. [Hyperliquid public WebSocket feeds](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket/subscriptions) · [Lighter public WebSocket feeds](https://docs.lighter.xyz/api/websocket.md)
+
+The November 23 capture ran for **15 minutes starting at 21:51 UTC** with zero reconnects. Hyperliquid BBO had **7,240** valid updates, with apparent age **233 ms median / 385 ms p95**. Lighter ticker had **44,659**, at **6.3 / 59.7 ms**. Hyperliquid L2 had only **74** updates, with a median inter-update gap of **12.36 seconds**. It yielded too few fresh rows for the forecasting comparison. [Capture and timing results](artifacts/research/followup/timing.json) · [Normalized public quotes](artifacts/research/followup/local-quotes.jsonl.gz)
+
+The analysis fits fixed ridge models on the first half, purges labels that overlap the split, and evaluates the second half. The exchange-clock diagnostic dates each Hyperliquid outcome using its exchange timestamp and the host’s recorded wall clock. Both versions use the same train and holdout decisions, and all features are drawn from quotes already received at decision time. The exchange clock is an observational check subject to timestamp semantics and cross-host clock skew.
+
+| Horizon | Outcome clock | Holdout decisions | Hyperliquid-only R² | Lighter-only R² | Both venues R² |
+|---|---|---:|---:|---:|---:|
+| 500 ms | Receive | 4,410 | 12.57% | 26.23% | 42.32% |
+| 500 ms | Exchange | 4,410 | 7.35% | 32.08% | 39.36% |
+| 2 s | Receive | 4,409 | 14.72% | 22.66% | 38.80% |
+| 2 s | Exchange | 4,409 | 10.09% | 14.75% | 25.15% |
+
+R² is relative to predicting zero return. The two-second advantage of both venues over Hyperliquid alone fell from **24.08 to 15.06 percentage points** when outcomes were dated by exchange time. The exchange-clock improvement had a **9.6 to 18.7 point** paired interval across eight one-minute blocks. One host and one brief sample leave routing and time-of-day sensitivity unresolved.
+
+The executable-touch diagnostic uses the same **420** two-second signals across clocks and entry delays. It selects signals above the 90th percentile of absolute forecasts in the training half. The position crosses the Hyperliquid touch at modeled arrival and crosses back at the forecast horizon, at **4.5 bps per leg**. Using exchange timestamps for the touches, mean gross return fell from **+0.80 bps** at zero modeled entry delay to **+0.20 bps** at **500 ms**. Net return was **−8.20** and **−8.80 bps** respectively, with zero net-positive rows at any tested delay. The sample establishes a midpoint timing result and measures the cost of a standalone directional round trip. The Lighter maker and Hyperliquid hedge trade has different costs and is evaluated below.
+
+![Public feed receipt age and return at observable and exchange-timestamped Hyperliquid touches](artifacts/research/followup/timing.png)
+
+### Matched execution value
+
+Seven first-of-month BTC archive days from May through November 2026 supply **168 hours** of public books and trades. May through July provide initial training, then August through November are scored with models fit only on earlier days. Every five seconds the study builds a hypothetical bid and ask using a Lighter top-five book and Hyperliquid hedge depth. Each eligible time and side shares the same offered lot of **0.00030 BTC** across three candidate widths, **0, 0.25, and 0.50 bps** wider than the base quote. [Source and sample audit](artifacts/research/followup/execution_value.json)
+
+The label allows two seconds at the modeled order price. A print must be on the opposing side and occur after modeled quote arrival. Exact-price prints consume displayed queue ahead first. Trade-throughs clear that queue, and partial fills are capped by print volume. The label uses the last partial fill and a modeled hedge arrival to price the IOC against five levels and charges both legs’ fees. Unhedged quantity is reported and valued at the terminal executable touch with a taker fee allowance. This terminal valuation can apply to quantity below the order minimum. It represents marked inventory, with simulated hedge completion reported separately.
+
+A regularized logistic model estimates fill probability. A second ridge model estimates net bps conditional on a fill, normalized by offered notional. Their product ranks the candidate widths. Features include the quote’s cross-venue edge, distance from mid, displayed depth, imbalance, short returns, and signed flow. The independent candidate labels omit inventory history. The comparison includes unfilled opportunities with zero value and keeps common groups with known labels for all candidates. A 30-minute paired block bootstrap measures sampling sensitivity within each day. The results file also includes fixed-width controls and fill probability calibration by score quintile.
+
+| Held-out UTC day | Matched times and sides | Filled candidates, base → value width | Change in modeled net bps per opportunity | Paired 95% interval |
+|---|---:|---:|---:|---:|
+| Aug 1 | 28,568 | 15 → 12 | +0.000110 | +0.000018 to +0.000229 |
+| Sep 1 | 31,530 | 342 → 299 | +0.000193 | −0.000601 to +0.000963 |
+| Oct 1 | 31,374 | 129 → 115 | +0.000411 | −0.000033 to +0.001012 |
+| Nov 1 | 26,482 | 5 → 3 | +0.000036 | −0.000096 to +0.000212 |
+
+On November 1 the base-width fill model had average precision **0.0239** at **0.000189** fill prevalence, with a Brier score of **0.000232** versus **0.000239** for the constant baseline. Value selection improved the marked result per filled candidate from **0.74 to 1.55 bps**, on five and three fills respectively. Both fixed widening controls earned slightly more per opportunity than model-selected width on that day, with three fills each. The wide interval and low event count limit confidence in the final fold.
+
+![Paired changes in modeled value and fill counts on the same eligible candidate times and sides](artifacts/research/followup/execution-value.png)
+
+### Residual and quote-width policies
+
+`strict` retains the original residual-age guard. Recovery is opt-in. The two bounded modes relax the quote pause only when the residual is below Hyperliquid’s rounded lot or minimum notional at both the touch and modeled IOC limit, the books and account are healthy, and there is no unresolved hedge. The experiment caps recovery at **0.00020 BTC** and **30 minutes** of same-sign residual age.
+
+- `bounded_reduce` allows an opposing quote only, capped at twice the residual so a fill on that quote cannot increase its absolute size. If the capped quote misses a market minimum, it stays off.
+- `bounded_aggregate` permits continued quoting under existing inventory, notional, liquidity, and worst-case residual limits. Hedgeable exposure still uses the existing IOC policy.
+- `larger_lot` compares **0.00050 BTC** under strict recovery. Smaller partials can still leave a residual below the minimum.
+- `value_widen` uses the same bounded aggregation as its control and widens the bid or ask by the prior-day model's chosen offset. The latest action is eligible for five seconds. Widening follows the usual cancel-and-replace lifecycle, and exchange and risk bounds still apply.
+
+A session end still requires reconciled orders and exactly zero net residual. The research action file is read only by `simulate`. The maker accepts explicitly configured residual policies and defaults to `strict`.
+
+### Closed-loop replay
+
+Each scenario starts flat and consumes the same receive-timed public books and trades on September 1, October 1, and November 1. The paired run covers **72 distinct archive hours** across seven scenarios. The primary setting models **12 ms each way** with up to **2 ms** of seeded jitter. The latency stress uses **150 ms each way**. It charges the archive’s assumed **0 bps** Lighter maker and **4.5 bps** Hyperliquid taker fees. Terminal equity marks each venue’s remaining position to its last valid midpoint and excludes funding. The report reconciles this equity to an independent fill ledger and records order fill rates, post-fill markouts, hedge times, cancellation churn, turnover, and hourly drawdown. Paired intervals resample two-hour blocks within each day.
+
+| Replay policy | Sep 1 PnL (USDC) / filled orders | Oct 1 PnL (USDC) / filled orders | Nov 1 PnL (USDC) / filled orders |
+|---|---:|---:|---:|
+| Strict baseline | −0.1286 / 2 | +0.0620 / 19 | +0.0323 / 7 |
+| Larger lot | +0.0164 / 13 | +0.0653 / 16 | +0.0850 / 13 |
+| Bounded reduction | −0.1286 / 2 | +0.0620 / 19 | +0.0323 / 7 |
+| Bounded aggregation | −0.0174 / 9 | +0.0620 / 19 | +0.0263 / 13 |
+| Aggregation + value width | −0.1365 / 6 | +0.0565 / 18 | +0.0327 / 5 |
+| Bounded aggregation at 150 ms | +0.0196 / 16 | −0.0718 / 13 | −0.0081 / 13 |
+| Aggregation + value width at 150 ms | +0.0276 / 15 | +0.0379 / 20 | −0.0109 / 10 |
+
+Bounded aggregation shortened the longest November residual episode from **10.38 hours to 24.2 minutes** and finished flat. In September it shortened the longest episode from **23.43 to 10.89 hours** and still ended with **0.00010 BTC** outstanding. Reduction-only left the same filled-order counts, residuals, and PnL as the strict baseline on all three days. Larger lots raised marked PnL on all three days and raised peak net exposure from **0.00030 to 0.00050 BTC**. The larger-lot PnL intervals all included zero, and it ended October with a **0.00007 BTC short** residual.
+
+Value widening under primary latency changed PnL versus aggregation alone by **−0.1191**, **−0.0055**, and **+0.0064 USDC** in chronological order. All paired intervals included zero. At 150 ms per leg the changes were **+0.0080**, **+0.1097**, and **−0.0028 USDC**, with all intervals again including zero. In the primary November run, widening reduced filled orders from **13 to 5** and the 10.38-hour residual recurred. Fills and inventory feedback were large enough to reverse some of the matched-opportunity results. [Full replay metrics and paired intervals](artifacts/research/followup/closed_loop.json)
+
+![Hourly marked equity for strict quoting, bounded aggregation, and aggregation with value-selected width](artifacts/research/followup/closed-loop.png)
+
+The forecasting gain survived the clock check on this short public sample. The fitted quote-width policy showed inconsistent after-fee improvement once inventory fed back into quoting. Bounded aggregation improved recovery on some paths, with outstanding exposure still possible after its age limit. These results support keeping value widening in replay and retaining strict recovery as the default while collecting signed fill and hedge evidence across more sessions.
+
+### Reproduce and calibrate
+
+Use Python 3.11 and the pinned research dependencies. The replay step builds a Rust release binary. To reproduce the timing results, pass `artifacts/research/followup/local-quotes.jsonl.gz` to `--log` in place of a fresh capture. The quote-value analysis downloads the seven public sample days. For the closed-loop comparison, build the September, October, and November archive journals before running the paired scenarios.
+
+```sh
+python3.11 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r research/requirements.txt
+
+work=$(mktemp -d)
+python -m research.timing capture --seconds 900 --out "$work/local.jsonl"
+python -m research.timing analyze --log "$work/local.jsonl" --out "$work/timing.json"
+
+python -m research.execution_value --download --raw "$work/raw" \
+  --work "$work/labels" --out "$work/values" \
+  --verify-manifest artifacts/research/followup/execution_value.json
+for day in 2026-09-01 2026-10-01 2026-11-01; do
+  python -m research.archive --raw "$work/raw" --day "$day" --out "$work/$day.jsonl"
+done
+cargo build --release --locked
+python -m research.followup closed-loop --raw "$work/raw" --work "$work" \
+  --values "$work/values" --out "$work/closed"
+cp "$work/values/execution_value.json" "$work/closed/closed_loop.json" "$work/"
+python -m research.followup_charts --out "$work"
+```
+
+For venue calibration, use a finished signed testnet journal containing actual Lighter and Hyperliquid fills. Run fixed-fill comparisons with the journal’s instrument fees, fit assumptions using the calibration session, then check the same settings on another signed session. The checker requires a clean signed journal with fills on both legs and reports observed alongside simulated hedge completion, latency, residual exposure, and PnL.
+
+```sh
+./target/release/event-driven-mm simulate --log signed-testnet.jsonl \
+  --mode fixed-fills --config research/calibration.json > signed-calibration.json
+python -m research.followup calibrate --report signed-calibration.json
+```
+
+Signed fill calibration remains pending. This run had no funded testnet credentials, and the direct capture used only public feeds. The offline signer test exercised signing without submitting orders.

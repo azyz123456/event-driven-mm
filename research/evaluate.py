@@ -66,7 +66,7 @@ def read_trace(path, signal):
             if data["venue"] == "lighter":
                 positions[(name, fill["client"])]["filled"] += qty
     frame = pd.DataFrame(positions.values())
-    if not frame.empty:
+    if not frame.empty and signal is not None:
         forecasts = asof(signal["available_us"].to_numpy(), signal["prediction_bps"].to_numpy(),
                         frame["at"].to_numpy(), study_config()["signal_max_age_ms"] * 1000)
         frame["adverse"] = np.where(frame["side"] == "buy", -forecasts, forecasts)

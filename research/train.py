@@ -72,11 +72,12 @@ def paired_ci(times, y, better, reference, block_us, seed, draws):
     delta = (y - reference) ** 2 - (y - better) ** 2
     numerator = np.bincount(ids, weights=delta)
     denominator = np.bincount(ids, weights=y ** 2)
-    if len(numerator) < 2:
+    if len(numerator) < 2 or not denominator.sum():
         return None
     rng = np.random.default_rng(seed)
     sample = rng.integers(0, len(numerator), (draws, len(numerator)))
-    ratios = numerator[sample].sum(axis=1) / denominator[sample].sum(axis=1)
+    num, den = numerator[sample].sum(axis=1), denominator[sample].sum(axis=1)
+    ratios = np.divide(num, den, out=np.full(len(num), np.nan), where=den>0)
     return {"blocks": len(numerator), "estimate": float(delta.sum() / (y @ y)),
             "ci95": np.quantile(ratios[np.isfinite(ratios)], [.025, .975]).tolist()}
 

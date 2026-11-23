@@ -89,33 +89,57 @@ struct Opportunities {
     suppressed: [u64; 2],
 }
 
-type Signals = Arc<[(u64, Decimal)]>;
+#[derive(Clone)]
+struct Signals {
+    points: Arc<[(u64, Decimal, Decimal)]>,
+    widen: bool,
+}
 
-pub fn load_signals(path: &Path) -> Result<Signals> {
+fn load_signals(path: &Path) -> Result<Signals> {
     let mut lines = BufReader::new(
         File::open(path).with_context(|| format!("open signal {}", path.display()))?,
     )
     .lines();
-    ensure!(
-        lines.next().transpose()?.as_deref() == Some("available_us,prediction_bps"),
-        "invalid signal CSV header"
-    );
+    let widen = match lines.next().transpose()?.as_deref() {
+        Some("available_us,prediction_bps") => false,
+        Some("available_us,bid_widen_bps,ask_widen_bps") => true,
+        _ => anyhow::bail!("invalid signal CSV header"),
+    };
     let mut points = Vec::new();
     for (idx, line) in lines.enumerate() {
         let line = line?;
-        let (at, value) = line
-            .split_once(',')
-            .with_context(|| format!("invalid signal row {}", idx + 2))?;
-        let at = at.parse()?;
-        let value: Decimal = value.parse()?;
+        let fields = line.split(',').collect::<Vec<_>>();
         ensure!(
-            value.abs() <= Decimal::from(1_000) && points.last().is_none_or(|(last, _)| *last < at),
-            "signals must have strictly increasing receipt times and bounded predictions"
+            fields.len() == if widen { 3 } else { 2 },
+            "invalid signal row {}",
+            idx + 2
         );
-        points.push((at, value));
+        let at = fields[0].parse()?;
+        let first: Decimal = fields[1].parse()?;
+        let second: Decimal = if widen {
+            fields[2].parse()?
+        } else {
+            Decimal::ZERO
+        };
+        ensure!(
+            points.last().is_none_or(|(last, _, _)| *last < at)
+                && first.abs() <= Decimal::from(1_000),
+            "signals must have strictly increasing times and bounded values"
+        );
+        if widen {
+            let bounds = Decimal::ZERO..=Decimal::from(100);
+            ensure!(
+                bounds.contains(&first) && bounds.contains(&second),
+                "quote adjustments must widen by 0 to 100 bps"
+            );
+        }
+        points.push((at, first, second));
     }
     ensure!(!points.is_empty(), "signal CSV has no observations");
-    Ok(points.into())
+    Ok(Signals {
+        points: points.into(),
+        widen,
+    })
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -130,6 +154,12 @@ pub struct Scenario {
     extra_taker_fee_bps: Decimal,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     quote_signal: Option<QuoteSignal>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    value_signal_max_age_ms: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    maker_size: Option<Decimal>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    residual_policy: Option<crate::maker::ResidualPolicy>,
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     respect_trade_time: bool,
 }
@@ -165,9 +195,25 @@ impl Scenario {
                 "invalid quote signal threshold or age"
             );
         }
-        let mut config = strategy.clone();
+        ensure!(
+            self.value_signal_max_age_ms
+                .is_none_or(|age| (1..=10_000).contains(&age))
+                && (self.quote_signal.is_none() || self.value_signal_max_age_ms.is_none()),
+            "invalid value signal max age or conflicting signal type"
+        );
+        self.strategy(strategy).validate()
+    }
+
+    fn strategy(&self, source: &crate::maker::Config) -> crate::maker::Config {
+        let mut config = source.clone();
         config.hedge_policy = self.hedge;
-        config.validate()
+        if let Some(size) = self.maker_size {
+            config.size = size;
+        }
+        if let Some(policy) = self.residual_policy {
+            config.residual_policy = policy;
+        }
+        config
     }
 }
 
@@ -206,8 +252,7 @@ impl Simulation {
         session_seed: u64,
         flow: Flow,
     ) -> Result<Self> {
-        let mut config = config.clone();
-        config.hedge_policy = scenario.hedge;
+        let config = scenario.strategy(config);
         let engine = Engine::new(config, session_seed, false)?;
         let engine = if flow == Flow::FixedFills {
             engine.with_fixed_lighter_fills()
@@ -394,25 +439,37 @@ impl Simulation {
         if matches!(input, Input::Order { .. }) {
             trace_line(trace, &self.scenario.name, now, "order_update", &input)?;
         }
+        let point = self.signals.as_ref().and_then(|source| {
+            let samples = &source.points;
+            samples
+                .get(
+                    samples
+                        .partition_point(|(at, _, _)| *at <= now)
+                        .checked_sub(1)?,
+                )
+                .copied()
+        });
         let forecast = self
             .scenario
             .quote_signal
-            .zip(self.signals.as_ref())
-            .and_then(|(settings, samples)| {
-                let next = samples.partition_point(|(at, _)| *at <= now);
-                samples
-                    .get(next.checked_sub(1)?)
-                    .filter(|(at, _)| now - *at <= settings.max_age_ms * 1_000)
-                    .map(|point| (settings, *point))
-            });
-        let suppressed = forecast.and_then(|(settings, (_, bps))| {
+            .zip(point)
+            .filter(|(settings, (at, _, _))| now - *at <= settings.max_age_ms * 1_000);
+        let suppressed = forecast.and_then(|(settings, (_, bps, _))| {
             (bps.abs() >= settings.threshold_bps).then_some(if bps > Decimal::ZERO {
                 Side::Sell
             } else {
                 Side::Buy
             })
         });
+        let widen = self
+            .scenario
+            .value_signal_max_age_ms
+            .zip(point)
+            .filter(|(age, (at, _, _))| now - *at <= *age * 1_000)
+            .map(|(_, (_, bid, ask))| [bid, ask])
+            .unwrap_or([Decimal::ZERO; 2]);
         self.engine.suppress_quote(suppressed);
+        self.engine.widen_quotes(widen);
         let intents = self.engine.apply(self.anchor, now / 1000, input)?;
         if self.signals.is_some() {
             for (idx, side) in [Side::Buy, Side::Sell].into_iter().enumerate() {
@@ -429,7 +486,7 @@ impl Simulation {
                         now,
                         "quote_opportunity",
                         &json!({"side":side, "price":price, "size":size, "suppressed":filtered,
-                            "forecast":forecast.map(|(_, point)| point), "source_seq":self.anchor}),
+                            "forecast":forecast.map(|(_, point)| (point.0, point.1)), "widen_bps":widen[idx], "source_seq":self.anchor}),
                     )?;
                 }
             }
@@ -563,20 +620,21 @@ pub fn run(
     );
 
     let signals = signal_path.map(load_signals).transpose()?;
-    ensure!(
-        signals.is_some()
-            || scenarios
-                .iter()
-                .all(|scenario| scenario.quote_signal.is_none()),
-        "scenario quote_signal requires --quote-signal"
-    );
-    ensure!(
-        flow == Flow::ClosedLoop
-            || scenarios
-                .iter()
-                .all(|scenario| scenario.quote_signal.is_none()),
-        "quote filtering requires closed-loop simulation"
-    );
+    for scenario in &scenarios {
+        if scenario.quote_signal.is_some() || scenario.value_signal_max_age_ms.is_some() {
+            ensure!(
+                flow == Flow::ClosedLoop,
+                "quote signals require closed-loop simulation"
+            );
+            ensure!(
+                signals.as_ref().is_some_and(
+                    |signal| signal.widen == scenario.value_signal_max_age_ms.is_some()
+                ),
+                "provide a matching --quote-signal CSV for {}",
+                scenario.name
+            );
+        }
+    }
 
     let mut reader = open(log)?;
     let start = reader.next_record()?.context("empty simulation journal")?;
@@ -804,7 +862,7 @@ pub fn run(
         "version": 1, "journal_version": version, "capture": capture, "mode": flow, "seed": seed,
         "duration_us": now_us, "fixed_lighter_fills": reference.maker_fills,
         "detailed_trade_counts": {"hyperliquid": detailed_prints[0], "lighter": detailed_prints[1]},
-        "signal_rows": signals.as_ref().map(|s| s.len()), "fees_bps_override": fees_bps, "funding": "excluded", "end_valuation": "last_valid_venue_mid",
+        "signal_rows": signals.as_ref().map(|s| s.points.len()), "fees_bps_override": fees_bps, "funding": "excluded", "end_valuation": "last_valid_venue_mid",
         "observed": calibration, "source_end": source_end,
         "recorded_timing": {
             "intent_to_first_write": LatencySummary::of(reference.intent_to_write),

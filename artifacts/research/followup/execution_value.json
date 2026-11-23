@@ -1,0 +1,1054 @@
+{
+  "days": [
+    "2026-05-01",
+    "2026-06-01",
+    "2026-07-01",
+    "2026-08-01",
+    "2026-09-01",
+    "2026-10-01",
+    "2026-11-01"
+  ],
+  "opportunity_step_us": 5000000,
+  "hold_us": 2000000,
+  "one_way_us": 12000,
+  "quantity": 0.0003,
+  "candidate_widen_bps": [
+    0.0,
+    0.25,
+    0.5
+  ],
+  "results": [
+    {
+      "day": "2026-08-01",
+      "train_days": [
+        "2026-05-01",
+        "2026-06-01",
+        "2026-07-01"
+      ],
+      "training_candidate_fills": 2109,
+      "training_conditional_fills": 2079,
+      "training_probability": 0.009178718181333048,
+      "baseline_ap": 0.2980270219700037,
+      "baseline_prevalence": 0.0005250630075609073,
+      "baseline_brier": 0.00047048984411731054,
+      "constant_brier": 0.0005996730642655515,
+      "baseline": {
+        "opportunities": 28568,
+        "filled_quotes": 15,
+        "labelled_rows": 28568,
+        "net_bps_per_opportunity": 0.0002037443046777487,
+        "net_bps_per_fill": 0.38803781973559504,
+        "filled_quantity": 0.0045,
+        "hedged_quantity": 0.0045,
+        "residual_quantity": 0.0
+      },
+      "value_widen": {
+        "opportunities": 28568,
+        "filled_quotes": 12,
+        "labelled_rows": 28568,
+        "net_bps_per_opportunity": 0.0003139679692836057,
+        "net_bps_per_fill": 0.747453078874504,
+        "filled_quantity": 0.0036,
+        "hedged_quantity": 0.0036,
+        "residual_quantity": 0.0
+      },
+      "paired_value": {
+        "delta_bps_per_opportunity": 0.00011022366460585702,
+        "blocks": 48,
+        "ci95": [
+          1.751122589686114e-05,
+          0.00022900124965910093
+        ]
+      },
+      "fixed_widen": {
+        "0.25": {
+          "opportunities": 28568,
+          "filled_quotes": 11,
+          "labelled_rows": 28568,
+          "net_bps_per_opportunity": 0.00018594087673944631,
+          "net_bps_per_fill": 0.48290536060840933,
+          "filled_quantity": 0.0033,
+          "hedged_quantity": 0.0033,
+          "residual_quantity": 0.0
+        },
+        "0.5": {
+          "opportunities": 28568,
+          "filled_quotes": 11,
+          "labelled_rows": 28568,
+          "net_bps_per_opportunity": 0.00022532958623279383,
+          "net_bps_per_fill": 0.585201419954405,
+          "filled_quantity": 0.0033,
+          "hedged_quantity": 0.0033,
+          "residual_quantity": 0.0
+        }
+      },
+      "chosen_offsets": {
+        "0.0": 25351,
+        "0.25": 1727,
+        "0.5": 1490
+      },
+      "unknown_economics_groups": 0,
+      "probability_calibration": [
+        {
+          "cases": 5714,
+          "forecast": 7.994702670958519e-05,
+          "event_rate": 0.0
+        },
+        {
+          "cases": 5714,
+          "forecast": 0.0002830872932477833,
+          "event_rate": 0.0
+        },
+        {
+          "cases": 5714,
+          "forecast": 0.0007343623306748882,
+          "event_rate": 0.00035001750087504374
+        },
+        {
+          "cases": 5713,
+          "forecast": 0.0019721735535045016,
+          "event_rate": 0.00017503938386136881
+        },
+        {
+          "cases": 5713,
+          "forecast": 0.012549904832804307,
+          "event_rate": 0.002100472606336426
+        }
+      ]
+    },
+    {
+      "day": "2026-09-01",
+      "train_days": [
+        "2026-05-01",
+        "2026-06-01",
+        "2026-07-01",
+        "2026-08-01"
+      ],
+      "training_candidate_fills": 2146,
+      "training_conditional_fills": 2116,
+      "training_probability": 0.007156703172668755,
+      "baseline_ap": 0.35696735506716476,
+      "baseline_prevalence": 0.010846812559467175,
+      "baseline_brier": 0.008549068092824488,
+      "constant_brier": 0.010742776124053496,
+      "baseline": {
+        "opportunities": 31530,
+        "filled_quotes": 342,
+        "labelled_rows": 31530,
+        "net_bps_per_opportunity": 0.0091525980497392,
+        "net_bps_per_fill": 0.8438053114277104,
+        "filled_quantity": 0.09975999999999999,
+        "hedged_quantity": 0.09747,
+        "residual_quantity": 0.0022899999999999995
+      },
+      "value_widen": {
+        "opportunities": 31530,
+        "filled_quotes": 299,
+        "labelled_rows": 31530,
+        "net_bps_per_opportunity": 0.009345152186706014,
+        "net_bps_per_fill": 0.9854603626984634,
+        "filled_quantity": 0.08764999999999999,
+        "hedged_quantity": 0.08603000000000001,
+        "residual_quantity": 0.0016200000000000001
+      },
+      "paired_value": {
+        "delta_bps_per_opportunity": 0.0001925541369668131,
+        "blocks": 48,
+        "ci95": [
+          -0.0006010623077972477,
+          0.0009627165348236184
+        ]
+      },
+      "fixed_widen": {
+        "0.25": {
+          "opportunities": 31530,
+          "filled_quotes": 267,
+          "labelled_rows": 31530,
+          "net_bps_per_opportunity": 0.008805619286622123,
+          "net_bps_per_fill": 1.039854592161781,
+          "filled_quantity": 0.07832999999999998,
+          "hedged_quantity": 0.07644999999999999,
+          "residual_quantity": 0.0018799999999999997
+        },
+        "0.5": {
+          "opportunities": 31530,
+          "filled_quotes": 200,
+          "labelled_rows": 31530,
+          "net_bps_per_opportunity": 0.008078666241549489,
+          "net_bps_per_fill": 1.273601732980277,
+          "filled_quantity": 0.05873000000000001,
+          "hedged_quantity": 0.05755,
+          "residual_quantity": 0.0011799999999999998
+        }
+      },
+      "chosen_offsets": {
+        "0.0": 22199,
+        "0.25": 2830,
+        "0.5": 6501
+      },
+      "unknown_economics_groups": 0,
+      "probability_calibration": [
+        {
+          "cases": 6306,
+          "forecast": 1.0278773173457702e-05,
+          "event_rate": 0.0001585791309863622
+        },
+        {
+          "cases": 6306,
+          "forecast": 9.243954400963912e-05,
+          "event_rate": 0.0001585791309863622
+        },
+        {
+          "cases": 6306,
+          "forecast": 0.0007919425978556082,
+          "event_rate": 0.0009514747859181732
+        },
+        {
+          "cases": 6306,
+          "forecast": 0.006229970297395049,
+          "event_rate": 0.004281636536631779
+        },
+        {
+          "cases": 6306,
+          "forecast": 0.06996383980443768,
+          "event_rate": 0.048683793212813194
+        }
+      ]
+    },
+    {
+      "day": "2026-10-01",
+      "train_days": [
+        "2026-05-01",
+        "2026-06-01",
+        "2026-07-01",
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "training_candidate_fills": 2955,
+      "training_conditional_fills": 2925,
+      "training_probability": 0.007913234022354724,
+      "baseline_ap": 0.2394664080122916,
+      "baseline_prevalence": 0.004206903145616216,
+      "baseline_brier": 0.00366344677926006,
+      "constant_brier": 0.0042029420001074855,
+      "baseline": {
+        "opportunities": 31374,
+        "filled_quotes": 129,
+        "labelled_rows": 31374,
+        "net_bps_per_opportunity": 0.0014542951786755212,
+        "net_bps_per_fill": 0.3536981157811302,
+        "filled_quantity": 0.03712,
+        "hedged_quantity": 0.0353,
+        "residual_quantity": 0.0018199999999999998
+      },
+      "value_widen": {
+        "opportunities": 31374,
+        "filled_quotes": 115,
+        "labelled_rows": 31374,
+        "net_bps_per_opportunity": 0.0018650275457851658,
+        "net_bps_per_fill": 0.5088119497518592,
+        "filled_quantity": 0.03292,
+        "hedged_quantity": 0.0308,
+        "residual_quantity": 0.00212
+      },
+      "paired_value": {
+        "delta_bps_per_opportunity": 0.00041073236710964463,
+        "blocks": 48,
+        "ci95": [
+          -3.302903373127936e-05,
+          0.00101169713788982
+        ]
+      },
+      "fixed_widen": {
+        "0.25": {
+          "opportunities": 31374,
+          "filled_quotes": 91,
+          "labelled_rows": 31374,
+          "net_bps_per_opportunity": 0.001170248517568566,
+          "net_bps_per_fill": 0.40346568121094717,
+          "filled_quantity": 0.027100000000000003,
+          "hedged_quantity": 0.026119999999999997,
+          "residual_quantity": 0.00098
+        },
+        "0.5": {
+          "opportunities": 31374,
+          "filled_quotes": 70,
+          "labelled_rows": 31374,
+          "net_bps_per_opportunity": 0.0011808930233980165,
+          "net_bps_per_fill": 0.5292762530869911,
+          "filled_quantity": 0.02084,
+          "hedged_quantity": 0.019839999999999997,
+          "residual_quantity": 0.0009999999999999998
+        }
+      },
+      "chosen_offsets": {
+        "0.0": 22587,
+        "0.25": 2892,
+        "0.5": 5895
+      },
+      "unknown_economics_groups": 3,
+      "probability_calibration": [
+        {
+          "cases": 6276,
+          "forecast": 3.0551821282168554e-05,
+          "event_rate": 0.0
+        },
+        {
+          "cases": 6276,
+          "forecast": 0.00016864121099994874,
+          "event_rate": 0.0004780114722753346
+        },
+        {
+          "cases": 6275,
+          "forecast": 0.0005660055728878406,
+          "event_rate": 0.00031872509960159364
+        },
+        {
+          "cases": 6275,
+          "forecast": 0.0021538867975818,
+          "event_rate": 0.0015936254980079682
+        },
+        {
+          "cases": 6275,
+          "forecast": 0.03153912410130114,
+          "event_rate": 0.01864541832669323
+        }
+      ]
+    },
+    {
+      "day": "2026-11-01",
+      "train_days": [
+        "2026-05-01",
+        "2026-06-01",
+        "2026-07-01",
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "training_candidate_fills": 3254,
+      "training_conditional_fills": 3215,
+      "training_probability": 0.007285197386185667,
+      "baseline_ap": 0.02394548995391038,
+      "baseline_prevalence": 0.00018880749188127785,
+      "baseline_brier": 0.00023180135076168392,
+      "constant_brier": 0.00023913059314427276,
+      "baseline": {
+        "opportunities": 26482,
+        "filled_quotes": 5,
+        "labelled_rows": 26482,
+        "net_bps_per_opportunity": 0.00013904181879851986,
+        "net_bps_per_fill": 0.7364210890844806,
+        "filled_quantity": 0.0014999999999999998,
+        "hedged_quantity": 0.0014999999999999998,
+        "residual_quantity": 0.0
+      },
+      "value_widen": {
+        "opportunities": 26482,
+        "filled_quotes": 3,
+        "labelled_rows": 26482,
+        "net_bps_per_opportunity": 0.0001752391619912232,
+        "net_bps_per_fill": 1.5468944959505242,
+        "filled_quantity": 0.0009,
+        "hedged_quantity": 0.0009,
+        "residual_quantity": 0.0
+      },
+      "paired_value": {
+        "delta_bps_per_opportunity": 3.619734319270332e-05,
+        "blocks": 48,
+        "ci95": [
+          -9.629920456200802e-05,
+          0.0002118772393715461
+        ]
+      },
+      "fixed_widen": {
+        "0.25": {
+          "opportunities": 26482,
+          "filled_quotes": 3,
+          "labelled_rows": 26482,
+          "net_bps_per_opportunity": 0.00018442344136345495,
+          "net_bps_per_fill": 1.6279671913956715,
+          "filled_quantity": 0.0009,
+          "hedged_quantity": 0.0009,
+          "residual_quantity": 0.0
+        },
+        "0.5": {
+          "opportunities": 26482,
+          "filled_quotes": 3,
+          "labelled_rows": 26482,
+          "net_bps_per_opportunity": 0.00021304360045528255,
+          "net_bps_per_fill": 1.880606875752264,
+          "filled_quantity": 0.0009,
+          "hedged_quantity": 0.0009,
+          "residual_quantity": 0.0
+        }
+      },
+      "chosen_offsets": {
+        "0.0": 19354,
+        "0.25": 3161,
+        "0.5": 3967
+      },
+      "unknown_economics_groups": 0,
+      "probability_calibration": [
+        {
+          "cases": 5297,
+          "forecast": 7.774908534733675e-05,
+          "event_rate": 0.0
+        },
+        {
+          "cases": 5297,
+          "forecast": 0.00021558358917618013,
+          "event_rate": 0.0
+        },
+        {
+          "cases": 5296,
+          "forecast": 0.00046171870767892817,
+          "event_rate": 0.00018882175226586103
+        },
+        {
+          "cases": 5296,
+          "forecast": 0.0010131900452803844,
+          "event_rate": 0.0
+        },
+        {
+          "cases": 5296,
+          "forecast": 0.006044860196541039,
+          "event_rate": 0.0007552870090634441
+        }
+      ]
+    }
+  ],
+  "data": {
+    "2026-05-01": {
+      "hyperliquid": {
+        "books": {
+          "rows": 157885,
+          "timestamp_lag_ms": [
+            134.573,
+            200.245,
+            358.841,
+            602.281
+          ],
+          "gap_ms": [
+            539.14,
+            720.512,
+            1071.616,
+            2364.279
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 468679,
+          "timestamp_lag_ms": [
+            107.767,
+            190.98,
+            455.452,
+            840.478
+          ],
+          "gap_ms": [
+            0.0,
+            1055.313,
+            1942.689,
+            9758.752
+          ],
+          "negative_lag": 0
+        }
+      },
+      "lighter": {
+        "books": {
+          "rows": 938254,
+          "timestamp_lag_ms": [
+            2.193,
+            2.995,
+            3.597,
+            4.803
+          ],
+          "gap_ms": [
+            51.474,
+            297.843,
+            593.798,
+            7449.416
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 660892,
+          "timestamp_lag_ms": [
+            5.11,
+            62.388,
+            254.066,
+            364.116
+          ],
+          "gap_ms": [
+            0.0,
+            662.649,
+            1346.623,
+            7461.676
+          ],
+          "negative_lag": 0
+        }
+      }
+    },
+    "2026-06-01": {
+      "hyperliquid": {
+        "books": {
+          "rows": 157751,
+          "timestamp_lag_ms": [
+            225.946,
+            316.431,
+            669.075,
+            982.384
+          ],
+          "gap_ms": [
+            537.405,
+            867.118,
+            1130.073,
+            3311.127
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 538693,
+          "timestamp_lag_ms": [
+            191.409,
+            331.649,
+            932.882,
+            1758.498
+          ],
+          "gap_ms": [
+            0.0,
+            979.395,
+            2258.055,
+            18202.687
+          ],
+          "negative_lag": 0
+        }
+      },
+      "lighter": {
+        "books": {
+          "rows": 1020966,
+          "timestamp_lag_ms": [
+            2.096,
+            3.075,
+            9.275,
+            10.075
+          ],
+          "gap_ms": [
+            51.727,
+            249.385,
+            501.373,
+            73474.641
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 750784,
+          "timestamp_lag_ms": [
+            5.144,
+            48.881,
+            162.06,
+            228.392
+          ],
+          "gap_ms": [
+            2.385,
+            541.426,
+            1145.178,
+            73611.275
+          ],
+          "negative_lag": 0
+        }
+      }
+    },
+    "2026-07-01": {
+      "hyperliquid": {
+        "books": {
+          "rows": 159278,
+          "timestamp_lag_ms": [
+            221.685,
+            307.546,
+            479.76,
+            706.523
+          ],
+          "gap_ms": [
+            538.683,
+            725.726,
+            991.673,
+            4027.402
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 564473,
+          "timestamp_lag_ms": [
+            185.996,
+            288.178,
+            616.27,
+            1240.161
+          ],
+          "gap_ms": [
+            0.0,
+            928.074,
+            1953.524,
+            9211.501
+          ],
+          "negative_lag": 0
+        }
+      },
+      "lighter": {
+        "books": {
+          "rows": 1459257,
+          "timestamp_lag_ms": [
+            1.478,
+            2.91,
+            3.818,
+            5.476
+          ],
+          "gap_ms": [
+            50.334,
+            102.276,
+            249.012,
+            74746.387
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 591860,
+          "timestamp_lag_ms": [
+            4.372,
+            37.438,
+            126.992,
+            181.159
+          ],
+          "gap_ms": [
+            20.989,
+            683.441,
+            1402.485,
+            74824.409
+          ],
+          "negative_lag": 0
+        }
+      }
+    },
+    "2026-08-01": {
+      "hyperliquid": {
+        "books": {
+          "rows": 148632,
+          "timestamp_lag_ms": [
+            202.673,
+            245.097,
+            338.068,
+            453.021
+          ],
+          "gap_ms": [
+            542.432,
+            1034.054,
+            1290.392,
+            93841.507
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 125555,
+          "timestamp_lag_ms": [
+            173.776,
+            230.285,
+            407.357,
+            1388.129
+          ],
+          "gap_ms": [
+            0.0,
+            3434.305,
+            6300.468,
+            209651.924
+          ],
+          "negative_lag": 0
+        }
+      },
+      "lighter": {
+        "books": {
+          "rows": 905164,
+          "timestamp_lag_ms": [
+            1.686,
+            2.594,
+            4.034,
+            4.435
+          ],
+          "gap_ms": [
+            52.633,
+            253.468,
+            497.131,
+            75070.153
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 718525,
+          "timestamp_lag_ms": [
+            4.207,
+            104.519,
+            346.202,
+            456.069
+          ],
+          "gap_ms": [
+            27.256,
+            513.466,
+            1043.783,
+            75106.246
+          ],
+          "negative_lag": 0
+        }
+      }
+    },
+    "2026-09-01": {
+      "hyperliquid": {
+        "books": {
+          "rows": 156735,
+          "timestamp_lag_ms": [
+            210.891,
+            264.581,
+            387.972,
+            527.386
+          ],
+          "gap_ms": [
+            540.784,
+            698.193,
+            1063.816,
+            2841.68
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 360024,
+          "timestamp_lag_ms": [
+            181.521,
+            255.587,
+            446.059,
+            735.345
+          ],
+          "gap_ms": [
+            0.0,
+            1186.189,
+            2433.252,
+            9120.994
+          ],
+          "negative_lag": 0
+        }
+      },
+      "lighter": {
+        "books": {
+          "rows": 1051743,
+          "timestamp_lag_ms": [
+            1.928,
+            3.34,
+            4.036,
+            5.416
+          ],
+          "gap_ms": [
+            51.583,
+            245.343,
+            497.293,
+            40764.27
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 656952,
+          "timestamp_lag_ms": [
+            5.974,
+            53.365,
+            175.087,
+            246.201
+          ],
+          "gap_ms": [
+            0.0,
+            703.893,
+            1665.812,
+            42044.024
+          ],
+          "negative_lag": 0
+        }
+      }
+    },
+    "2026-10-01": {
+      "hyperliquid": {
+        "books": {
+          "rows": 155773,
+          "timestamp_lag_ms": [
+            225.707,
+            286.24,
+            451.359,
+            639.586
+          ],
+          "gap_ms": [
+            540.503,
+            753.071,
+            1094.249,
+            3492.846
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 294078,
+          "timestamp_lag_ms": [
+            188.037,
+            280.968,
+            554.693,
+            883.981
+          ],
+          "gap_ms": [
+            0.0,
+            1663.476,
+            3627.589,
+            14960.94
+          ],
+          "negative_lag": 0
+        }
+      },
+      "lighter": {
+        "books": {
+          "rows": 1091732,
+          "timestamp_lag_ms": [
+            2.027,
+            3.179,
+            4.459,
+            5.073
+          ],
+          "gap_ms": [
+            51.887,
+            206.22,
+            451.038,
+            121382.765
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 575837,
+          "timestamp_lag_ms": [
+            5.549,
+            44.011,
+            176.983,
+            263.89
+          ],
+          "gap_ms": [
+            0.0,
+            769.939,
+            1699.59,
+            121383.478
+          ],
+          "negative_lag": 0
+        }
+      }
+    },
+    "2026-11-01": {
+      "hyperliquid": {
+        "books": {
+          "rows": 147340,
+          "timestamp_lag_ms": [
+            217.898,
+            273.655,
+            480.485,
+            671.134
+          ],
+          "gap_ms": [
+            543.861,
+            1055.471,
+            1537.996,
+            4323.321
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 163640,
+          "timestamp_lag_ms": [
+            184.128,
+            270.982,
+            517.818,
+            807.592
+          ],
+          "gap_ms": [
+            0.0,
+            2261.181,
+            4352.904,
+            12054.292
+          ],
+          "negative_lag": 0
+        }
+      },
+      "lighter": {
+        "books": {
+          "rows": 899210,
+          "timestamp_lag_ms": [
+            1.691,
+            2.604,
+            3.754,
+            4.669
+          ],
+          "gap_ms": [
+            54.939,
+            291.864,
+            545.99,
+            917151.803
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 525545,
+          "timestamp_lag_ms": [
+            4.902,
+            108.716,
+            367.333,
+            490.71
+          ],
+          "gap_ms": [
+            0.0,
+            799.219,
+            1845.967,
+            917468.374
+          ],
+          "negative_lag": 0
+        }
+      }
+    }
+  },
+  "sources": {
+    "2026-05-01_hyperliquid_book_snapshot_5.csv.gz": {
+      "sha256": "32d0571862324851b099f4c0fc4bfc4cbb62986bcbdf51d9da2e861238611cb5",
+      "bytes": 5750988,
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/05/01/BTC.csv.gz"
+    },
+    "2026-05-01_hyperliquid_trades.csv.gz": {
+      "sha256": "567d74d0e7bbc34d9e9f3e5b3f60f61ebce444e5e763e8c1140377d06574df56",
+      "bytes": 7653483,
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/05/01/BTC.csv.gz"
+    },
+    "2026-05-01_lighter_book_snapshot_5.csv.gz": {
+      "sha256": "3ad126ac99bda08254b8034cc345ab55ded8ae5afe0078aa22d9875dbb4f69fc",
+      "bytes": 23324429,
+      "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/05/01/1.csv.gz"
+    },
+    "2026-05-01_lighter_trades.csv.gz": {
+      "sha256": "d084201f83659fc985ee7e7f38bc1a80e12ef9bf7c92d90775eb4f3aac3d2aba",
+      "bytes": 7023661,
+      "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/05/01/1.csv.gz"
+    },
+    "2026-06-01_hyperliquid_book_snapshot_5.csv.gz": {
+      "sha256": "019fcf53b036549175c881e1dca4683ddf0c458bc14dc503f4f4ce0a1079d18c",
+      "bytes": 6437836,
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/06/01/BTC.csv.gz"
+    },
+    "2026-06-01_hyperliquid_trades.csv.gz": {
+      "sha256": "67008343c092c9b431f2daecdc3e4f40f2307d851bf3fe5f765d88d23f1c81a2",
+      "bytes": 8665768,
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/06/01/BTC.csv.gz"
+    },
+    "2026-06-01_lighter_book_snapshot_5.csv.gz": {
+      "sha256": "ccc1e939b0f443178a1c77c6995ab3301fd838f17f976e856bde39fb1cf67b2c",
+      "bytes": 26802990,
+      "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/06/01/1.csv.gz"
+    },
+    "2026-06-01_lighter_trades.csv.gz": {
+      "sha256": "2ed7610f2fa2799c148abe8b2b8662c2685bc6957c2c0aa812f51e2b3d2a987f",
+      "bytes": 8123755,
+      "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/06/01/1.csv.gz"
+    },
+    "2026-07-01_hyperliquid_book_snapshot_5.csv.gz": {
+      "sha256": "8929e11a5b45376d9badc73575defc5ab27dba7ca76caa2766d0e9ab5400bd9c",
+      "bytes": 7401547,
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/07/01/BTC.csv.gz"
+    },
+    "2026-07-01_hyperliquid_trades.csv.gz": {
+      "sha256": "4bab18c838df764be0d8892f77b419d2f1eff13a875cefce0740b276b2081173",
+      "bytes": 9224410,
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/07/01/BTC.csv.gz"
+    },
+    "2026-07-01_lighter_book_snapshot_5.csv.gz": {
+      "sha256": "d2164ad35f368012a40e53ecccfdc6e38c30574a90fbca46d546f25af2156e55",
+      "bytes": 42109745,
+      "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/07/01/1.csv.gz"
+    },
+    "2026-07-01_lighter_trades.csv.gz": {
+      "sha256": "7f789a8eb99382b9315da6809147156f329905f5f61a94b2853e9ed81a14f70f",
+      "bytes": 7017709,
+      "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/07/01/1.csv.gz"
+    },
+    "2026-08-01_hyperliquid_book_snapshot_5.csv.gz": {
+      "sha256": "af60db9615909ac766d5c4563444da194dc147190f4fad8a57cb80035cc2d1be",
+      "bytes": 4291809,
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/08/01/BTC.csv.gz"
+    },
+    "2026-08-01_hyperliquid_trades.csv.gz": {
+      "sha256": "242ebfce4bbffedbfedd1c4dba041740ec42b891579f68d31131ffe238c62d2f",
+      "bytes": 2231658,
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/08/01/BTC.csv.gz"
+    },
+    "2026-08-01_lighter_book_snapshot_5.csv.gz": {
+      "sha256": "d2194713b6d36423890b02feb2889efdda6f477b9b517034eda73bde460bc96c",
+      "bytes": 18009660,
+      "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/08/01/1.csv.gz"
+    },
+    "2026-08-01_lighter_trades.csv.gz": {
+      "sha256": "093cfeb6d7055481535a248bf9f37f01a3d0bc79c6f21ab31e44eeb7f5c34493",
+      "bytes": 7375656,
+      "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/08/01/1.csv.gz"
+    },
+    "2026-09-01_hyperliquid_book_snapshot_5.csv.gz": {
+      "sha256": "adcd298d9da20ba97cafbc880dc86d1e3dd637e2f7c704de6dc5acf30908e89b",
+      "bytes": 6066312,
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/09/01/BTC.csv.gz"
+    },
+    "2026-09-01_hyperliquid_trades.csv.gz": {
+      "sha256": "fbfd47e521fb50d18056f3f9e65a1b6fa2dd63296d8753cd8f75c85bb4ce0f00",
+      "bytes": 6138456,
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/09/01/BTC.csv.gz"
+    },
+    "2026-09-01_lighter_book_snapshot_5.csv.gz": {
+      "sha256": "589ea1530fa10b9bab723e74427c892a1917b15d7dd60129487dee73868ff365",
+      "bytes": 27550562,
+      "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/09/01/1.csv.gz"
+    },
+    "2026-09-01_lighter_trades.csv.gz": {
+      "sha256": "81ce57639275736aba815f0b6782fee61cd2e612f46efff302285d0c0df16e95",
+      "bytes": 6917527,
+      "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/09/01/1.csv.gz"
+    },
+    "2026-10-01_hyperliquid_book_snapshot_5.csv.gz": {
+      "sha256": "700ea994a0b98d497ea053ecd2c1fb9bbd06513c037eff9be30c39af99950442",
+      "bytes": 6006539,
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/10/01/BTC.csv.gz"
+    },
+    "2026-10-01_hyperliquid_trades.csv.gz": {
+      "sha256": "7e52fb675620d586737436f14ab217eda9948d518f6d1ac00bb7566b0427230c",
+      "bytes": 4935372,
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/10/01/BTC.csv.gz"
+    },
+    "2026-10-01_lighter_book_snapshot_5.csv.gz": {
+      "sha256": "45ea59607e157b32e2f0d34cd8b1a38f43a8652a87ad0c511b4dd006c502168c",
+      "bytes": 29343762,
+      "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/10/01/1.csv.gz"
+    },
+    "2026-10-01_lighter_trades.csv.gz": {
+      "sha256": "d66d4608f72193f22296f9275fddec6f3ba89e53becdb4356f42bd898ed9a6fb",
+      "bytes": 6549527,
+      "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/10/01/1.csv.gz"
+    },
+    "2026-11-01_hyperliquid_book_snapshot_5.csv.gz": {
+      "sha256": "c18d6e3535f6bf1de1610904eddacbff7ecb0e6307c716d4d12b60b9a0bdcff6",
+      "bytes": 3891687,
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/11/01/BTC.csv.gz"
+    },
+    "2026-11-01_hyperliquid_trades.csv.gz": {
+      "sha256": "1efd9636d444e5887012255657b019e4ce8ada70bdb124a0675f6c906f6b7259",
+      "bytes": 2886139,
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/11/01/BTC.csv.gz"
+    },
+    "2026-11-01_lighter_book_snapshot_5.csv.gz": {
+      "sha256": "c7d64bd87de5a68e128aec3f229afd397f7af15c6fd23a565ccd8ffbbb556672",
+      "bytes": 21594187,
+      "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/11/01/1.csv.gz"
+    },
+    "2026-11-01_lighter_trades.csv.gz": {
+      "sha256": "839442af30e24306da5223f91f0823cc519a2cd30a2729d7643daa0730cb77d6",
+      "bytes": 5566535,
+      "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/11/01/1.csv.gz"
+    }
+  }
+}

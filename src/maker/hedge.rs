@@ -1,8 +1,8 @@
 use rust_decimal::Decimal;
 
-use super::state::State;
+use super::state::{Book, State};
 use super::strategy::{bps, round_price};
-use super::{Action, Config, HedgePolicy, Kind, Mode, OrderRole, Status, Venue};
+use super::{Action, Config, HedgePolicy, Instrument, Kind, Mode, OrderRole, Status, Venue};
 use crate::intent::Side;
 
 pub fn desired(config: &Config, state: &State) -> Option<(Option<u64>, Action)> {
@@ -64,19 +64,13 @@ pub fn desired(config: &Config, state: &State) -> Option<(Option<u64>, Action)> 
         && !urgent
         && protection
         && state.passive_attempted_for != state.residual_since_ms;
-    let slippage = bps(config.slippage_bps);
     let price = if passive {
         match side {
             Side::Buy => bid,
             Side::Sell => ask,
         }
     } else {
-        let raw_limit = match side {
-            Side::Buy => ask * (Decimal::ONE + slippage),
-            Side::Sell => bid * (Decimal::ONE - slippage),
-        };
-        // Round towards the touch so the price stays within the slippage bound.
-        round_price(instrument, venue, side, raw_limit)
+        ioc_limit(config, instrument, &hedge.book, side)?
     };
     if price <= Decimal::ZERO {
         return None;
@@ -104,4 +98,19 @@ pub fn desired(config: &Config, state: &State) -> Option<(Option<u64>, Action)> 
             size,
         },
     ))
+}
+
+pub(super) fn ioc_limit(
+    config: &Config,
+    instrument: &Instrument,
+    book: &Book,
+    side: Side,
+) -> Option<Decimal> {
+    let (bid, ask) = book.touch()?;
+    let slippage = bps(config.slippage_bps);
+    let raw = match side {
+        Side::Buy => ask * (Decimal::ONE + slippage),
+        Side::Sell => bid * (Decimal::ONE - slippage),
+    };
+    Some(round_price(instrument, Venue::Hyperliquid, side, raw))
 }

@@ -57,5 +57,64 @@ class ResearchTests(unittest.TestCase):
         self.assertEqual(interval(np.zeros(25), 71), [0., 0.])
 
 
+class FollowupTests(unittest.TestCase):
+    def test_public_bbo_and_trading_clock_are_explicit(self):
+        from research.timing import parse
+        event = {"channel":"bbo","data":{"coin":"BTC","time":50,
+                 "bbo":[{"px":"99","sz":"1"},{"px":"101","sz":"2"}]}}
+        self.assertEqual(parse("hyperliquid",event),("bbo",50_000,(99.,101.,1.,2.)))
+
+    def test_clock_diagnostic_matches_rows_and_purges_future_receipts(self):
+        import json
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+        from research.timing import analyze
+
+        start = 100_000_000
+        rows = [{"type": "start", "utc_us": start}]
+        for i, at in enumerate(range(0, 40_000_000, 100_000)):
+            for channel, lag in (("bbo", 300_000), ("l2Book", 400_000), ("ticker", 0)):
+                price = 100 + np.sin((at - lag) / 1_000_000) + 0.01 * (i % 3)
+                rows.append({
+                    "type": "quote", "channel": channel, "at_us": at,
+                    "utc_us": start + at, "source_us": start + at - lag,
+                    "levels": [price - .01, price + .01, 1, 2],
+                })
+        rows.append({"type": "end", "at_us": 40_000_000})
+        with TemporaryDirectory() as output:
+            path = Path(output) / "capture.jsonl"
+            path.write_text("\n".join(map(json.dumps, rows)) + "\n")
+            results = analyze(path)
+        def bbo_500(row):
+            return row["channel"] == "bbo" and row["horizon_ms"] == 500
+
+        raw = next(filter(bbo_500, results["scores"]))
+        receive, exchange = filter(bbo_500, results["common_clock_scores"])
+        self.assertEqual([receive["clock"], exchange["clock"]], ["receive", "exchange"])
+        self.assertEqual(receive["holdout_rows"], exchange["holdout_rows"])
+        self.assertEqual(receive["train_rows"], exchange["train_rows"])
+        self.assertEqual(raw["train_rows"] - exchange["train_rows"], 3)
+
+    def test_matched_quote_uses_trade_occurrence_and_lot(self):
+        from research.execution_value import fill_path
+        book = np.array([[99.,1.,98.,1.,97.,1.,96.,1.,95.,1.]])
+        asks = np.array([[101.,1.,102.,1.,103.,1.,104.,1.,105.,1.]])
+        fill, last = fill_path(100,99.,1,.00030,10,np.array([100]),book,asks,
+            np.array([120,130,140]),np.array([105,125,130]),np.array([98.,98.,98.]),
+            np.array([1.,.00014,.0005]),np.array([False,False,False]),1.)
+        self.assertAlmostEqual(fill,.00030)
+        self.assertEqual(last,140)
+
+    def test_calibration_rejects_observe_only_reports(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+        from research.followup import calibrate
+        with TemporaryDirectory() as path:
+            report = Path(path)/"observe.json"
+            report.write_text('{"mode":"fixed_fills","observed":null,"source_end":{"clean":true}}')
+            with self.assertRaisesRegex(ValueError,"clean signed"):
+                calibrate(report)
+
+
 if __name__ == "__main__":
     unittest.main()

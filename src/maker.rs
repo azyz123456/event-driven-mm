@@ -64,6 +64,41 @@ pub enum OrderRole {
     Hedge,
 }
 
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum ResidualPolicy {
+    #[default]
+    Strict,
+    BoundedAggregate {
+        max_base: Decimal,
+        max_age_ms: u64,
+    },
+    BoundedReduce {
+        max_base: Decimal,
+        max_age_ms: u64,
+    },
+}
+
+impl ResidualPolicy {
+    fn is_default(&self) -> bool {
+        *self == Self::Strict
+    }
+
+    fn limits(&self) -> Option<(Decimal, u64, bool)> {
+        match *self {
+            Self::Strict => None,
+            Self::BoundedAggregate {
+                max_base,
+                max_age_ms,
+            } => Some((max_base, max_age_ms, false)),
+            Self::BoundedReduce {
+                max_base,
+                max_age_ms,
+            } => Some((max_base, max_age_ms, true)),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Config {
@@ -81,6 +116,8 @@ pub struct Config {
     pub slippage_bps: Decimal,
     pub max_residual: Decimal,
     pub max_residual_ms: u64,
+    #[serde(default, skip_serializing_if = "ResidualPolicy::is_default")]
+    pub residual_policy: ResidualPolicy,
     pub book_stale_ms: u64,
     pub account_stale_ms: u64,
     pub min_quote_ms: u64,
@@ -148,6 +185,15 @@ impl Config {
             ensure!(
                 self.mode == Mode::Hedged && wait_ms > 0 && wait_ms <= self.max_residual_ms,
                 "passive hedging requires hedged mode and a positive wait within max_residual_ms"
+            );
+        }
+        if let Some((max_base, max_age_ms, _)) = self.residual_policy.limits() {
+            ensure!(
+                self.mode == Mode::Hedged
+                    && max_base > Decimal::ZERO
+                    && max_base < self.max_residual
+                    && max_age_ms > self.max_residual_ms,
+                "bounded residual recovery needs hedged mode, a lower size cap, and a longer age cap"
             );
         }
         Ok(())
@@ -308,6 +354,7 @@ pub struct Engine {
     next_id: u64,
     fixed_lighter_fills: bool,
     quote_filter: Option<Side>,
+    quote_widen_bps: [Decimal; 2],
     pub quote_opportunities: [Option<(Decimal, Decimal)>; 2],
 }
 
@@ -323,6 +370,7 @@ impl Engine {
             next_id: 1,
             fixed_lighter_fills: false,
             quote_filter: None,
+            quote_widen_bps: [Decimal::ZERO; 2],
             quote_opportunities: [None; 2],
         })
     }
@@ -334,6 +382,10 @@ impl Engine {
 
     pub fn suppress_quote(&mut self, side: Option<Side>) {
         self.quote_filter = side;
+    }
+
+    pub fn widen_quotes(&mut self, bps: [Decimal; 2]) {
+        self.quote_widen_bps = bps;
     }
 
     pub fn apply(&mut self, seq: u64, at_ms: u64, input: Input) -> Result<Vec<Intent>> {
@@ -363,8 +415,37 @@ impl Engine {
                 self.quote_opportunities[usize::from(side == Side::Sell)] = Some((price, size));
             }
         }
-        let actions = if let Some(side) = self.quote_filter {
-            quotes[usize::from(side == Side::Sell)] = None;
+        let modify = self.quote_filter.is_some() || self.quote_widen_bps != [Decimal::ZERO; 2];
+        let actions = if modify {
+            if let Some(side) = self.quote_filter {
+                quotes[usize::from(side == Side::Sell)] = None;
+            }
+            if let Some(instrument) = &self.state.venue(venue).instrument {
+                for ((quote, side), widen) in quotes
+                    .iter_mut()
+                    .zip(strategy::SIDES)
+                    .zip(self.quote_widen_bps)
+                {
+                    if widen.is_zero() {
+                        continue;
+                    }
+                    if let Some(new) = quote {
+                        let distance = new.price * strategy::bps(widen);
+                        new.price = strategy::round_price(
+                            instrument,
+                            venue,
+                            side,
+                            new.price - side.signed(distance),
+                        );
+                        if new.price <= Decimal::ZERO
+                            || new.price * new.size > self.config.max_order_notional
+                            || !instrument.valid_size(new.price, new.size)
+                        {
+                            *quote = None;
+                        }
+                    }
+                }
+            }
             execution::reconcile(&self.config, &self.state, quotes)
         } else {
             baseline

@@ -27,6 +27,7 @@ pub(crate) fn config(mode: Mode) -> Config {
         slippage_bps: d(10, 0),
         max_residual: d(5, 1),
         max_residual_ms: 5_000,
+        residual_policy: ResidualPolicy::Strict,
         book_stale_ms: 5_000,
         account_stale_ms: 25_000,
         min_quote_ms: 300,
@@ -526,5 +527,123 @@ fn passive_hedge_cancels_before_ioc_and_hedges_only_the_remainder() -> Result<()
     assert!(actions.iter().any(|intent| intent.venue == hs
         && matches!(intent.action,
         Action::Place { side: Side::Sell, kind: Kind::Ioc, size, .. } if size == d(20, 2))));
+    Ok(())
+}
+
+#[test]
+fn aged_subminimum_residual_recovery_obeys_direction_size_and_age() -> Result<()> {
+    let hl = Venue::Hyperliquid;
+    let li = Venue::Lighter;
+    let mut fixture = Fixture::new(Mode::Hedged)?;
+    fixture.engine.config.max_residual_ms = 500;
+    fixture.apply(
+        1,
+        Input::Connected {
+            venue: hl,
+            generation: 1,
+        },
+    )?;
+    let mut meta = instrument(hl);
+    let Input::Instrument {
+        instrument: ref mut h,
+        ..
+    } = meta
+    else {
+        unreachable!()
+    };
+    h.min_notional = d(10, 0);
+    fixture.apply(2, meta)?;
+    fixture.apply(3, book(hl, 1, None))?;
+    fixture.apply(4, account(hl, 3, Decimal::ZERO))?;
+    fixture.apply(
+        5,
+        Input::Connected {
+            venue: li,
+            generation: 2,
+        },
+    )?;
+    fixture.apply(6, instrument(li))?;
+    fixture.apply(7, book(li, 1, None))?;
+    let quotes = fixture.apply(8, account(li, 7, Decimal::ZERO))?;
+    assert_eq!(quotes.len(), 2);
+    assert!(
+        fixture
+            .apply(10, fill("dust", li, &quotes[0], 1, d(1, 1)))?
+            .iter()
+            .all(|intent| intent.venue != hl)
+    );
+    fixture.apply(511, Input::Tick)?;
+    assert!(
+        strategy::desired(&fixture.engine.config, &fixture.engine.state)
+            .iter()
+            .all(Option::is_none)
+    );
+
+    fixture.engine.config.residual_policy = ResidualPolicy::BoundedReduce {
+        max_base: d(12, 2),
+        max_age_ms: 1000,
+    };
+    let [bid, ask] = strategy::desired(&fixture.engine.config, &fixture.engine.state);
+    assert!(bid.is_none());
+    assert_eq!(ask.unwrap().size, d(2, 1));
+
+    fixture.engine.config.residual_policy = ResidualPolicy::BoundedAggregate {
+        max_base: d(12, 2),
+        max_age_ms: 1000,
+    };
+    assert!(
+        strategy::desired(&fixture.engine.config, &fixture.engine.state)
+            .iter()
+            .all(Option::is_some)
+    );
+    fixture.apply(1010, Input::Tick)?;
+    assert!(
+        strategy::desired(&fixture.engine.config, &fixture.engine.state)
+            .iter()
+            .all(Option::is_none)
+    );
+    assert_eq!(fixture.engine.state.residual(), d(1, 1));
+    assert!(!fixture.engine.end().clean);
+    Ok(())
+}
+
+#[test]
+fn aged_hedgeable_residual_still_blocks_quotes_with_recovery_enabled() -> Result<()> {
+    let hl = Venue::Hyperliquid;
+    let li = Venue::Lighter;
+    let mut fixture = Fixture::new(Mode::Hedged)?;
+    fixture.engine.config.max_residual_ms = 500;
+    fixture.engine.config.hedge_retry_ms = 1000;
+    fixture.engine.config.residual_policy = ResidualPolicy::BoundedAggregate {
+        max_base: d(2, 1),
+        max_age_ms: 1000,
+    };
+    fixture.warm(hl, 1)?;
+    fixture.apply(
+        5,
+        Input::Connected {
+            venue: li,
+            generation: 2,
+        },
+    )?;
+    fixture.apply(6, instrument(li))?;
+    fixture.apply(7, book(li, 1, None))?;
+    let quotes = fixture.apply(8, account(li, 7, Decimal::ZERO))?;
+    let intents = fixture.apply(10, fill("hedgeable", li, &quotes[0], 1, d(1, 1)))?;
+    let hedge = intents.iter().find(|intent| intent.venue == hl).unwrap();
+    fixture.apply(14, update(hl, hedge, 2, Status::Terminal, Decimal::ZERO))?;
+    assert!(
+        fixture
+            .engine
+            .state
+            .active_orders()
+            .all(|(_, order)| order.venue != hl)
+    );
+    fixture.apply(511, Input::Tick)?;
+    assert!(
+        strategy::desired(&fixture.engine.config, &fixture.engine.state)
+            .iter()
+            .all(Option::is_none)
+    );
     Ok(())
 }
