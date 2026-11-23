@@ -10,7 +10,7 @@ use rust_decimal::Decimal;
 use serde_json::{Value, json};
 
 use crate::intent::Side;
-use crate::maker::{Fill, Input, Instrument, Level, Status, Venue};
+use crate::maker::{Fill, Input, Instrument, Level, Status, TradePrint, Venue};
 use crate::network::maker::{decimal, number};
 
 pub const HOST: &str = "api.testnet.lighter.xyz";
@@ -129,6 +129,19 @@ pub fn observations(
                         id: trade_id(trade)?,
                         connection,
                         venue_ms: number(trade, "timestamp")?,
+                        is_snapshot: kind == "subscribed/trade",
+                        trade: Some(TradePrint {
+                            price: decimal(trade, "price")?,
+                            size: decimal(trade, "size")?,
+                            aggressor: if trade["is_maker_ask"]
+                                .as_bool()
+                                .context("missing Lighter maker side")?
+                            {
+                                Side::Buy
+                            } else {
+                                Side::Sell
+                            },
+                        }),
                     })
                 })
                 .collect()

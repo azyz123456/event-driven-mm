@@ -4,7 +4,9 @@ use anyhow::{Result, ensure};
 use rust_decimal::Decimal;
 use serde::Serialize;
 
-use super::{Action, Config, Fill, Input, Instrument, Intent, Kind, Level, Status, Venue};
+use super::{
+    Action, Config, Fill, Input, Instrument, Intent, Kind, Level, OrderRole, Status, Venue,
+};
 use crate::intent::Side;
 
 #[derive(Default, Serialize)]
@@ -30,8 +32,10 @@ pub struct State {
     pub protection_ms: Option<u64>,
     pub residual_since_ms: Option<u64>,
     pub last_hedge_ms: Option<u64>,
+    pub passive_attempted_for: Option<u64>,
 }
 
+#[derive(Serialize)]
 pub struct AppliedFill {
     pub venue: Venue,
     pub fill: Fill,
@@ -69,6 +73,7 @@ pub struct Order {
     pub oid: Option<u64>,
     pub side: Side,
     pub kind: Kind,
+    pub role: OrderRole,
     pub price: Decimal,
     pub size: Decimal,
     pub filled: Decimal,
@@ -136,7 +141,13 @@ impl State {
                 .is_some_and(|at| self.now_ms - at <= config.book_stale_ms)
     }
 
-    pub fn apply(&mut self, config: &Config, at_ms: u64, input: Input) -> Result<()> {
+    pub fn apply(
+        &mut self,
+        config: &Config,
+        at_ms: u64,
+        input: Input,
+        fixed_lighter_fills: bool,
+    ) -> Result<()> {
         ensure!(at_ms >= self.now_ms, "maker event time moved backwards");
         self.now_ms = at_ms;
         self.applied_fills.clear();
@@ -223,7 +234,7 @@ impl State {
             } => {
                 self.order(venue, client, oid, status, filled)?;
             }
-            Input::Fill { venue, fill } => self.fill(config, venue, fill)?,
+            Input::Fill { venue, fill } => self.fill(config, venue, fill, fixed_lighter_fills)?,
             Input::Protection { expires_ms } => self.protection_ms = expires_ms,
             Input::Stop => self.stop_ms = Some(at_ms),
             Input::Tick | Input::PublicTrade { .. } | Input::PublicBook { .. } => {}
@@ -284,7 +295,13 @@ impl State {
         Ok(())
     }
 
-    fn fill(&mut self, config: &Config, venue: Venue, fill: Fill) -> Result<()> {
+    fn fill(
+        &mut self,
+        config: &Config,
+        venue: Venue,
+        fill: Fill,
+        fixed_lighter_fills: bool,
+    ) -> Result<()> {
         ensure!(
             !fill.id.is_empty()
                 && fill.price > Decimal::ZERO
@@ -297,7 +314,10 @@ impl State {
         if !self.seen.insert(key.clone()) {
             return Ok(());
         }
-        if let Some(client) = self.find_order(venue, fill.client, Some(fill.oid)) {
+        if venue == Venue::Lighter && fixed_lighter_fills {
+            ensure!(fill.maker, "fixed Lighter flow must contain maker fills");
+            self.book_fill(venue, &fill);
+        } else if let Some(client) = self.find_order(venue, fill.client, Some(fill.oid)) {
             self.apply_fill(venue, client, &fill)?;
         } else if config.mode.uses(venue) && self.unmatched.len() < 1024 {
             self.unmatched.insert(key, fill);
@@ -326,6 +346,11 @@ impl State {
             self.active.insert(client);
         }
         self.order_ids.insert((venue, fill.oid), client);
+        self.book_fill(venue, fill);
+        Ok(())
+    }
+
+    fn book_fill(&mut self, venue: Venue, fill: &Fill) {
         self.applied_fills.push(AppliedFill {
             venue,
             fill: fill.clone(),
@@ -338,7 +363,6 @@ impl State {
         state.fees += fill.fee;
         state.fills += 1;
         state.changed_ms = Some(now);
-        Ok(())
     }
 
     fn find_order(&self, venue: Venue, client: Option<u64>, oid: Option<u64>) -> Option<u64> {
@@ -349,6 +373,10 @@ impl State {
                     .is_some_and(|order| order.venue == venue)
             })
             .or_else(|| oid.and_then(|oid| self.order_ids.get(&(venue, oid)).copied()))
+    }
+
+    pub fn client_for_oid(&self, venue: Venue, oid: u64) -> Option<u64> {
+        self.order_ids.get(&(venue, oid)).copied()
     }
 
     pub fn active_orders(&self) -> impl Iterator<Item = (u64, &Order)> {
@@ -365,7 +393,7 @@ impl State {
         self.lighter_actions.len()
     }
 
-    pub fn sent(&mut self, intent: &Intent) {
+    pub fn sent(&mut self, intent: &Intent, role: OrderRole) {
         let now = self.now_ms;
         if intent.venue == Venue::Lighter {
             self.lighter_actions.push_back(now);
@@ -379,7 +407,7 @@ impl State {
                 size,
             } => {
                 self.active.insert(intent.client);
-                if kind == Kind::PostOnly {
+                if role == OrderRole::Quote {
                     self.last_quotes[usize::from(side == Side::Sell)] = Some(now);
                 }
                 self.orders.insert(
@@ -393,6 +421,7 @@ impl State {
                         oid: None,
                         side,
                         kind,
+                        role,
                         price,
                         size,
                         filled: Decimal::ZERO,
@@ -402,8 +431,11 @@ impl State {
                         status: None,
                     },
                 );
-                if kind == Kind::Ioc {
-                    self.last_hedge_ms = Some(now);
+                if role == OrderRole::Hedge {
+                    match kind {
+                        Kind::Ioc => self.last_hedge_ms = Some(now),
+                        Kind::PostOnly => self.passive_attempted_for = self.residual_since_ms,
+                    }
                 }
             }
             Action::Cancel { .. } => {
@@ -459,6 +491,10 @@ impl Instrument {
 }
 
 impl Book {
+    pub(crate) fn sequence(&self) -> Option<u64> {
+        self.sequence
+    }
+
     pub fn has_snapshot(&self) -> bool {
         self.sequence.is_some()
     }
@@ -469,7 +505,7 @@ impl Book {
         (bid < ask).then_some((bid, ask))
     }
 
-    fn update(
+    pub(crate) fn update(
         &mut self,
         now: u64,
         sequence: u64,

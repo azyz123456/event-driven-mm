@@ -83,6 +83,7 @@ fn follow(
                         config,
                         seed,
                         observe,
+                        ..
                     },
                 seq,
                 connection_id,
@@ -93,7 +94,7 @@ fn follow(
                     "invalid maker session start"
                 );
                 ensure!(
-                    version == crate::event::MAKER_FORMAT_VERSION,
+                    crate::event::supported_maker_version(version),
                     "unsupported maker format {version}"
                 );
                 session = Some(Session::Maker(Box::new(maker::diagnostics::Replay::new(

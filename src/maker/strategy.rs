@@ -55,7 +55,7 @@ pub fn desired(config: &Config, state: &State) -> [Option<Quote>; 2] {
     let pending_hedge = |side| {
         state
             .active_orders()
-            .filter(|(_, order)| order.kind == super::Kind::Ioc && order.side == side)
+            .filter(|(_, order)| order.role == super::OrderRole::Hedge && order.side == side)
             .map(|(_, order)| order.outstanding())
             .sum::<Decimal>()
     };
@@ -147,7 +147,7 @@ fn hedge_ready(config: &Config, state: &State) -> bool {
             .residual_since_ms
             .is_none_or(|since| state.now_ms - since < config.max_residual_ms)
         && !state.active_orders().any(|(_, order)| {
-            order.kind == super::Kind::Ioc
+            order.role == super::OrderRole::Hedge
                 && !order.done()
                 && (state.now_ms - order.sent_ms >= config.action_timeout_ms
                     || Some(order.generation) != state.venue(Venue::Hyperliquid).generation)

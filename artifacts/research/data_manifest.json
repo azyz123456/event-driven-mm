@@ -1,0 +1,430 @@
+{
+  "2026-08-01": {
+    "day": "2026-08-01",
+    "variant": "receive",
+    "grid_rows": 864000,
+    "venues": {
+      "hyperliquid": {
+        "fresh_grid_fraction": 0.9542199074074074,
+        "invalid_books": 0,
+        "books": {
+          "rows": 148632,
+          "timestamp_lag_ms": [
+            202.673,
+            245.097,
+            338.068,
+            453.021
+          ],
+          "gap_ms": [
+            542.432,
+            1034.054,
+            1290.392,
+            93841.507
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 125555,
+          "timestamp_lag_ms": [
+            173.776,
+            230.285,
+            407.357,
+            1388.129
+          ],
+          "gap_ms": [
+            0.0,
+            3434.305,
+            6300.468,
+            209651.924
+          ],
+          "negative_lag": 0
+        }
+      },
+      "lighter": {
+        "fresh_grid_fraction": 0.9896261574074074,
+        "invalid_books": 0,
+        "books": {
+          "rows": 905164,
+          "timestamp_lag_ms": [
+            1.686,
+            2.594,
+            4.034,
+            4.435
+          ],
+          "gap_ms": [
+            52.633,
+            253.468,
+            497.131,
+            75070.153
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 718525,
+          "timestamp_lag_ms": [
+            4.207,
+            104.519,
+            346.202,
+            456.069
+          ],
+          "gap_ms": [
+            27.256,
+            513.466,
+            1043.783,
+            75106.246
+          ],
+          "negative_lag": 0
+        }
+      }
+    },
+    "sources": {
+      "2026-08-01_hyperliquid_book_snapshot_5.csv.gz": {
+        "sha256": "af60db9615909ac766d5c4563444da194dc147190f4fad8a57cb80035cc2d1be",
+        "bytes": 4291809,
+        "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/08/01/BTC.csv.gz"
+      },
+      "2026-08-01_hyperliquid_trades.csv.gz": {
+        "sha256": "242ebfce4bbffedbfedd1c4dba041740ec42b891579f68d31131ffe238c62d2f",
+        "bytes": 2231658,
+        "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/08/01/BTC.csv.gz"
+      },
+      "2026-08-01_lighter_book_snapshot_5.csv.gz": {
+        "sha256": "d2194713b6d36423890b02feb2889efdda6f477b9b517034eda73bde460bc96c",
+        "bytes": 18009660,
+        "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/08/01/1.csv.gz"
+      },
+      "2026-08-01_lighter_trades.csv.gz": {
+        "sha256": "093cfeb6d7055481535a248bf9f37f01a3d0bc79c6f21ab31e44eeb7f5c34493",
+        "bytes": 7375656,
+        "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/08/01/1.csv.gz"
+      }
+    },
+    "usable_rows": 710709,
+    "label_rows": {
+      "500": 685501,
+      "2000": 681253,
+      "5000": 675377
+    }
+  },
+  "2026-09-01": {
+    "day": "2026-09-01",
+    "variant": "receive",
+    "grid_rows": 864000,
+    "venues": {
+      "hyperliquid": {
+        "fresh_grid_fraction": 0.9866053240740741,
+        "invalid_books": 0,
+        "books": {
+          "rows": 156735,
+          "timestamp_lag_ms": [
+            210.891,
+            264.581,
+            387.972,
+            527.386
+          ],
+          "gap_ms": [
+            540.784,
+            698.193,
+            1063.816,
+            2841.68
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 360024,
+          "timestamp_lag_ms": [
+            181.521,
+            255.587,
+            446.059,
+            735.345
+          ],
+          "gap_ms": [
+            0.0,
+            1186.189,
+            2433.252,
+            9120.994
+          ],
+          "negative_lag": 0
+        }
+      },
+      "lighter": {
+        "fresh_grid_fraction": 0.9877696759259259,
+        "invalid_books": 0,
+        "books": {
+          "rows": 1051743,
+          "timestamp_lag_ms": [
+            1.928,
+            3.34,
+            4.036,
+            5.416
+          ],
+          "gap_ms": [
+            51.583,
+            245.343,
+            497.293,
+            40764.27
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 656952,
+          "timestamp_lag_ms": [
+            5.974,
+            53.365,
+            175.087,
+            246.201
+          ],
+          "gap_ms": [
+            0.0,
+            703.893,
+            1665.812,
+            42044.024
+          ],
+          "negative_lag": 0
+        }
+      }
+    },
+    "sources": {
+      "2026-09-01_hyperliquid_book_snapshot_5.csv.gz": {
+        "sha256": "adcd298d9da20ba97cafbc880dc86d1e3dd637e2f7c704de6dc5acf30908e89b",
+        "bytes": 6066312,
+        "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/09/01/BTC.csv.gz"
+      },
+      "2026-09-01_hyperliquid_trades.csv.gz": {
+        "sha256": "fbfd47e521fb50d18056f3f9e65a1b6fa2dd63296d8753cd8f75c85bb4ce0f00",
+        "bytes": 6138456,
+        "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/09/01/BTC.csv.gz"
+      },
+      "2026-09-01_lighter_book_snapshot_5.csv.gz": {
+        "sha256": "589ea1530fa10b9bab723e74427c892a1917b15d7dd60129487dee73868ff365",
+        "bytes": 27550562,
+        "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/09/01/1.csv.gz"
+      },
+      "2026-09-01_lighter_trades.csv.gz": {
+        "sha256": "81ce57639275736aba815f0b6782fee61cd2e612f46efff302285d0c0df16e95",
+        "bytes": 6917527,
+        "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/09/01/1.csv.gz"
+      }
+    },
+    "usable_rows": 790380,
+    "label_rows": {
+      "500": 781643,
+      "2000": 780417,
+      "5000": 779070
+    }
+  },
+  "2026-10-01": {
+    "day": "2026-10-01",
+    "variant": "receive",
+    "grid_rows": 864000,
+    "venues": {
+      "hyperliquid": {
+        "fresh_grid_fraction": 0.979556712962963,
+        "invalid_books": 0,
+        "books": {
+          "rows": 155773,
+          "timestamp_lag_ms": [
+            225.707,
+            286.24,
+            451.359,
+            639.586
+          ],
+          "gap_ms": [
+            540.503,
+            753.071,
+            1094.249,
+            3492.846
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 294078,
+          "timestamp_lag_ms": [
+            188.037,
+            280.968,
+            554.693,
+            883.981
+          ],
+          "gap_ms": [
+            0.0,
+            1663.476,
+            3627.589,
+            14960.94
+          ],
+          "negative_lag": 0
+        }
+      },
+      "lighter": {
+        "fresh_grid_fraction": 0.9905046296296296,
+        "invalid_books": 0,
+        "books": {
+          "rows": 1091732,
+          "timestamp_lag_ms": [
+            2.027,
+            3.179,
+            4.459,
+            5.073
+          ],
+          "gap_ms": [
+            51.887,
+            206.22,
+            451.038,
+            121382.765
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 575837,
+          "timestamp_lag_ms": [
+            5.549,
+            44.011,
+            176.983,
+            263.89
+          ],
+          "gap_ms": [
+            0.0,
+            769.939,
+            1699.59,
+            121383.478
+          ],
+          "negative_lag": 0
+        }
+      }
+    },
+    "sources": {
+      "2026-10-01_hyperliquid_book_snapshot_5.csv.gz": {
+        "sha256": "700ea994a0b98d497ea053ecd2c1fb9bbd06513c037eff9be30c39af99950442",
+        "bytes": 6006539,
+        "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/10/01/BTC.csv.gz"
+      },
+      "2026-10-01_hyperliquid_trades.csv.gz": {
+        "sha256": "7e52fb675620d586737436f14ab217eda9948d518f6d1ac00bb7566b0427230c",
+        "bytes": 4935372,
+        "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/10/01/BTC.csv.gz"
+      },
+      "2026-10-01_lighter_book_snapshot_5.csv.gz": {
+        "sha256": "45ea59607e157b32e2f0d34cd8b1a38f43a8652a87ad0c511b4dd006c502168c",
+        "bytes": 29343762,
+        "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/10/01/1.csv.gz"
+      },
+      "2026-10-01_lighter_trades.csv.gz": {
+        "sha256": "d66d4608f72193f22296f9275fddec6f3ba89e53becdb4356f42bd898ed9a6fb",
+        "bytes": 6549527,
+        "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/10/01/1.csv.gz"
+      }
+    },
+    "usable_rows": 779509,
+    "label_rows": {
+      "500": 766188,
+      "2000": 764423,
+      "5000": 763259
+    }
+  },
+  "2026-11-01": {
+    "day": "2026-11-01",
+    "variant": "receive",
+    "grid_rows": 864000,
+    "venues": {
+      "hyperliquid": {
+        "fresh_grid_fraction": 0.9391435185185185,
+        "invalid_books": 0,
+        "books": {
+          "rows": 147340,
+          "timestamp_lag_ms": [
+            217.898,
+            273.655,
+            480.485,
+            671.134
+          ],
+          "gap_ms": [
+            543.861,
+            1055.471,
+            1537.996,
+            4323.321
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 163640,
+          "timestamp_lag_ms": [
+            184.128,
+            270.982,
+            517.818,
+            807.592
+          ],
+          "gap_ms": [
+            0.0,
+            2261.181,
+            4352.904,
+            12054.292
+          ],
+          "negative_lag": 0
+        }
+      },
+      "lighter": {
+        "fresh_grid_fraction": 0.9773831018518518,
+        "invalid_books": 0,
+        "books": {
+          "rows": 899210,
+          "timestamp_lag_ms": [
+            1.691,
+            2.604,
+            3.754,
+            4.669
+          ],
+          "gap_ms": [
+            54.939,
+            291.864,
+            545.99,
+            917151.803
+          ],
+          "negative_lag": 0
+        },
+        "trades": {
+          "rows": 525545,
+          "timestamp_lag_ms": [
+            4.902,
+            108.716,
+            367.333,
+            490.71
+          ],
+          "gap_ms": [
+            0.0,
+            799.219,
+            1845.967,
+            917468.374
+          ],
+          "negative_lag": 0
+        }
+      }
+    },
+    "sources": {
+      "2026-11-01_hyperliquid_book_snapshot_5.csv.gz": {
+        "sha256": "c18d6e3535f6bf1de1610904eddacbff7ecb0e6307c716d4d12b60b9a0bdcff6",
+        "bytes": 3891687,
+        "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/11/01/BTC.csv.gz"
+      },
+      "2026-11-01_hyperliquid_trades.csv.gz": {
+        "sha256": "1efd9636d444e5887012255657b019e4ce8ada70bdb124a0675f6c906f6b7259",
+        "bytes": 2886139,
+        "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/11/01/BTC.csv.gz"
+      },
+      "2026-11-01_lighter_book_snapshot_5.csv.gz": {
+        "sha256": "c7d64bd87de5a68e128aec3f229afd397f7af15c6fd23a565ccd8ffbbb556672",
+        "bytes": 21594187,
+        "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/11/01/1.csv.gz"
+      },
+      "2026-11-01_lighter_trades.csv.gz": {
+        "sha256": "839442af30e24306da5223f91f0823cc519a2cd30a2729d7643daa0730cb77d6",
+        "bytes": 5566535,
+        "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/11/01/1.csv.gz"
+      }
+    },
+    "usable_rows": 657101,
+    "label_rows": {
+      "500": 623524,
+      "2000": 619854,
+      "5000": 615767
+    }
+  }
+}

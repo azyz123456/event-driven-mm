@@ -15,6 +15,7 @@ fn d(value: i64, scale: u32) -> Decimal {
 pub(crate) fn config(mode: Mode) -> Config {
     Config {
         mode,
+        hedge_policy: HedgePolicy::Ioc,
         coin: "BTC".into(),
         lighter_market: mode.uses(Venue::Lighter).then_some(4096),
         size: d(30, 2),
@@ -128,6 +129,7 @@ impl Fixture {
                 config: config.clone(),
                 seed: 7,
                 observe: false,
+                capture: None,
             },
         )?;
         Ok(Self {
@@ -385,4 +387,144 @@ fn late_ioc_id_recovers_buffered_fill_and_a_zero_fill_can_retry() -> Result<()> 
     assert_eq!(fixture.engine.state.venue(hyper).fills, 1);
     assert!(fixture.engine.state.orders[&retry.client].done());
     fixture.assert_replays()
+}
+
+#[test]
+fn fixed_fill_simulator_uses_lighter_flow_without_copying_historical_hyperliquid_fills()
+-> Result<()> {
+    let hs = Venue::Hyperliquid;
+    let ls = Venue::Lighter;
+    let mut fixture = Fixture::new(Mode::Hedged)?;
+    fixture.warm(hs, 1)?;
+    fixture.apply(
+        5,
+        Input::Connected {
+            venue: ls,
+            generation: 2,
+        },
+    )?;
+    fixture.apply(6, instrument(ls))?;
+    fixture.apply(7, book(ls, 3, None))?;
+    let quotes = fixture.apply(8, account(ls, 7, Decimal::ZERO))?;
+    let first = fixture.apply(50, fill("lighter-real", ls, &quotes[0], 4, d(30, 2)))?;
+    let recorded_hedge = first.iter().find(|intent| intent.venue == hs).unwrap();
+    fixture.apply(65, fill("hex-real", hs, recorded_hedge, 12, d(30, 2)))?;
+    fixture.apply(
+        66,
+        update(hs, recorded_hedge, 12, Status::Terminal, d(30, 2)),
+    )?;
+
+    // A print attributable to our real hedge must not fill the simulated passive order.
+    for (at, id, volume) in [(110, "hex-real", d(80, 0)), (130, "public-flow", d(530, 2))] {
+        fixture.apply(
+            at,
+            Input::PublicTrade {
+                venue: hs,
+                connection: 1,
+                id: id.into(),
+                venue_ms: u64::MAX / 1000,
+                trade: Some(TradePrint {
+                    price: d(101, 0),
+                    size: volume,
+                    aggressor: Side::Buy,
+                }),
+                is_snapshot: false,
+            },
+        )?;
+    }
+    fixture.apply(380, Input::Stop)?;
+    fixture.apply(550, Input::Tick)?;
+    fixture.journal.append(
+        None,
+        Event::MakerEnd {
+            summary: fixture.engine.end(),
+        },
+    )?;
+    let mut report = Vec::new();
+    let mut trace = Vec::new();
+    crate::sim::run(
+        fixture.file.path(),
+        std::path::Path::new("examples/simulation.json"),
+        crate::sim::Flow::FixedFills,
+        77,
+        None,
+        &mut report,
+        &mut trace,
+    )?;
+    let report: serde_json::Value = serde_json::from_slice(&report)?;
+    assert_eq!(report["fixed_lighter_fills"], 1);
+    assert_eq!(report["observed"]["hedge_ioc"]["full"], 1);
+    assert_eq!(
+        report["scenarios"][1]["metrics"]["hedge_passive"]["full"],
+        1
+    );
+    for row in report["scenarios"].as_array().unwrap() {
+        assert_eq!(row["metrics"]["quotes"]["placements"], 0);
+        assert_eq!(row["metrics"]["venues"][0]["fills"], 1);
+        assert_eq!(row["metrics"]["venues"][1]["fills"], 1);
+    }
+    for event in String::from_utf8(trace)?
+        .lines()
+        .map(serde_json::from_str::<serde_json::Value>)
+    {
+        let event = event?;
+        if event["scenario"] == "passive_then_ioc"
+            && event["event"] == "fill"
+            && event["data"]["fill"]["id"]
+                .as_str()
+                .unwrap()
+                .starts_with("sim-")
+        {
+            assert!(event["at_us"].as_u64().unwrap() >= 130_000);
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn passive_hedge_cancels_before_ioc_and_hedges_only_the_remainder() -> Result<()> {
+    let hs = Venue::Hyperliquid;
+    let ls = Venue::Lighter;
+    let mut fixture = Fixture::new(Mode::Hedged)?;
+    fixture.engine.config.hedge_policy = HedgePolicy::PassiveThenIoc { wait_ms: 150 };
+    fixture.warm(hs, 1)?;
+    fixture.apply(
+        5,
+        Input::Protection {
+            expires_ms: Some(60_000),
+        },
+    )?;
+    fixture.apply(
+        6,
+        Input::Connected {
+            venue: ls,
+            generation: 2,
+        },
+    )?;
+    fixture.apply(7, instrument(ls))?;
+    fixture.apply(8, book(ls, 3, None))?;
+    let quotes = fixture.apply(9, account(ls, 8, Decimal::ZERO))?;
+    let placements = fixture.apply(20, fill("lighter", ls, &quotes[0], 4, d(30, 2)))?;
+    let passive = placements.iter().find(|intent| intent.venue == hs).unwrap();
+    assert!(
+        matches!(passive.action, Action::Place { side: Side::Sell, kind: Kind::PostOnly, price, .. }
+        if price == d(101, 0))
+    );
+    fixture.apply(25, update(hs, passive, 8, Status::Open, Decimal::ZERO))?;
+    let cancels = fixture.apply(170, Input::Tick)?;
+    assert!(
+        cancels.iter().any(|intent| intent.client == passive.client
+            && matches!(intent.action, Action::Cancel { .. }))
+    );
+    assert!(
+        fixture
+            .apply(175, update(hs, passive, 8, Status::Terminal, d(10, 2)))?
+            .iter()
+            .all(|intent| intent.venue == ls)
+    );
+    let actions = fixture.apply(178, fill("partial-hedge", hs, passive, 8, d(10, 2)))?;
+    assert!(actions.iter().any(|intent| intent.venue == hs
+        && matches!(intent.action,
+        Action::Place { side: Side::Sell, kind: Kind::Ioc, size, .. } if size == d(20, 2))));
+    Ok(())
 }

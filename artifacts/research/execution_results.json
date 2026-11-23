@@ -1,0 +1,2086 @@
+{
+  "threshold_bps": 0.5281596174901341,
+  "days": [
+    {
+      "day": "2026-10-01",
+      "scenarios": {
+        "baseline_base": {
+          "orders": 12235,
+          "filled_orders": 19,
+          "fill_rate": 0.0015529219452390683,
+          "unresolved": 0,
+          "metrics": {
+            "end_residual": "0.00000",
+            "exposed_us": 2607355,
+            "exposure_to_first_hedge_fill": {
+              "p50_us": 26450,
+              "p95_us": 424903,
+              "p99_us": 488115,
+              "samples": 20
+            },
+            "hedge_ioc": {
+              "empty": 0,
+              "fill_fraction": "1",
+              "filled_base": "0.00570",
+              "full": 22,
+              "partial": 0,
+              "placements": 22,
+              "requested_base": "0.00570",
+              "unresolved": 0
+            },
+            "hedge_passive": {
+              "empty": 0,
+              "fill_fraction": null,
+              "filled_base": "0",
+              "full": 0,
+              "partial": 0,
+              "placements": 0,
+              "requested_base": "0",
+              "unresolved": 0
+            },
+            "max_residual": "0.00030",
+            "max_residual_age_us": 570482,
+            "net_pnl": "0.0620313925",
+            "net_pnl_per_hour": "0.0025846442594683545753139815",
+            "open_orders": 0,
+            "order_cancels": 12227,
+            "quotes": {
+              "empty": 12216,
+              "fill_fraction": "0.001552998103707578630746093",
+              "filled_base": "0.00570",
+              "full": 19,
+              "partial": 0,
+              "placements": 12235,
+              "requested_base": "3.67032",
+              "unresolved": 0
+            },
+            "venues": [
+              {
+                "cash": "-125.382300",
+                "fees": "0",
+                "fills": 25,
+                "gross_pnl": "1.86937500",
+                "mark": "84834.450",
+                "mark_age_us": 266683,
+                "net_pnl": "1.86937500",
+                "position": "0.00150",
+                "venue": "lighter"
+              },
+              {
+                "cash": "125.66275",
+                "fees": "0.2153436075",
+                "fills": 22,
+                "gross_pnl": "-1.5920000",
+                "mark": "84836.50",
+                "mark_age_us": 0,
+                "net_pnl": "-1.8073436075",
+                "position": "-0.00150",
+                "venue": "hyperliquid"
+              }
+            ]
+          },
+          "opportunities": {
+            "eligible": [
+              2771,
+              9464
+            ],
+            "suppressed": [
+              0,
+              0
+            ]
+          },
+          "equity": [
+            0.0,
+            -0.02168875500001377,
+            -0.033209894999998824,
+            -0.05908489499999803,
+            -0.00883489499999257,
+            -0.013934895000005554,
+            -0.008759894999997186,
+            -0.008609894999977996,
+            -0.0040348950000037576,
+            0.011865104999998266,
+            0.01486510500001259,
+            0.032265104999993355,
+            0.03426733499999557,
+            0.03866326500002515,
+            0.005663265000038109,
+            0.05127022200001363,
+            0.049830222000011304,
+            0.03436282200000562,
+            0.04834618200001728,
+            0.06088196700000026,
+            0.07846196699999552,
+            0.05805639249999217,
+            0.04185639249998019,
+            0.04710639249999815,
+            0.06203139249997491
+          ],
+          "markouts": {
+            "500": {
+              "matched": 19,
+              "all_fills": 25,
+              "quantity_weighted_bps": -1.1637852994119555,
+              "adverse_share": 0.47368421052631576
+            },
+            "2000": {
+              "matched": 21,
+              "all_fills": 25,
+              "quantity_weighted_bps": -5.5368949965195435,
+              "adverse_share": 1.0
+            },
+            "5000": {
+              "matched": 21,
+              "all_fills": 25,
+              "quantity_weighted_bps": -5.643597964511,
+              "adverse_share": 1.0
+            }
+          },
+          "decision_cohort": {
+            "flagged": {
+              "orders": 2017,
+              "filled_orders": 10,
+              "fill_rate": 0.00495785820525533,
+              "unresolved": 0,
+              "markouts": {
+                "500": {
+                  "matched": 10,
+                  "all_fills": 14,
+                  "quantity_weighted_bps": -2.3769773861006227,
+                  "adverse_share": 0.8
+                },
+                "2000": {
+                  "matched": 11,
+                  "all_fills": 14,
+                  "quantity_weighted_bps": -6.699069959485724,
+                  "adverse_share": 1.0
+                },
+                "5000": {
+                  "matched": 11,
+                  "all_fills": 14,
+                  "quantity_weighted_bps": -6.314963278621823,
+                  "adverse_share": 1.0
+                }
+              }
+            },
+            "unflagged": {
+              "orders": 9667,
+              "filled_orders": 8,
+              "fill_rate": 0.0008275576704251578,
+              "unresolved": 0,
+              "markouts": {
+                "500": {
+                  "matched": 8,
+                  "all_fills": 10,
+                  "quantity_weighted_bps": -0.018697907629344646,
+                  "adverse_share": 0.125
+                },
+                "2000": {
+                  "matched": 9,
+                  "all_fills": 10,
+                  "quantity_weighted_bps": -4.544030391814669,
+                  "adverse_share": 1.0
+                },
+                "5000": {
+                  "matched": 9,
+                  "all_fills": 10,
+                  "quantity_weighted_bps": -5.276539087747834,
+                  "adverse_share": 1.0
+                }
+              }
+            },
+            "missing_signal": {
+              "orders": 551,
+              "filled_orders": 1,
+              "fill_rate": 0.0018148820326678765,
+              "unresolved": 0,
+              "markouts": {
+                "500": {
+                  "matched": 1,
+                  "all_fills": 1,
+                  "quantity_weighted_bps": 0.0,
+                  "adverse_share": 0.0
+                },
+                "2000": {
+                  "matched": 1,
+                  "all_fills": 1,
+                  "quantity_weighted_bps": -3.586693367606181,
+                  "adverse_share": 1.0
+                },
+                "5000": {
+                  "matched": 1,
+                  "all_fills": 1,
+                  "quantity_weighted_bps": -2.9889111396718175,
+                  "adverse_share": 1.0
+                }
+              }
+            }
+          }
+        },
+        "filtered_base": {
+          "orders": 87,
+          "filled_orders": 2,
+          "fill_rate": 0.022988505747126436,
+          "unresolved": 0,
+          "metrics": {
+            "end_residual": "0.00010",
+            "exposed_us": 85858707008,
+            "exposure_to_first_hedge_fill": {
+              "p50_us": 25791,
+              "p95_us": 26633,
+              "p99_us": 26633,
+              "samples": 2
+            },
+            "hedge_ioc": {
+              "empty": 0,
+              "fill_fraction": "1",
+              "filled_base": "0.00050",
+              "full": 2,
+              "partial": 0,
+              "placements": 2,
+              "requested_base": "0.00050",
+              "unresolved": 0
+            },
+            "hedge_passive": {
+              "empty": 0,
+              "fill_fraction": null,
+              "filled_base": "0",
+              "full": 0,
+              "partial": 0,
+              "placements": 0,
+              "requested_base": "0",
+              "unresolved": 0
+            },
+            "max_residual": "0.00030",
+            "max_residual_age_us": 85858680375,
+            "net_pnl": "0.1462806300",
+            "net_pnl_per_hour": "0.0060950331011981453155402187",
+            "open_orders": 0,
+            "order_cancels": 86,
+            "quotes": {
+              "empty": 85,
+              "fill_fraction": "0.0229885057471264367816091954",
+              "filled_base": "0.00060",
+              "full": 2,
+              "partial": 0,
+              "placements": 87,
+              "requested_base": "0.02610",
+              "unresolved": 0
+            },
+            "venues": [
+              {
+                "cash": "-50.115930",
+                "fees": "0",
+                "fills": 3,
+                "gross_pnl": "0.78474000",
+                "mark": "84834.450",
+                "mark_age_us": 266683,
+                "net_pnl": "0.78474000",
+                "position": "0.00060",
+                "venue": "lighter"
+              },
+              {
+                "cash": "41.79860",
+                "fees": "0.0188093700",
+                "fills": 2,
+                "gross_pnl": "-0.6196500",
+                "mark": "84836.50",
+                "mark_age_us": 0,
+                "net_pnl": "-0.6384593700",
+                "position": "-0.00050",
+                "venue": "hyperliquid"
+              }
+            ]
+          },
+          "opportunities": {
+            "eligible": [
+              95,
+              63
+            ],
+            "suppressed": [
+              54,
+              20
+            ]
+          },
+          "equity": [
+            0.0,
+            -0.004919370000003198,
+            -0.006909370000002468,
+            -0.018759369999997944,
+            0.026040629999997122,
+            0.06010062999999377,
+            0.08057063000000397,
+            0.06243063000000859,
+            -0.006539369999998712,
+            0.014520629999999812,
+            0.03672063000000492,
+            0.06208062999999697,
+            0.05549063000000132,
+            0.034370630000005065,
+            0.04017063000000576,
+            0.061540630000003205,
+            0.07152063000000197,
+            0.06824062999999825,
+            0.1446206300000057,
+            0.13708062999999981,
+            0.1309706300000002,
+            0.11969063000000091,
+            0.10551062999999772,
+            0.1281106300000019,
+            0.1462806299999997
+          ],
+          "markouts": {
+            "500": {
+              "matched": 1,
+              "all_fills": 3,
+              "quantity_weighted_bps": 0.0,
+              "adverse_share": 0.0
+            },
+            "2000": {
+              "matched": 1,
+              "all_fills": 3,
+              "quantity_weighted_bps": -3.586693367606181,
+              "adverse_share": 1.0
+            },
+            "5000": {
+              "matched": 1,
+              "all_fills": 3,
+              "quantity_weighted_bps": -2.9889111396718175,
+              "adverse_share": 1.0
+            }
+          }
+        },
+        "baseline_queue": {
+          "orders": 12235,
+          "filled_orders": 19,
+          "fill_rate": 0.0015529219452390683,
+          "unresolved": 0,
+          "metrics": {
+            "end_residual": "0.00000",
+            "exposed_us": 2607355,
+            "exposure_to_first_hedge_fill": {
+              "p50_us": 26450,
+              "p95_us": 424903,
+              "p99_us": 488115,
+              "samples": 20
+            },
+            "hedge_ioc": {
+              "empty": 0,
+              "fill_fraction": "1",
+              "filled_base": "0.00570",
+              "full": 22,
+              "partial": 0,
+              "placements": 22,
+              "requested_base": "0.00570",
+              "unresolved": 0
+            },
+            "hedge_passive": {
+              "empty": 0,
+              "fill_fraction": null,
+              "filled_base": "0",
+              "full": 0,
+              "partial": 0,
+              "placements": 0,
+              "requested_base": "0",
+              "unresolved": 0
+            },
+            "max_residual": "0.00030",
+            "max_residual_age_us": 570482,
+            "net_pnl": "0.0620313925",
+            "net_pnl_per_hour": "0.0025846442594683545753139815",
+            "open_orders": 0,
+            "order_cancels": 12227,
+            "quotes": {
+              "empty": 12216,
+              "fill_fraction": "0.001552998103707578630746093",
+              "filled_base": "0.00570",
+              "full": 19,
+              "partial": 0,
+              "placements": 12235,
+              "requested_base": "3.67032",
+              "unresolved": 0
+            },
+            "venues": [
+              {
+                "cash": "-125.382300",
+                "fees": "0",
+                "fills": 25,
+                "gross_pnl": "1.86937500",
+                "mark": "84834.450",
+                "mark_age_us": 266683,
+                "net_pnl": "1.86937500",
+                "position": "0.00150",
+                "venue": "lighter"
+              },
+              {
+                "cash": "125.66275",
+                "fees": "0.2153436075",
+                "fills": 22,
+                "gross_pnl": "-1.5920000",
+                "mark": "84836.50",
+                "mark_age_us": 0,
+                "net_pnl": "-1.8073436075",
+                "position": "-0.00150",
+                "venue": "hyperliquid"
+              }
+            ]
+          },
+          "opportunities": {
+            "eligible": [
+              2771,
+              9464
+            ],
+            "suppressed": [
+              0,
+              0
+            ]
+          },
+          "equity": [
+            0.0,
+            -0.02168875500001377,
+            -0.033209894999998824,
+            -0.05908489499999803,
+            -0.00883489499999257,
+            -0.013934895000005554,
+            -0.008759894999997186,
+            -0.008609894999977996,
+            -0.0040348950000037576,
+            0.011865104999998266,
+            0.01486510500001259,
+            0.032265104999993355,
+            0.03426733499999557,
+            0.03866326500002515,
+            0.005663265000038109,
+            0.05127022200001363,
+            0.049830222000011304,
+            0.03436282200000562,
+            0.04834618200001728,
+            0.06088196700000026,
+            0.07846196699999552,
+            0.05805639249999217,
+            0.04185639249998019,
+            0.04710639249999815,
+            0.06203139249997491
+          ],
+          "markouts": {
+            "500": {
+              "matched": 19,
+              "all_fills": 25,
+              "quantity_weighted_bps": -1.1637852994119555,
+              "adverse_share": 0.47368421052631576
+            },
+            "2000": {
+              "matched": 21,
+              "all_fills": 25,
+              "quantity_weighted_bps": -5.5368949965195435,
+              "adverse_share": 1.0
+            },
+            "5000": {
+              "matched": 21,
+              "all_fills": 25,
+              "quantity_weighted_bps": -5.643597964511,
+              "adverse_share": 1.0
+            }
+          },
+          "decision_cohort": {
+            "flagged": {
+              "orders": 2017,
+              "filled_orders": 10,
+              "fill_rate": 0.00495785820525533,
+              "unresolved": 0,
+              "markouts": {
+                "500": {
+                  "matched": 10,
+                  "all_fills": 14,
+                  "quantity_weighted_bps": -2.3769773861006227,
+                  "adverse_share": 0.8
+                },
+                "2000": {
+                  "matched": 11,
+                  "all_fills": 14,
+                  "quantity_weighted_bps": -6.699069959485724,
+                  "adverse_share": 1.0
+                },
+                "5000": {
+                  "matched": 11,
+                  "all_fills": 14,
+                  "quantity_weighted_bps": -6.314963278621823,
+                  "adverse_share": 1.0
+                }
+              }
+            },
+            "unflagged": {
+              "orders": 9667,
+              "filled_orders": 8,
+              "fill_rate": 0.0008275576704251578,
+              "unresolved": 0,
+              "markouts": {
+                "500": {
+                  "matched": 8,
+                  "all_fills": 10,
+                  "quantity_weighted_bps": -0.018697907629344646,
+                  "adverse_share": 0.125
+                },
+                "2000": {
+                  "matched": 9,
+                  "all_fills": 10,
+                  "quantity_weighted_bps": -4.544030391814669,
+                  "adverse_share": 1.0
+                },
+                "5000": {
+                  "matched": 9,
+                  "all_fills": 10,
+                  "quantity_weighted_bps": -5.276539087747834,
+                  "adverse_share": 1.0
+                }
+              }
+            },
+            "missing_signal": {
+              "orders": 551,
+              "filled_orders": 1,
+              "fill_rate": 0.0018148820326678765,
+              "unresolved": 0,
+              "markouts": {
+                "500": {
+                  "matched": 1,
+                  "all_fills": 1,
+                  "quantity_weighted_bps": 0.0,
+                  "adverse_share": 0.0
+                },
+                "2000": {
+                  "matched": 1,
+                  "all_fills": 1,
+                  "quantity_weighted_bps": -3.586693367606181,
+                  "adverse_share": 1.0
+                },
+                "5000": {
+                  "matched": 1,
+                  "all_fills": 1,
+                  "quantity_weighted_bps": -2.9889111396718175,
+                  "adverse_share": 1.0
+                }
+              }
+            }
+          }
+        },
+        "filtered_queue": {
+          "orders": 87,
+          "filled_orders": 2,
+          "fill_rate": 0.022988505747126436,
+          "unresolved": 0,
+          "metrics": {
+            "end_residual": "0.00010",
+            "exposed_us": 85858707008,
+            "exposure_to_first_hedge_fill": {
+              "p50_us": 25791,
+              "p95_us": 26633,
+              "p99_us": 26633,
+              "samples": 2
+            },
+            "hedge_ioc": {
+              "empty": 0,
+              "fill_fraction": "1",
+              "filled_base": "0.00050",
+              "full": 2,
+              "partial": 0,
+              "placements": 2,
+              "requested_base": "0.00050",
+              "unresolved": 0
+            },
+            "hedge_passive": {
+              "empty": 0,
+              "fill_fraction": null,
+              "filled_base": "0",
+              "full": 0,
+              "partial": 0,
+              "placements": 0,
+              "requested_base": "0",
+              "unresolved": 0
+            },
+            "max_residual": "0.00030",
+            "max_residual_age_us": 85858680375,
+            "net_pnl": "0.1462806300",
+            "net_pnl_per_hour": "0.0060950331011981453155402187",
+            "open_orders": 0,
+            "order_cancels": 86,
+            "quotes": {
+              "empty": 85,
+              "fill_fraction": "0.0229885057471264367816091954",
+              "filled_base": "0.00060",
+              "full": 2,
+              "partial": 0,
+              "placements": 87,
+              "requested_base": "0.02610",
+              "unresolved": 0
+            },
+            "venues": [
+              {
+                "cash": "-50.115930",
+                "fees": "0",
+                "fills": 3,
+                "gross_pnl": "0.78474000",
+                "mark": "84834.450",
+                "mark_age_us": 266683,
+                "net_pnl": "0.78474000",
+                "position": "0.00060",
+                "venue": "lighter"
+              },
+              {
+                "cash": "41.79860",
+                "fees": "0.0188093700",
+                "fills": 2,
+                "gross_pnl": "-0.6196500",
+                "mark": "84836.50",
+                "mark_age_us": 0,
+                "net_pnl": "-0.6384593700",
+                "position": "-0.00050",
+                "venue": "hyperliquid"
+              }
+            ]
+          },
+          "opportunities": {
+            "eligible": [
+              95,
+              63
+            ],
+            "suppressed": [
+              54,
+              20
+            ]
+          },
+          "equity": [
+            0.0,
+            -0.004919370000003198,
+            -0.006909370000002468,
+            -0.018759369999997944,
+            0.026040629999997122,
+            0.06010062999999377,
+            0.08057063000000397,
+            0.06243063000000859,
+            -0.006539369999998712,
+            0.014520629999999812,
+            0.03672063000000492,
+            0.06208062999999697,
+            0.05549063000000132,
+            0.034370630000005065,
+            0.04017063000000576,
+            0.061540630000003205,
+            0.07152063000000197,
+            0.06824062999999825,
+            0.1446206300000057,
+            0.13708062999999981,
+            0.1309706300000002,
+            0.11969063000000091,
+            0.10551062999999772,
+            0.1281106300000019,
+            0.1462806299999997
+          ],
+          "markouts": {
+            "500": {
+              "matched": 1,
+              "all_fills": 3,
+              "quantity_weighted_bps": 0.0,
+              "adverse_share": 0.0
+            },
+            "2000": {
+              "matched": 1,
+              "all_fills": 3,
+              "quantity_weighted_bps": -3.586693367606181,
+              "adverse_share": 1.0
+            },
+            "5000": {
+              "matched": 1,
+              "all_fills": 3,
+              "quantity_weighted_bps": -2.9889111396718175,
+              "adverse_share": 1.0
+            }
+          }
+        },
+        "baseline_slow": {
+          "orders": 7341,
+          "filled_orders": 13,
+          "fill_rate": 0.001770875902465604,
+          "unresolved": 0,
+          "metrics": {
+            "end_residual": "-0.00010",
+            "exposed_us": 32514730259,
+            "exposure_to_first_hedge_fill": {
+              "p50_us": 302475,
+              "p95_us": 1507738,
+              "p99_us": 1507738,
+              "samples": 13
+            },
+            "hedge_ioc": {
+              "empty": 3,
+              "fill_fraction": "0.8085106382978723404255319149",
+              "filled_base": "0.00380",
+              "full": 14,
+              "partial": 0,
+              "placements": 17,
+              "requested_base": "0.00470",
+              "unresolved": 0
+            },
+            "hedge_passive": {
+              "empty": 0,
+              "fill_fraction": null,
+              "filled_base": "0",
+              "full": 0,
+              "partial": 0,
+              "placements": 0,
+              "requested_base": "0",
+              "unresolved": 0
+            },
+            "max_residual": "0.00030",
+            "max_residual_age_us": 32508745672,
+            "net_pnl": "-0.0718386160",
+            "net_pnl_per_hour": "-0.0029932790312993777866235099",
+            "open_orders": 0,
+            "order_cancels": 7337,
+            "quotes": {
+              "empty": 7328,
+              "fill_fraction": "0.0017708759024656041411251873",
+              "filled_base": "0.00390",
+              "full": 13,
+              "partial": 0,
+              "placements": 7341,
+              "requested_base": "2.20230",
+              "unresolved": 0
+            },
+            "venues": [
+              {
+                "cash": "-74.905410",
+                "fees": "0",
+                "fills": 17,
+                "gross_pnl": "1.44559500",
+                "mark": "84834.450",
+                "mark_age_us": 266683,
+                "net_pnl": "1.44559500",
+                "position": "0.00090",
+                "venue": "lighter"
+              },
+              {
+                "cash": "83.46228",
+                "fees": "0.1432136160",
+                "fills": 14,
+                "gross_pnl": "-1.3742200",
+                "mark": "84836.50",
+                "mark_age_us": 0,
+                "net_pnl": "-1.5174336160",
+                "position": "-0.00100",
+                "venue": "hyperliquid"
+              }
+            ]
+          },
+          "opportunities": {
+            "eligible": [
+              756,
+              6585
+            ],
+            "suppressed": [
+              0,
+              0
+            ]
+          },
+          "equity": [
+            0.0,
+            -0.024838755000004653,
+            -0.036359894999989706,
+            -0.06223489499998891,
+            -0.011984894999983453,
+            -0.017084894999996436,
+            -0.011909894999988069,
+            -0.011759894999968878,
+            -0.00718489499999464,
+            0.008715105000007384,
+            0.011715105000021708,
+            0.029115105000002472,
+            0.020741168999990123,
+            0.006216684000008854,
+            -0.03503331599999626,
+            0.0055513840000145365,
+            -0.0062286159999871415,
+            -0.022148615999981303,
+            -0.08307861599998034,
+            -0.0686386160000012,
+            -0.04055361599998264,
+            -0.04922361599999192,
+            -0.05124361599999361,
+            -0.06859361599998692,
+            -0.07183861599999375
+          ],
+          "markouts": {
+            "500": {
+              "matched": 15,
+              "all_fills": 17,
+              "quantity_weighted_bps": -1.41388827002869,
+              "adverse_share": 0.6
+            },
+            "2000": {
+              "matched": 16,
+              "all_fills": 17,
+              "quantity_weighted_bps": -4.676348232874655,
+              "adverse_share": 1.0
+            },
+            "5000": {
+              "matched": 16,
+              "all_fills": 17,
+              "quantity_weighted_bps": -5.038658609112755,
+              "adverse_share": 1.0
+            }
+          },
+          "decision_cohort": {
+            "flagged": {
+              "orders": 1052,
+              "filled_orders": 6,
+              "fill_rate": 0.005703422053231939,
+              "unresolved": 0,
+              "markouts": {
+                "500": {
+                  "matched": 8,
+                  "all_fills": 8,
+                  "quantity_weighted_bps": -1.94696080108045,
+                  "adverse_share": 0.875
+                },
+                "2000": {
+                  "matched": 8,
+                  "all_fills": 8,
+                  "quantity_weighted_bps": -4.602155832596335,
+                  "adverse_share": 1.0
+                },
+                "5000": {
+                  "matched": 8,
+                  "all_fills": 8,
+                  "quantity_weighted_bps": -4.532348504650141,
+                  "adverse_share": 1.0
+                }
+              }
+            },
+            "unflagged": {
+              "orders": 6062,
+              "filled_orders": 6,
+              "fill_rate": 0.0009897723523589574,
+              "unresolved": 0,
+              "markouts": {
+                "500": {
+                  "matched": 6,
+                  "all_fills": 8,
+                  "quantity_weighted_bps": -0.9677515409582231,
+                  "adverse_share": 0.3333333333333333
+                },
+                "2000": {
+                  "matched": 7,
+                  "all_fills": 8,
+                  "quantity_weighted_bps": -4.983310086262334,
+                  "adverse_share": 1.0
+                },
+                "5000": {
+                  "matched": 7,
+                  "all_fills": 8,
+                  "quantity_weighted_bps": -6.056180228356077,
+                  "adverse_share": 1.0
+                }
+              }
+            },
+            "missing_signal": {
+              "orders": 227,
+              "filled_orders": 1,
+              "fill_rate": 0.004405286343612335,
+              "unresolved": 0,
+              "markouts": {
+                "500": {
+                  "matched": 1,
+                  "all_fills": 1,
+                  "quantity_weighted_bps": 0.0,
+                  "adverse_share": 0.0
+                },
+                "2000": {
+                  "matched": 1,
+                  "all_fills": 1,
+                  "quantity_weighted_bps": -3.586693367606181,
+                  "adverse_share": 1.0
+                },
+                "5000": {
+                  "matched": 1,
+                  "all_fills": 1,
+                  "quantity_weighted_bps": -2.9889111396718175,
+                  "adverse_share": 1.0
+                }
+              }
+            }
+          }
+        },
+        "filtered_slow": {
+          "orders": 938,
+          "filled_orders": 4,
+          "fill_rate": 0.0042643923240938165,
+          "unresolved": 0,
+          "metrics": {
+            "end_residual": "0.00002",
+            "exposed_us": 80684288244,
+            "exposure_to_first_hedge_fill": {
+              "p50_us": 301536,
+              "p95_us": 301911,
+              "p99_us": 301911,
+              "samples": 3
+            },
+            "hedge_ioc": {
+              "empty": 0,
+              "fill_fraction": "1",
+              "filled_base": "0.00090",
+              "full": 3,
+              "partial": 0,
+              "placements": 3,
+              "requested_base": "0.00090",
+              "unresolved": 0
+            },
+            "hedge_passive": {
+              "empty": 0,
+              "fill_fraction": null,
+              "filled_base": "0",
+              "full": 0,
+              "partial": 0,
+              "placements": 0,
+              "requested_base": "0",
+              "unresolved": 0
+            },
+            "max_residual": "0.00030",
+            "max_residual_age_us": 80683384192,
+            "net_pnl": "0.0301599550",
+            "net_pnl_per_hour": "0.0012566662042380218679681226",
+            "open_orders": 0,
+            "order_cancels": 938,
+            "quotes": {
+              "empty": 934,
+              "fill_fraction": "0.0032693674484719260838663824",
+              "filled_base": "0.00092",
+              "full": 3,
+              "partial": 1,
+              "placements": 938,
+              "requested_base": "0.28140",
+              "unresolved": 0
+            },
+            "venues": [
+              {
+                "cash": "-76.830944",
+                "fees": "0",
+                "fills": 4,
+                "gross_pnl": "1.21675000",
+                "mark": "84834.450",
+                "mark_age_us": 266683,
+                "net_pnl": "1.21675000",
+                "position": "0.00092",
+                "venue": "lighter"
+              },
+              {
+                "cash": "75.20010",
+                "fees": "0.0338400450",
+                "fills": 3,
+                "gross_pnl": "-1.1527500",
+                "mark": "84836.50",
+                "mark_age_us": 0,
+                "net_pnl": "-1.1865900450",
+                "position": "-0.00090",
+                "venue": "hyperliquid"
+              }
+            ]
+          },
+          "opportunities": {
+            "eligible": [
+              1049,
+              1116
+            ],
+            "suppressed": [
+              591,
+              666
+            ]
+          },
+          "equity": [
+            0.0,
+            -0.020835045000012542,
+            -0.02659804500000007,
+            -0.04276804500000253,
+            -0.007008045000020502,
+            -0.0029160450000205174,
+            0.003937954999997828,
+            0.00038995500000282846,
+            -0.010964045000008582,
+            0.0017279549999926758,
+            0.0077679550000056,
+            0.02211995499997954,
+            0.019081954999990103,
+            0.009097955000001434,
+            -0.011742045000005419,
+            0.0092919549999948,
+            0.010327954999993949,
+            -0.0005680450000085102,
+            0.02294795499999225,
+            0.025119954999979655,
+            0.03561795499999221,
+            0.02272195499999441,
+            0.011245954999992591,
+            0.01856595499998548,
+            0.030159954999973593
+          ],
+          "markouts": {
+            "500": {
+              "matched": 3,
+              "all_fills": 4,
+              "quantity_weighted_bps": 0.0,
+              "adverse_share": 0.0
+            },
+            "2000": {
+              "matched": 3,
+              "all_fills": 4,
+              "quantity_weighted_bps": -2.6626740243428646,
+              "adverse_share": 1.0
+            },
+            "5000": {
+              "matched": 3,
+              "all_fills": 4,
+              "quantity_weighted_bps": -2.373424559213334,
+              "adverse_share": 1.0
+            }
+          }
+        }
+      },
+      "paired": {
+        "base": {
+          "net_pnl_delta": 0.08424923750002478,
+          "net_pnl_delta_ci95": [
+            -0.2105898437748932,
+            0.345146940837551
+          ],
+          "filled_orders_delta": -17
+        },
+        "queue": {
+          "net_pnl_delta": 0.08424923750002478,
+          "net_pnl_delta_ci95": [
+            -0.2105898437748932,
+            0.345146940837551
+          ],
+          "filled_orders_delta": -17
+        },
+        "slow": {
+          "net_pnl_delta": 0.10199857099996734,
+          "net_pnl_delta_ci95": [
+            -0.08044198390001113,
+            0.32017209787495166
+          ],
+          "filled_orders_delta": -9
+        }
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "scenarios": {
+        "baseline_base": {
+          "orders": 4475,
+          "filled_orders": 7,
+          "fill_rate": 0.0015642458100558658,
+          "unresolved": 0,
+          "metrics": {
+            "end_residual": "0.00009",
+            "exposed_us": 37381950221,
+            "exposure_to_first_hedge_fill": {
+              "p50_us": 26263,
+              "p95_us": 518580,
+              "p99_us": 518580,
+              "samples": 7
+            },
+            "hedge_ioc": {
+              "empty": 0,
+              "fill_fraction": "1",
+              "filled_base": "0.00201",
+              "full": 7,
+              "partial": 0,
+              "placements": 7,
+              "requested_base": "0.00201",
+              "unresolved": 0
+            },
+            "hedge_passive": {
+              "empty": 0,
+              "fill_fraction": null,
+              "filled_base": "0",
+              "full": 0,
+              "partial": 0,
+              "placements": 0,
+              "requested_base": "0",
+              "unresolved": 0
+            },
+            "max_residual": "0.00030",
+            "max_residual_age_us": 37380911713,
+            "net_pnl": "0.0322811730",
+            "net_pnl_per_hour": "0.0013450493168113380915020259",
+            "open_orders": 0,
+            "order_cancels": 4470,
+            "quotes": {
+              "empty": 4468,
+              "fill_fraction": "0.0015642458100558659217877095",
+              "filled_base": "0.00210",
+              "full": 7,
+              "partial": 0,
+              "placements": 4475,
+              "requested_base": "1.34250",
+              "unresolved": 0
+            },
+            "venues": [
+              {
+                "cash": "23.704140",
+                "fees": "0",
+                "fills": 8,
+                "gross_pnl": "0.20626500",
+                "mark": "78326.250",
+                "mark_age_us": 0,
+                "net_pnl": "0.20626500",
+                "position": "-0.00030",
+                "venue": "lighter"
+              },
+              {
+                "cash": "-30.65034",
+                "fees": "0.0705888270",
+                "fills": 7,
+                "gross_pnl": "-0.1033950",
+                "mark": "78325.50",
+                "mark_age_us": 446903,
+                "net_pnl": "-0.1739838270",
+                "position": "0.00039",
+                "venue": "hyperliquid"
+              }
+            ]
+          },
+          "opportunities": {
+            "eligible": [
+              2220,
+              2255
+            ],
+            "suppressed": [
+              0,
+              0
+            ]
+          },
+          "equity": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0058885349999897585,
+            0.00160925999998085,
+            -0.009790740000028109,
+            -0.033130740000004266,
+            0.0009508499999810738,
+            0.009466172999989197,
+            0.004831172999992361,
+            0.00042117299998878366,
+            0.016636172999991317,
+            -0.0036588270000095235,
+            -0.011248827000013506,
+            -0.019018827000010674,
+            -0.011863827000016869,
+            -0.013888827000009485,
+            -0.018043827000010282,
+            0.03228117299999056
+          ],
+          "markouts": {
+            "500": {
+              "matched": 6,
+              "all_fills": 8,
+              "quantity_weighted_bps": -3.4572322090947614,
+              "adverse_share": 0.8333333333333334
+            },
+            "2000": {
+              "matched": 8,
+              "all_fills": 8,
+              "quantity_weighted_bps": -6.744830311872312,
+              "adverse_share": 1.0
+            },
+            "5000": {
+              "matched": 8,
+              "all_fills": 8,
+              "quantity_weighted_bps": -7.679879805996834,
+              "adverse_share": 1.0
+            }
+          },
+          "decision_cohort": {
+            "flagged": {
+              "orders": 483,
+              "filled_orders": 4,
+              "fill_rate": 0.008281573498964804,
+              "unresolved": 0,
+              "markouts": {
+                "500": {
+                  "matched": 4,
+                  "all_fills": 4,
+                  "quantity_weighted_bps": -2.802115197083625,
+                  "adverse_share": 0.75
+                },
+                "2000": {
+                  "matched": 4,
+                  "all_fills": 4,
+                  "quantity_weighted_bps": -6.552830982784316,
+                  "adverse_share": 1.0
+                },
+                "5000": {
+                  "matched": 4,
+                  "all_fills": 4,
+                  "quantity_weighted_bps": -7.997018797471483,
+                  "adverse_share": 1.0
+                }
+              }
+            },
+            "unflagged": {
+              "orders": 3280,
+              "filled_orders": 3,
+              "fill_rate": 0.0009146341463414635,
+              "unresolved": 0,
+              "markouts": {
+                "500": {
+                  "matched": 2,
+                  "all_fills": 4,
+                  "quantity_weighted_bps": -4.767466233117035,
+                  "adverse_share": 1.0
+                },
+                "2000": {
+                  "matched": 4,
+                  "all_fills": 4,
+                  "quantity_weighted_bps": -7.000829417322976,
+                  "adverse_share": 1.0
+                },
+                "5000": {
+                  "matched": 4,
+                  "all_fills": 4,
+                  "quantity_weighted_bps": -7.2570278173639675,
+                  "adverse_share": 1.0
+                }
+              }
+            },
+            "missing_signal": {
+              "orders": 712,
+              "filled_orders": 0,
+              "fill_rate": 0.0,
+              "unresolved": 0,
+              "markouts": {}
+            }
+          }
+        },
+        "filtered_base": {
+          "orders": 9170,
+          "filled_orders": 1,
+          "fill_rate": 0.00010905125408942203,
+          "unresolved": 0,
+          "metrics": {
+            "end_residual": "0.00000",
+            "exposed_us": 25245,
+            "exposure_to_first_hedge_fill": {
+              "p50_us": 25245,
+              "p95_us": 25245,
+              "p99_us": 25245,
+              "samples": 1
+            },
+            "hedge_ioc": {
+              "empty": 0,
+              "fill_fraction": "1",
+              "filled_base": "0.00030",
+              "full": 1,
+              "partial": 0,
+              "placements": 1,
+              "requested_base": "0.00030",
+              "unresolved": 0
+            },
+            "hedge_passive": {
+              "empty": 0,
+              "fill_fraction": null,
+              "filled_base": "0",
+              "full": 0,
+              "partial": 0,
+              "placements": 0,
+              "requested_base": "0",
+              "unresolved": 0
+            },
+            "max_residual": "0.00030",
+            "max_residual_age_us": 25245,
+            "net_pnl": "0.0037543050",
+            "net_pnl_per_hour": "0.0001564294263827213048799842",
+            "open_orders": 0,
+            "order_cancels": 9170,
+            "quotes": {
+              "empty": 9169,
+              "fill_fraction": "0.0001090512540894220283533261",
+              "filled_base": "0.00030",
+              "full": 1,
+              "partial": 0,
+              "placements": 9170,
+              "requested_base": "2.75100",
+              "unresolved": 0
+            },
+            "venues": [
+              {
+                "cash": "-23.343060",
+                "fees": "0",
+                "fills": 1,
+                "gross_pnl": "0.15481500",
+                "mark": "78326.250",
+                "mark_age_us": 0,
+                "net_pnl": "0.15481500",
+                "position": "0.00030",
+                "venue": "lighter"
+              },
+              {
+                "cash": "23.35710",
+                "fees": "0.0105106950",
+                "fills": 1,
+                "gross_pnl": "-0.1405500",
+                "mark": "78325.50",
+                "mark_age_us": 446903,
+                "net_pnl": "-0.1510606950",
+                "position": "-0.00030",
+                "venue": "hyperliquid"
+              }
+            ]
+          },
+          "opportunities": {
+            "eligible": [
+              10239,
+              10258
+            ],
+            "suppressed": [
+              5781,
+              5877
+            ]
+          },
+          "equity": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.005554305000000426,
+            0.006589305000005652,
+            0.0077143050000003655,
+            0.005479305000001489,
+            0.003754305000001068
+          ],
+          "markouts": {
+            "500": {
+              "matched": 1,
+              "all_fills": 1,
+              "quantity_weighted_bps": 0.0,
+              "adverse_share": 0.0
+            },
+            "2000": {
+              "matched": 1,
+              "all_fills": 1,
+              "quantity_weighted_bps": -8.862344668143724,
+              "adverse_share": 1.0
+            },
+            "5000": {
+              "matched": 1,
+              "all_fills": 1,
+              "quantity_weighted_bps": -8.862344668143724,
+              "adverse_share": 1.0
+            }
+          }
+        },
+        "baseline_queue": {
+          "orders": 4475,
+          "filled_orders": 7,
+          "fill_rate": 0.0015642458100558658,
+          "unresolved": 0,
+          "metrics": {
+            "end_residual": "0.00009",
+            "exposed_us": 37381950221,
+            "exposure_to_first_hedge_fill": {
+              "p50_us": 26263,
+              "p95_us": 518580,
+              "p99_us": 518580,
+              "samples": 7
+            },
+            "hedge_ioc": {
+              "empty": 0,
+              "fill_fraction": "1",
+              "filled_base": "0.00201",
+              "full": 7,
+              "partial": 0,
+              "placements": 7,
+              "requested_base": "0.00201",
+              "unresolved": 0
+            },
+            "hedge_passive": {
+              "empty": 0,
+              "fill_fraction": null,
+              "filled_base": "0",
+              "full": 0,
+              "partial": 0,
+              "placements": 0,
+              "requested_base": "0",
+              "unresolved": 0
+            },
+            "max_residual": "0.00030",
+            "max_residual_age_us": 37380911713,
+            "net_pnl": "0.0322811730",
+            "net_pnl_per_hour": "0.0013450493168113380915020259",
+            "open_orders": 0,
+            "order_cancels": 4470,
+            "quotes": {
+              "empty": 4468,
+              "fill_fraction": "0.0015642458100558659217877095",
+              "filled_base": "0.00210",
+              "full": 7,
+              "partial": 0,
+              "placements": 4475,
+              "requested_base": "1.34250",
+              "unresolved": 0
+            },
+            "venues": [
+              {
+                "cash": "23.704140",
+                "fees": "0",
+                "fills": 8,
+                "gross_pnl": "0.20626500",
+                "mark": "78326.250",
+                "mark_age_us": 0,
+                "net_pnl": "0.20626500",
+                "position": "-0.00030",
+                "venue": "lighter"
+              },
+              {
+                "cash": "-30.65034",
+                "fees": "0.0705888270",
+                "fills": 7,
+                "gross_pnl": "-0.1033950",
+                "mark": "78325.50",
+                "mark_age_us": 446903,
+                "net_pnl": "-0.1739838270",
+                "position": "0.00039",
+                "venue": "hyperliquid"
+              }
+            ]
+          },
+          "opportunities": {
+            "eligible": [
+              2220,
+              2255
+            ],
+            "suppressed": [
+              0,
+              0
+            ]
+          },
+          "equity": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0058885349999897585,
+            0.00160925999998085,
+            -0.009790740000028109,
+            -0.033130740000004266,
+            0.0009508499999810738,
+            0.009466172999989197,
+            0.004831172999992361,
+            0.00042117299998878366,
+            0.016636172999991317,
+            -0.0036588270000095235,
+            -0.011248827000013506,
+            -0.019018827000010674,
+            -0.011863827000016869,
+            -0.013888827000009485,
+            -0.018043827000010282,
+            0.03228117299999056
+          ],
+          "markouts": {
+            "500": {
+              "matched": 6,
+              "all_fills": 8,
+              "quantity_weighted_bps": -3.4572322090947614,
+              "adverse_share": 0.8333333333333334
+            },
+            "2000": {
+              "matched": 8,
+              "all_fills": 8,
+              "quantity_weighted_bps": -6.744830311872312,
+              "adverse_share": 1.0
+            },
+            "5000": {
+              "matched": 8,
+              "all_fills": 8,
+              "quantity_weighted_bps": -7.679879805996834,
+              "adverse_share": 1.0
+            }
+          },
+          "decision_cohort": {
+            "flagged": {
+              "orders": 483,
+              "filled_orders": 4,
+              "fill_rate": 0.008281573498964804,
+              "unresolved": 0,
+              "markouts": {
+                "500": {
+                  "matched": 4,
+                  "all_fills": 4,
+                  "quantity_weighted_bps": -2.802115197083625,
+                  "adverse_share": 0.75
+                },
+                "2000": {
+                  "matched": 4,
+                  "all_fills": 4,
+                  "quantity_weighted_bps": -6.552830982784316,
+                  "adverse_share": 1.0
+                },
+                "5000": {
+                  "matched": 4,
+                  "all_fills": 4,
+                  "quantity_weighted_bps": -7.997018797471483,
+                  "adverse_share": 1.0
+                }
+              }
+            },
+            "unflagged": {
+              "orders": 3280,
+              "filled_orders": 3,
+              "fill_rate": 0.0009146341463414635,
+              "unresolved": 0,
+              "markouts": {
+                "500": {
+                  "matched": 2,
+                  "all_fills": 4,
+                  "quantity_weighted_bps": -4.767466233117035,
+                  "adverse_share": 1.0
+                },
+                "2000": {
+                  "matched": 4,
+                  "all_fills": 4,
+                  "quantity_weighted_bps": -7.000829417322976,
+                  "adverse_share": 1.0
+                },
+                "5000": {
+                  "matched": 4,
+                  "all_fills": 4,
+                  "quantity_weighted_bps": -7.2570278173639675,
+                  "adverse_share": 1.0
+                }
+              }
+            },
+            "missing_signal": {
+              "orders": 712,
+              "filled_orders": 0,
+              "fill_rate": 0.0,
+              "unresolved": 0,
+              "markouts": {}
+            }
+          }
+        },
+        "filtered_queue": {
+          "orders": 9170,
+          "filled_orders": 1,
+          "fill_rate": 0.00010905125408942203,
+          "unresolved": 0,
+          "metrics": {
+            "end_residual": "0.00000",
+            "exposed_us": 25245,
+            "exposure_to_first_hedge_fill": {
+              "p50_us": 25245,
+              "p95_us": 25245,
+              "p99_us": 25245,
+              "samples": 1
+            },
+            "hedge_ioc": {
+              "empty": 0,
+              "fill_fraction": "1",
+              "filled_base": "0.00030",
+              "full": 1,
+              "partial": 0,
+              "placements": 1,
+              "requested_base": "0.00030",
+              "unresolved": 0
+            },
+            "hedge_passive": {
+              "empty": 0,
+              "fill_fraction": null,
+              "filled_base": "0",
+              "full": 0,
+              "partial": 0,
+              "placements": 0,
+              "requested_base": "0",
+              "unresolved": 0
+            },
+            "max_residual": "0.00030",
+            "max_residual_age_us": 25245,
+            "net_pnl": "0.0037543050",
+            "net_pnl_per_hour": "0.0001564294263827213048799842",
+            "open_orders": 0,
+            "order_cancels": 9170,
+            "quotes": {
+              "empty": 9169,
+              "fill_fraction": "0.0001090512540894220283533261",
+              "filled_base": "0.00030",
+              "full": 1,
+              "partial": 0,
+              "placements": 9170,
+              "requested_base": "2.75100",
+              "unresolved": 0
+            },
+            "venues": [
+              {
+                "cash": "-23.343060",
+                "fees": "0",
+                "fills": 1,
+                "gross_pnl": "0.15481500",
+                "mark": "78326.250",
+                "mark_age_us": 0,
+                "net_pnl": "0.15481500",
+                "position": "0.00030",
+                "venue": "lighter"
+              },
+              {
+                "cash": "23.35710",
+                "fees": "0.0105106950",
+                "fills": 1,
+                "gross_pnl": "-0.1405500",
+                "mark": "78325.50",
+                "mark_age_us": 446903,
+                "net_pnl": "-0.1510606950",
+                "position": "-0.00030",
+                "venue": "hyperliquid"
+              }
+            ]
+          },
+          "opportunities": {
+            "eligible": [
+              10239,
+              10258
+            ],
+            "suppressed": [
+              5781,
+              5877
+            ]
+          },
+          "equity": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.005554305000000426,
+            0.006589305000005652,
+            0.0077143050000003655,
+            0.005479305000001489,
+            0.003754305000001068
+          ],
+          "markouts": {
+            "500": {
+              "matched": 1,
+              "all_fills": 1,
+              "quantity_weighted_bps": 0.0,
+              "adverse_share": 0.0
+            },
+            "2000": {
+              "matched": 1,
+              "all_fills": 1,
+              "quantity_weighted_bps": -8.862344668143724,
+              "adverse_share": 1.0
+            },
+            "5000": {
+              "matched": 1,
+              "all_fills": 1,
+              "quantity_weighted_bps": -8.862344668143724,
+              "adverse_share": 1.0
+            }
+          }
+        },
+        "baseline_slow": {
+          "orders": 4422,
+          "filled_orders": 4,
+          "fill_rate": 0.0009045680687471732,
+          "unresolved": 0,
+          "metrics": {
+            "end_residual": "0.00009",
+            "exposed_us": 37381858322,
+            "exposure_to_first_hedge_fill": {
+              "p50_us": 302171,
+              "p95_us": 479533,
+              "p99_us": 479533,
+              "samples": 4
+            },
+            "hedge_ioc": {
+              "empty": 0,
+              "fill_fraction": "1",
+              "filled_base": "0.00111",
+              "full": 4,
+              "partial": 0,
+              "placements": 4,
+              "requested_base": "0.00111",
+              "unresolved": 0
+            },
+            "hedge_passive": {
+              "empty": 0,
+              "fill_fraction": null,
+              "filled_base": "0",
+              "full": 0,
+              "partial": 0,
+              "placements": 0,
+              "requested_base": "0",
+              "unresolved": 0
+            },
+            "max_residual": "0.00030",
+            "max_residual_age_us": 37380773713,
+            "net_pnl": "0.0216833580",
+            "net_pnl_per_hour": "0.0009034735467659636252088852",
+            "open_orders": 0,
+            "order_cancels": 4422,
+            "quotes": {
+              "empty": 4418,
+              "fill_fraction": "0.0009045680687471732247851651",
+              "filled_base": "0.00120",
+              "full": 4,
+              "partial": 0,
+              "placements": 4422,
+              "requested_base": "1.32660",
+              "unresolved": 0
+            },
+            "venues": [
+              {
+                "cash": "46.972500",
+                "fees": "0",
+                "fills": 5,
+                "gross_pnl": "-0.02325000",
+                "mark": "78326.250",
+                "mark_age_us": 0,
+                "net_pnl": "-0.02325000",
+                "position": "-0.00060",
+                "venue": "lighter"
+              },
+              {
+                "cash": "-53.96064",
+                "fees": "0.0390216420",
+                "fills": 4,
+                "gross_pnl": "0.0839550",
+                "mark": "78325.50",
+                "mark_age_us": 446903,
+                "net_pnl": "0.0449333580",
+                "position": "0.00069",
+                "venue": "hyperliquid"
+              }
+            ]
+          },
+          "opportunities": {
+            "eligible": [
+              2194,
+              2228
+            ],
+            "suppressed": [
+              0,
+              0
+            ]
+          },
+          "equity": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -0.0013326900000052433,
+            -0.0050569650000085176,
+            -0.01360696499999392,
+            -0.03111196499997959,
+            -0.006586965000010991,
+            0.00413335800000425,
+            -0.006036641999990877,
+            -0.009276641999996116,
+            0.008843358000007129,
+            -0.016176641999990693,
+            -0.023076641999992376,
+            -0.03141664199998928,
+            -0.025296642000000702,
+            -0.028446641999991584,
+            -0.030366641999997057,
+            0.021683358000004205
+          ],
+          "markouts": {
+            "500": {
+              "matched": 5,
+              "all_fills": 5,
+              "quantity_weighted_bps": -2.0954565512429086,
+              "adverse_share": 0.8
+            },
+            "2000": {
+              "matched": 5,
+              "all_fills": 5,
+              "quantity_weighted_bps": -5.137607052889691,
+              "adverse_share": 1.0
+            },
+            "5000": {
+              "matched": 5,
+              "all_fills": 5,
+              "quantity_weighted_bps": -5.201811016906642,
+              "adverse_share": 1.0
+            }
+          },
+          "decision_cohort": {
+            "flagged": {
+              "orders": 359,
+              "filled_orders": 1,
+              "fill_rate": 0.002785515320334262,
+              "unresolved": 0,
+              "markouts": {
+                "500": {
+                  "matched": 1,
+                  "all_fills": 1,
+                  "quantity_weighted_bps": -0.31965017484864566,
+                  "adverse_share": 1.0
+                },
+                "2000": {
+                  "matched": 1,
+                  "all_fills": 1,
+                  "quantity_weighted_bps": -1.406460769334041,
+                  "adverse_share": 1.0
+                },
+                "5000": {
+                  "matched": 1,
+                  "all_fills": 1,
+                  "quantity_weighted_bps": -1.1507406294551243,
+                  "adverse_share": 1.0
+                }
+              }
+            },
+            "unflagged": {
+              "orders": 3463,
+              "filled_orders": 3,
+              "fill_rate": 0.0008663008951775916,
+              "unresolved": 0,
+              "markouts": {
+                "500": {
+                  "matched": 4,
+                  "all_fills": 4,
+                  "quantity_weighted_bps": -2.687392010040996,
+                  "adverse_share": 0.75
+                },
+                "2000": {
+                  "matched": 4,
+                  "all_fills": 4,
+                  "quantity_weighted_bps": -6.381322480741574,
+                  "adverse_share": 1.0
+                },
+                "5000": {
+                  "matched": 4,
+                  "all_fills": 4,
+                  "quantity_weighted_bps": -6.552167812723813,
+                  "adverse_share": 1.0
+                }
+              }
+            },
+            "missing_signal": {
+              "orders": 600,
+              "filled_orders": 0,
+              "fill_rate": 0.0,
+              "unresolved": 0,
+              "markouts": {}
+            }
+          }
+        },
+        "filtered_slow": {
+          "orders": 9095,
+          "filled_orders": 6,
+          "fill_rate": 0.0006597031335898846,
+          "unresolved": 0,
+          "metrics": {
+            "end_residual": "0.00000",
+            "exposed_us": 1810826,
+            "exposure_to_first_hedge_fill": {
+              "p50_us": 301304,
+              "p95_us": 303129,
+              "p99_us": 303129,
+              "samples": 6
+            },
+            "hedge_ioc": {
+              "empty": 0,
+              "fill_fraction": "1",
+              "filled_base": "0.00180",
+              "full": 6,
+              "partial": 0,
+              "placements": 6,
+              "requested_base": "0.00180",
+              "unresolved": 0
+            },
+            "hedge_passive": {
+              "empty": 0,
+              "fill_fraction": null,
+              "filled_base": "0",
+              "full": 0,
+              "partial": 0,
+              "placements": 0,
+              "requested_base": "0",
+              "unresolved": 0
+            },
+            "max_residual": "0.00030",
+            "max_residual_age_us": 303129,
+            "net_pnl": "0.0220649100",
+            "net_pnl_per_hour": "0.0009193715519880167293971618",
+            "open_orders": 0,
+            "order_cancels": 9095,
+            "quotes": {
+              "empty": 9089,
+              "fill_fraction": "0.0006597031335898845519516218",
+              "filled_base": "0.00180",
+              "full": 6,
+              "partial": 0,
+              "placements": 9095,
+              "requested_base": "2.72850",
+              "unresolved": 0
+            },
+            "venues": [
+              {
+                "cash": "-46.707360",
+                "fees": "0",
+                "fills": 6,
+                "gross_pnl": "0.28839000",
+                "mark": "78326.250",
+                "mark_age_us": 0,
+                "net_pnl": "0.28839000",
+                "position": "0.00060",
+                "venue": "lighter"
+              },
+              {
+                "cash": "46.79220",
+                "fees": "0.0632250900",
+                "fills": 6,
+                "gross_pnl": "-0.2031000",
+                "mark": "78325.50",
+                "mark_age_us": 446903,
+                "net_pnl": "-0.2663250900",
+                "position": "-0.00060",
+                "venue": "hyperliquid"
+              }
+            ]
+          },
+          "opportunities": {
+            "eligible": [
+              8626,
+              8577
+            ],
+            "suppressed": [
+              4197,
+              4201
+            ]
+          },
+          "equity": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.011208509999992344,
+            0.010038509999994005,
+            0.008133509999993294,
+            0.012858509999993828,
+            0.01216850999999508,
+            0.018442815000000223,
+            0.020512815000010676,
+            0.022762815000000103,
+            0.01829281500000235,
+            0.02206490999999744
+          ],
+          "markouts": {
+            "500": {
+              "matched": 5,
+              "all_fills": 6,
+              "quantity_weighted_bps": -3.10001646160287,
+              "adverse_share": 0.6
+            },
+            "2000": {
+              "matched": 6,
+              "all_fills": 6,
+              "quantity_weighted_bps": -7.347123369701086,
+              "adverse_share": 1.0
+            },
+            "5000": {
+              "matched": 6,
+              "all_fills": 6,
+              "quantity_weighted_bps": -7.8370467132260275,
+              "adverse_share": 1.0
+            }
+          }
+        }
+      },
+      "paired": {
+        "base": {
+          "net_pnl_delta": -0.02852686799998949,
+          "net_pnl_delta_ci95": [
+            -0.18287329469997174,
+            0.11256934087497095
+          ],
+          "filled_orders_delta": -6
+        },
+        "queue": {
+          "net_pnl_delta": -0.02852686799998949,
+          "net_pnl_delta_ci95": [
+            -0.18287329469997174,
+            0.11256934087497095
+          ],
+          "filled_orders_delta": -6
+        },
+        "slow": {
+          "net_pnl_delta": 0.00038155199999323486,
+          "net_pnl_delta_ci95": [
+            -0.15205358294995203,
+            0.13316374867499298
+          ],
+          "filled_orders_delta": 2
+        }
+      }
+    }
+  ]
+}

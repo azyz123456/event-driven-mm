@@ -10,7 +10,9 @@ mod maker;
 mod network;
 mod order_test;
 mod queue;
+mod research_export;
 mod signing;
+mod sim;
 mod websocket;
 
 use std::fs::{File, OpenOptions};
@@ -94,6 +96,26 @@ enum Command {
         log: PathBuf,
         #[arg(long)]
         step: bool,
+    },
+    /// Compare execution policies on a finished hedged maker journal.
+    Simulate {
+        #[arg(long)]
+        log: PathBuf,
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long, value_enum)]
+        mode: sim::Flow,
+        #[arg(long, default_value_t = 1)]
+        seed: u64,
+        #[arg(long)]
+        trace: Option<PathBuf>,
+        #[arg(long)]
+        quote_signal: Option<PathBuf>,
+    },
+    /// Export point-in-time books, trades, and quote lifecycle observations as JSONL.
+    ResearchExport {
+        #[arg(long)]
+        log: PathBuf,
     },
     /// Replay a finished journal offline and verify any recorded order intents.
     Replay {
@@ -192,6 +214,32 @@ fn main() -> Result<()> {
         Command::InspectMaker { log, step } => maker::diagnostics::inspect(
             RecordSource::replay(read_journal(&log)?),
             step.then(|| io::stdin().lock()),
+            io::stdout().lock(),
+        ),
+        Command::Simulate {
+            log,
+            config,
+            mode,
+            seed,
+            trace,
+            quote_signal,
+        } => {
+            let trace: Box<dyn Write> = match trace {
+                Some(path) => Box::new(io::BufWriter::new(create_journal(&path)?)),
+                None => Box::new(io::sink()),
+            };
+            sim::run(
+                &log,
+                &config,
+                mode,
+                seed,
+                quote_signal.as_deref(),
+                io::stdout().lock(),
+                trace,
+            )
+        }
+        Command::ResearchExport { log } => research_export::run(
+            RecordSource::replay(read_journal(&log)?),
             io::stdout().lock(),
         ),
         Command::Replay { log } => engine::run(

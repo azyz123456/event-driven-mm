@@ -1,0 +1,55 @@
+{
+  "fees_bps": {
+    "hyperliquid_maker": "1.5",
+    "hyperliquid_taker": "4",
+    "lighter_maker": "0",
+    "lighter_taker": "0"
+  },
+  "scenarios": [
+    {
+      "name": "ioc",
+      "hedge": { "kind": "ioc" },
+      "outbound_us": 12000,
+      "inbound_us": 12000,
+      "jitter_us": 2000,
+      "cancel_ahead": "0",
+      "extra_taker_fee_bps": "0"
+    },
+    {
+      "name": "passive_then_ioc",
+      "hedge": { "kind": "passive_then_ioc", "wait_ms": 150 },
+      "outbound_us": 12000,
+      "inbound_us": 12000,
+      "jitter_us": 2000,
+      "cancel_ahead": "0",
+      "extra_taker_fee_bps": "0"
+    },
+    {
+      "name": "passive_cancels_ahead",
+      "hedge": { "kind": "passive_then_ioc", "wait_ms": 150 },
+      "outbound_us": 12000,
+      "inbound_us": 12000,
+      "jitter_us": 2000,
+      "cancel_ahead": "0.5",
+      "extra_taker_fee_bps": "0"
+    },
+    {
+      "name": "faster_ioc",
+      "hedge": { "kind": "ioc" },
+      "outbound_us": 3000,
+      "inbound_us": 3000,
+      "jitter_us": 1000,
+      "cancel_ahead": "0",
+      "extra_taker_fee_bps": "0"
+    },
+    {
+      "name": "faster_ioc_with_extra_fee",
+      "hedge": { "kind": "ioc" },
+      "outbound_us": 3000,
+      "inbound_us": 3000,
+      "jitter_us": 1000,
+      "cancel_ahead": "0",
+      "extra_taker_fee_bps": "0.5"
+    }
+  ]
+}

@@ -4,7 +4,9 @@ use serde_json::{Value, json};
 
 use crate::hyperliquid::Snapshot;
 use crate::intent::{self, Side, TimeInForce};
-use crate::maker::{Action, Fill, Input, Instrument, Intent, Kind, Level, Status, Venue};
+use crate::maker::{
+    Action, Fill, Input, Instrument, Intent, Kind, Level, Status, TradePrint, Venue,
+};
 use crate::signing::Signer;
 
 use super::{decimal, number};
@@ -123,6 +125,16 @@ pub fn observations(
                     id: number(trade, "tid")?.to_string(),
                     connection,
                     venue_ms: number(trade, "time")?,
+                    is_snapshot: false,
+                    trade: Some(TradePrint {
+                        price: decimal(trade, "px")?,
+                        size: decimal(trade, "sz")?,
+                        aggressor: match trade["side"].as_str() {
+                            Some("B") => Side::Buy,
+                            Some("A") => Side::Sell,
+                            _ => anyhow::bail!("unknown Hyperliquid public trade side"),
+                        },
+                    }),
                 })
             })
             .collect(),

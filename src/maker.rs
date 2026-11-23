@@ -41,10 +41,35 @@ impl Mode {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum HedgePolicy {
+    #[default]
+    Ioc,
+    PassiveThenIoc {
+        wait_ms: u64,
+    },
+}
+
+impl HedgePolicy {
+    fn is_default(&self) -> bool {
+        *self == Self::Ioc
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum OrderRole {
+    Quote,
+    Hedge,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Config {
     pub mode: Mode,
+    #[serde(default, skip_serializing_if = "HedgePolicy::is_default")]
+    pub hedge_policy: HedgePolicy,
     pub coin: String,
     pub lighter_market: Option<u16>,
     pub size: Decimal,
@@ -65,6 +90,19 @@ pub struct Config {
 }
 
 impl Config {
+    pub fn role(&self, venue: Venue) -> OrderRole {
+        if self.mode == Mode::Hedged && venue == Venue::Hyperliquid {
+            OrderRole::Hedge
+        } else {
+            OrderRole::Quote
+        }
+    }
+
+    pub fn requires_hyperliquid_protection(&self) -> bool {
+        self.mode == Mode::Hyperliquid
+            || matches!(self.hedge_policy, HedgePolicy::PassiveThenIoc { .. })
+    }
+
     pub fn validate(&self) -> Result<()> {
         ensure!(
             !self.coin.is_empty()
@@ -106,6 +144,12 @@ impl Config {
                 && self.action_timeout_ms > 0,
             "invalid exposure, freshness, or order timing limits"
         );
+        if let HedgePolicy::PassiveThenIoc { wait_ms } = self.hedge_policy {
+            ensure!(
+                self.mode == Mode::Hedged && wait_ms > 0 && wait_ms <= self.max_residual_ms,
+                "passive hedging requires hedged mode and a positive wait within max_residual_ms"
+            );
+        }
         Ok(())
     }
 }
@@ -138,6 +182,13 @@ pub struct Fill {
     pub size: Decimal,
     pub fee: Decimal,
     pub venue_ms: u64,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq, Serialize)]
+pub struct TradePrint {
+    pub price: Decimal,
+    pub size: Decimal,
+    pub aggressor: Side,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq, Serialize)]
@@ -201,6 +252,10 @@ pub enum Input {
         id: String,
         connection: u64,
         venue_ms: u64,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        trade: Option<TradePrint>,
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        is_snapshot: bool,
     },
     Tick,
     Stop,
@@ -251,6 +306,9 @@ pub struct Engine {
     pub seed: u64,
     pub observe: bool,
     next_id: u64,
+    fixed_lighter_fills: bool,
+    quote_filter: Option<Side>,
+    pub quote_opportunities: [Option<(Decimal, Decimal)>; 2],
 }
 
 impl Engine {
@@ -263,23 +321,55 @@ impl Engine {
             seed,
             observe,
             next_id: 1,
+            fixed_lighter_fills: false,
+            quote_filter: None,
+            quote_opportunities: [None; 2],
         })
     }
 
+    pub fn with_fixed_lighter_fills(mut self) -> Self {
+        self.fixed_lighter_fills = true;
+        self
+    }
+
+    pub fn suppress_quote(&mut self, side: Option<Side>) {
+        self.quote_filter = side;
+    }
+
     pub fn apply(&mut self, seq: u64, at_ms: u64, input: Input) -> Result<Vec<Intent>> {
+        self.quote_opportunities = [None; 2];
         let is_diagnostic = matches!(input, Input::PublicTrade { .. } | Input::PublicBook { .. });
-        self.state.apply(&self.config, at_ms, input)?;
+        self.state
+            .apply(&self.config, at_ms, input, self.fixed_lighter_fills)?;
         if self.observe || is_diagnostic {
             return Ok(vec![]);
         }
 
         let mut intents = Vec::new();
-        if let Some(action) = hedge::desired(&self.config, &self.state) {
-            self.emit(seq, Venue::Hyperliquid, None, action, &mut intents)?;
+        if let Some((client, action)) = hedge::desired(&self.config, &self.state) {
+            self.emit(seq, Venue::Hyperliquid, client, action, &mut intents)?;
         }
-        let quotes = strategy::desired(&self.config, &self.state);
+        if self.fixed_lighter_fills {
+            return Ok(intents);
+        }
+        let mut quotes = strategy::desired(&self.config, &self.state);
         let venue = self.config.mode.maker();
-        for (client, action) in execution::reconcile(&self.config, &self.state, quotes) {
+        let baseline = execution::reconcile(&self.config, &self.state, quotes);
+        for (_, action) in &baseline {
+            if let Action::Place {
+                side, price, size, ..
+            } = *action
+            {
+                self.quote_opportunities[usize::from(side == Side::Sell)] = Some((price, size));
+            }
+        }
+        let actions = if let Some(side) = self.quote_filter {
+            quotes[usize::from(side == Side::Sell)] = None;
+            execution::reconcile(&self.config, &self.state, quotes)
+        } else {
+            baseline
+        };
+        for (client, action) in actions {
             self.emit(seq, venue, client, action, &mut intents)?;
         }
         Ok(intents)
@@ -305,7 +395,7 @@ impl Engine {
             client,
             action,
         };
-        self.state.sent(&intent);
+        self.state.sent(&intent, self.config.role(venue));
         intents.push(intent);
         self.next_id += 1;
         Ok(())

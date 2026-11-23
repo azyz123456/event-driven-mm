@@ -10,7 +10,18 @@ use crate::order_test::{Config, Input, Outcome};
 pub const FORMAT_VERSION: u32 = 1;
 pub const ORDER_FORMAT_VERSION: u32 = 2;
 pub const REACTOR_FORMAT_VERSION: u32 = 3;
-pub const MAKER_FORMAT_VERSION: u32 = 4;
+pub const MAKER_FORMAT_VERSION: u32 = 5;
+
+pub fn supported_maker_version(version: u32) -> bool {
+    matches!(version, 4 | MAKER_FORMAT_VERSION)
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct MakerCapture {
+    pub hyperliquid: String,
+    pub lighter: String,
+    pub feed_copies: u8,
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Record {
@@ -39,6 +50,8 @@ pub enum Event {
         config: maker::Config,
         seed: u64,
         observe: bool,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        capture: Option<MakerCapture>,
     },
     MakerInput {
         elapsed_ms: u64,

@@ -1,0 +1,94 @@
+{
+  "fees_bps": {
+    "hyperliquid_maker": "1.5",
+    "hyperliquid_taker": "4.5",
+    "lighter_maker": "0",
+    "lighter_taker": "0"
+  },
+  "scenarios": [
+    {
+      "name": "baseline_base",
+      "hedge": {
+        "kind": "ioc"
+      },
+      "outbound_us": 12000,
+      "inbound_us": 12000,
+      "jitter_us": 2000,
+      "cancel_ahead": "0",
+      "extra_taker_fee_bps": "0",
+      "respect_trade_time": true
+    },
+    {
+      "name": "filtered_base",
+      "hedge": {
+        "kind": "ioc"
+      },
+      "outbound_us": 12000,
+      "inbound_us": 12000,
+      "jitter_us": 2000,
+      "cancel_ahead": "0",
+      "extra_taker_fee_bps": "0",
+      "respect_trade_time": true,
+      "quote_signal": {
+        "threshold_bps": "0.528159617",
+        "max_age_ms": 250
+      }
+    },
+    {
+      "name": "baseline_queue",
+      "hedge": {
+        "kind": "ioc"
+      },
+      "outbound_us": 12000,
+      "inbound_us": 12000,
+      "jitter_us": 2000,
+      "cancel_ahead": "0.5",
+      "extra_taker_fee_bps": "0",
+      "respect_trade_time": true
+    },
+    {
+      "name": "filtered_queue",
+      "hedge": {
+        "kind": "ioc"
+      },
+      "outbound_us": 12000,
+      "inbound_us": 12000,
+      "jitter_us": 2000,
+      "cancel_ahead": "0.5",
+      "extra_taker_fee_bps": "0",
+      "respect_trade_time": true,
+      "quote_signal": {
+        "threshold_bps": "0.528159617",
+        "max_age_ms": 250
+      }
+    },
+    {
+      "name": "baseline_slow",
+      "hedge": {
+        "kind": "ioc"
+      },
+      "outbound_us": 150000,
+      "inbound_us": 150000,
+      "jitter_us": 2000,
+      "cancel_ahead": "0",
+      "extra_taker_fee_bps": "0",
+      "respect_trade_time": true
+    },
+    {
+      "name": "filtered_slow",
+      "hedge": {
+        "kind": "ioc"
+      },
+      "outbound_us": 150000,
+      "inbound_us": 150000,
+      "jitter_us": 2000,
+      "cancel_ahead": "0",
+      "extra_taker_fee_bps": "0",
+      "respect_trade_time": true,
+      "quote_signal": {
+        "threshold_bps": "0.528159617",
+        "max_age_ms": 250
+      }
+    }
+  ]
+}

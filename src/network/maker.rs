@@ -14,7 +14,7 @@ use mio::net::TcpStream;
 use rust_decimal::Decimal;
 use serde_json::Value;
 
-use crate::event::{Event, MAKER_FORMAT_VERSION, Message, ReceiveTiming};
+use crate::event::{Event, MAKER_FORMAT_VERSION, MakerCapture, Message, ReceiveTiming};
 use crate::lighter;
 use crate::maker::{Action, Engine, Input, Intent, Mode, Status, Venue};
 use crate::queue::{CommandsIn, CommandsOut, RecordSink, command_queue};
@@ -137,6 +137,11 @@ pub fn run(
             config: config.clone(),
             seed,
             observe: engine.observe,
+            capture: Some(MakerCapture {
+                hyperliquid: crate::hyperliquid::TESTNET_ENDPOINT.into(),
+                lighter: format!("wss://{}{}", lighter::HOST, lighter::PATH),
+                feed_copies: copies,
+            }),
         },
     )?;
     let mut session = Session {
@@ -289,7 +294,7 @@ impl Session {
                     summary.clean || self.engine.observe || now.duration_since(stopped) >= RECOVERY;
                 if summary.clean
                     && self.hyperliquid.is_some()
-                    && self.engine.config.mode == Mode::Hyperliquid
+                    && self.engine.config.requires_hyperliquid_protection()
                     && !self.disarmed
                 {
                     let verified_at = *verified_stop.get_or_insert(now);
@@ -343,7 +348,7 @@ impl Session {
             }
             if stopped.is_none()
                 && self.hyperliquid.is_some()
-                && self.engine.config.mode == Mode::Hyperliquid
+                && self.engine.config.requires_hyperliquid_protection()
             {
                 self.protection(now, false)?;
             }
@@ -803,7 +808,7 @@ impl Session {
                 reported: order.reported,
                 check: order.cancel_ms.is_some()
                     || order.generation != generation
-                    || order.kind == crate::maker::Kind::Ioc
+                    || order.role == crate::maker::OrderRole::Hedge
                     || requested_ms.saturating_sub(order.sent_ms)
                         >= self.engine.config.action_timeout_ms,
 

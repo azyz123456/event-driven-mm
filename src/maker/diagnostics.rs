@@ -6,7 +6,7 @@ use rust_decimal::Decimal;
 use serde::Serialize;
 use serde_json::json;
 
-use crate::event::{Event, MAKER_FORMAT_VERSION, Record};
+use crate::event::{Event, Record, supported_maker_version};
 use crate::latency::Histogram;
 use crate::queue::RecordSource;
 
@@ -88,12 +88,13 @@ pub fn inspect(
         seed,
         observe,
         version,
+        ..
     } = record.event
     else {
         anyhow::bail!("inspect-maker requires a maker journal");
     };
     ensure!(
-        record.seq == 0 && version == MAKER_FORMAT_VERSION,
+        record.seq == 0 && supported_maker_version(version),
         "invalid maker session start"
     );
     let mut replay = Replay::new(Engine::new(config, seed, observe)?);
@@ -157,6 +158,7 @@ struct Report {
     cancels: u64,
     placements: u64,
     iocs: u64,
+    passive_hedges: u64,
     disconnects: u64,
     fills: BTreeMap<(Venue, String), u64>,
     public: BTreeMap<(Venue, String), BTreeMap<u64, u64>>,
@@ -243,21 +245,22 @@ impl Report {
                 self.intents += 1;
                 match intent.action {
                     Action::Cancel { .. } => self.cancels += 1,
-                    Action::Place {
-                        kind: Kind::PostOnly,
-                        ..
-                    } => self.placements += 1,
-                    Action::Place {
-                        kind: Kind::Ioc, ..
-                    } => {
-                        self.iocs += 1;
-                        if let Some(at) = self.lots.front().map(|lot| lot.at_ns) {
-                            self.hedge_writes.insert(intent.id, at);
-                            self.maker_to_intent
-                                .add(Some((engine.state.now_ms * 1_000_000).saturating_sub(at)));
-                        }
-                        if let Action::Place { size, .. } = intent.action {
-                            self.ioc_outcomes.insert(intent.client, size);
+                    Action::Place { kind, size, .. } => {
+                        if engine.config.role(intent.venue) == super::OrderRole::Quote {
+                            self.placements += 1;
+                        } else {
+                            if kind == Kind::Ioc {
+                                self.iocs += 1;
+                                self.ioc_outcomes.insert(intent.client, size);
+                            } else {
+                                self.passive_hedges += 1;
+                            }
+                            if let Some(at) = self.lots.front().map(|lot| lot.at_ns) {
+                                self.hedge_writes.insert(intent.id, at);
+                                self.maker_to_intent.add(Some(
+                                    (engine.state.now_ms * 1_000_000).saturating_sub(at),
+                                ));
+                            }
                         }
                     }
                 }
@@ -284,7 +287,7 @@ impl Report {
                 .get(&(applied.venue, fill.id.clone()))
                 .copied()
                 .unwrap_or(engine.state.now_ms * 1_000_000);
-            if fill.maker {
+            if fill.maker && engine.config.role(applied.venue) == super::OrderRole::Quote {
                 self.markouts.push_back(Markout {
                     next: 0,
                     at_ms: engine.state.now_ms,
@@ -360,7 +363,7 @@ impl Report {
                 self.matched_edge +=
                     quantity * (fill.side.signed(lot.fill.price - fill.price) - fee);
                 self.matched_size += quantity;
-                if lot.fill.maker && !fill.maker {
+                if lot.venue == Venue::Lighter && venue == Venue::Hyperliquid {
                     self.maker_to_hedge_fill.add(at.checked_sub(lot.at_ns));
                 }
             }
@@ -413,7 +416,7 @@ impl Report {
         };
         json!({
             "intents": self.intents, "post_only_placements": self.placements, "cancels": self.cancels,
-            "ioc_attempts": self.iocs, "ioc_unfilled": self.terminal_iocs[0], "ioc_partial": self.terminal_iocs[1],
+            "ioc_attempts": self.iocs, "passive_hedge_attempts": self.passive_hedges, "ioc_unfilled": self.terminal_iocs[0], "ioc_partial": self.terminal_iocs[1],
             "ioc_filled": self.terminal_iocs[2], "ioc_unresolved": self.ioc_outcomes.len(),
             "max_unhedged": self.max_residual, "max_unhedged_age_ms": self.max_residual_age_ms,
             "matched_base": self.matched_size, "matched_trade_edge_net_of_fees": self.matched_edge, "disconnects": self.disconnects, "wire_account_fills_per_hour": hourly_fills,

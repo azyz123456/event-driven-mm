@@ -2,3 +2,7 @@
 *.csv
 *.jsonl
 !/tests/fixtures/*.jsonl
+
+__pycache__/
+*.pyc
+.venv/

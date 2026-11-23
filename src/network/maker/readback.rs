@@ -116,7 +116,7 @@ fn hyper_snapshot(
         }
     }
     let orders = info(json!({"type":"openOrders","user":account}))?;
-    if config.mode == crate::maker::Mode::Hyperliquid && agent.is_some() {
+    if config.requires_hyperliquid_protection() && agent.is_some() {
         ensure!(
             orders
                 .as_array()

@@ -1,0 +1,3228 @@
+{
+  "config": {
+    "days": [
+      "2026-08-01",
+      "2026-09-01",
+      "2026-10-01",
+      "2026-11-01"
+    ],
+    "symbols": {
+      "hyperliquid": "BTC",
+      "lighter": "1"
+    },
+    "step_ms": 100,
+    "fresh_ms": 750,
+    "gap_ms": 2000,
+    "horizons_ms": [
+      500,
+      2000,
+      5000
+    ],
+    "windows_ms": [
+      250,
+      1000,
+      5000
+    ],
+    "ridge_penalty": 0.01,
+    "bootstrap_block_minutes": 30,
+    "bootstrap_draws": 2000,
+    "seed": 71,
+    "execution_target_ms": 2000,
+    "threshold_quantile": 0.9,
+    "signal_max_age_ms": 250,
+    "light_delays_ms": [
+      100,
+      500,
+      1500
+    ],
+    "exchange_clock_delay_ms": 500
+  },
+  "results": [
+    {
+      "day": "2026-09-01",
+      "horizon_ms": 500,
+      "variant": "receive",
+      "train_days": [
+        "2026-08-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 781643,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.3547181961040647,
+          "mae_bps": 0.09195750623889873,
+          "direction_hit": null,
+          "nonzero_return_share": 0.13053017809920897
+        },
+        "hyperliquid": {
+          "rows": 781643,
+          "r2_zero": 0.0751254834600612,
+          "rmse_bps": 0.3411338956957812,
+          "mae_bps": 0.1049970001908558,
+          "direction_hit": 0.8061414513662916,
+          "nonzero_return_share": 0.13053017809920897
+        },
+        "lighter": {
+          "rows": 781643,
+          "r2_zero": 0.23938781338869441,
+          "rmse_bps": 0.30936067518594523,
+          "mae_bps": 0.12866551609625737,
+          "direction_hit": 0.8766907123534716,
+          "nonzero_return_share": 0.13053017809920897
+        },
+        "two_venue": {
+          "rows": 781643,
+          "r2_zero": 0.2613738044192213,
+          "rmse_bps": 0.3048567533446288,
+          "mae_bps": 0.12654042131543292,
+          "direction_hit": 0.8785823499431529,
+          "nonzero_return_share": 0.13053017809920897
+        },
+        "no_trade_flow": {
+          "rows": 781643,
+          "r2_zero": 0.2511844714606313,
+          "rmse_bps": 0.3069522973778817,
+          "mae_bps": 0.12888621318708973,
+          "direction_hit": 0.866752264084369,
+          "nonzero_return_share": 0.13053017809920897
+        },
+        "no_basis": {
+          "rows": 781643,
+          "r2_zero": 0.26333983444256015,
+          "rmse_bps": 0.3044507584730257,
+          "mae_bps": 0.1221967088004819,
+          "direction_hit": 0.8928529423295566,
+          "nonzero_return_share": 0.13053017809920897
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.18624832095915944,
+        "ci95": [
+          0.17434319217675198,
+          0.19564624542237896
+        ]
+      }
+    },
+    {
+      "day": "2026-09-01",
+      "horizon_ms": 2000,
+      "variant": "receive",
+      "train_days": [
+        "2026-08-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 780417,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.8120823878281288,
+          "mae_bps": 0.33796004783529054,
+          "direction_hit": null,
+          "nonzero_return_share": 0.323557790258285
+        },
+        "hyperliquid": {
+          "rows": 780417,
+          "r2_zero": 0.06129933510471208,
+          "rmse_bps": 0.7867987377220906,
+          "mae_bps": 0.35824990974331017,
+          "direction_hit": 0.780472060512455,
+          "nonzero_return_share": 0.323557790258285
+        },
+        "lighter": {
+          "rows": 780417,
+          "r2_zero": 0.32262300667939836,
+          "rmse_bps": 0.668367483092645,
+          "mae_bps": 0.3520783589849922,
+          "direction_hit": 0.8104193893311156,
+          "nonzero_return_share": 0.323557790258285
+        },
+        "two_venue": {
+          "rows": 780417,
+          "r2_zero": 0.3269181974024875,
+          "rmse_bps": 0.666245082163544,
+          "mae_bps": 0.3674433224842138,
+          "direction_hit": 0.8002930577006852,
+          "nonzero_return_share": 0.323557790258285
+        },
+        "no_trade_flow": {
+          "rows": 780417,
+          "r2_zero": 0.3216522670838132,
+          "rmse_bps": 0.6688462257297652,
+          "mae_bps": 0.37140646889685486,
+          "direction_hit": 0.7966496376381134,
+          "nonzero_return_share": 0.323557790258285
+        },
+        "no_basis": {
+          "rows": 780417,
+          "r2_zero": 0.33586973538509535,
+          "rmse_bps": 0.6617999462755788,
+          "mae_bps": 0.3443209782351899,
+          "direction_hit": 0.8368896281335393,
+          "nonzero_return_share": 0.323557790258285
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.26561886229777587,
+        "ci95": [
+          0.24384401326119692,
+          0.28277077524219524
+        ]
+      }
+    },
+    {
+      "day": "2026-09-01",
+      "horizon_ms": 5000,
+      "variant": "receive",
+      "train_days": [
+        "2026-08-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 779070,
+          "r2_zero": 0.0,
+          "rmse_bps": 1.3815847338642027,
+          "mae_bps": 0.7382948945097113,
+          "direction_hit": null,
+          "nonzero_return_share": 0.5331793035285661
+        },
+        "hyperliquid": {
+          "rows": 779070,
+          "r2_zero": 0.05410560285171151,
+          "rmse_bps": 1.343689279658146,
+          "mae_bps": 0.7506157620849587,
+          "direction_hit": 0.7277073743812954,
+          "nonzero_return_share": 0.5331793035285661
+        },
+        "lighter": {
+          "rows": 779070,
+          "r2_zero": 0.18447098458061773,
+          "rmse_bps": 1.2476628227471953,
+          "mae_bps": 0.7218864459780323,
+          "direction_hit": 0.7196714365502763,
+          "nonzero_return_share": 0.5331793035285661
+        },
+        "two_venue": {
+          "rows": 779070,
+          "r2_zero": 0.19160165555562236,
+          "rmse_bps": 1.242196306127717,
+          "mae_bps": 0.7437018510607267,
+          "direction_hit": 0.7157786530054119,
+          "nonzero_return_share": 0.5331793035285661
+        },
+        "no_trade_flow": {
+          "rows": 779070,
+          "r2_zero": 0.18922348466933514,
+          "rmse_bps": 1.2440221297730978,
+          "mae_bps": 0.7479977886340964,
+          "direction_hit": 0.7112960537719315,
+          "nonzero_return_share": 0.5331793035285661
+        },
+        "no_basis": {
+          "rows": 779070,
+          "r2_zero": 0.20058513076382212,
+          "rmse_bps": 1.235274956314563,
+          "mae_bps": 0.7099682601010192,
+          "direction_hit": 0.76132205381045,
+          "nonzero_return_share": 0.5331793035285661
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.13749605270391027,
+        "ci95": [
+          0.12702141963057678,
+          0.14582801654644775
+        ]
+      }
+    },
+    {
+      "day": "2026-10-01",
+      "horizon_ms": 500,
+      "variant": "receive",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 766188,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.3331343799005425,
+          "mae_bps": 0.08527701653507967,
+          "direction_hit": null,
+          "nonzero_return_share": 0.11467812077453575
+        },
+        "hyperliquid": {
+          "rows": 766188,
+          "r2_zero": 0.12296281341730542,
+          "rmse_bps": 0.311981224803073,
+          "mae_bps": 0.1253524743130547,
+          "direction_hit": 0.9132305240994708,
+          "nonzero_return_share": 0.11467812077453575
+        },
+        "lighter": {
+          "rows": 766188,
+          "r2_zero": 0.22418765524180784,
+          "rmse_bps": 0.29342546241860584,
+          "mae_bps": 0.13326178492353932,
+          "direction_hit": 0.8869970978205202,
+          "nonzero_return_share": 0.11467812077453575
+        },
+        "two_venue": {
+          "rows": 766188,
+          "r2_zero": 0.27769076542860016,
+          "rmse_bps": 0.2831268377871019,
+          "mae_bps": 0.13587551021512798,
+          "direction_hit": 0.936675581858533,
+          "nonzero_return_share": 0.11467812077453575
+        },
+        "no_trade_flow": {
+          "rows": 766188,
+          "r2_zero": 0.26564168914470065,
+          "rmse_bps": 0.2854785366175484,
+          "mae_bps": 0.13490755644972025,
+          "direction_hit": 0.9318158538667274,
+          "nonzero_return_share": 0.11467812077453575
+        },
+        "no_basis": {
+          "rows": 766188,
+          "r2_zero": 0.275448641173186,
+          "rmse_bps": 0.2835659251316985,
+          "mae_bps": 0.13592703028704964,
+          "direction_hit": 0.9362772434985489,
+          "nonzero_return_share": 0.11467812077453575
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.15472795201129474,
+        "ci95": [
+          0.13626157449141538,
+          0.1673377197063251
+        ]
+      }
+    },
+    {
+      "day": "2026-10-01",
+      "horizon_ms": 2000,
+      "variant": "receive",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 764423,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.7645819537076516,
+          "mae_bps": 0.31779632892554266,
+          "direction_hit": null,
+          "nonzero_return_share": 0.3000132125799459
+        },
+        "hyperliquid": {
+          "rows": 764423,
+          "r2_zero": 0.13644817029591494,
+          "rmse_bps": 0.7105068144324989,
+          "mae_bps": 0.3833478122058923,
+          "direction_hit": 0.8443164426150164,
+          "nonzero_return_share": 0.3000132125799459
+        },
+        "lighter": {
+          "rows": 764423,
+          "r2_zero": 0.36388744801550155,
+          "rmse_bps": 0.6098050630556051,
+          "mae_bps": 0.34483381008834646,
+          "direction_hit": 0.8331015056445319,
+          "nonzero_return_share": 0.3000132125799459
+        },
+        "two_venue": {
+          "rows": 764423,
+          "r2_zero": 0.4121537988859958,
+          "rmse_bps": 0.5862136154897106,
+          "mae_bps": 0.3467704444930788,
+          "direction_hit": 0.8915351644087086,
+          "nonzero_return_share": 0.3000132125799459
+        },
+        "no_trade_flow": {
+          "rows": 764423,
+          "r2_zero": 0.40882595541082145,
+          "rmse_bps": 0.5878705743955398,
+          "mae_bps": 0.34697592432531094,
+          "direction_hit": 0.8908549427262065,
+          "nonzero_return_share": 0.3000132125799459
+        },
+        "no_basis": {
+          "rows": 764423,
+          "r2_zero": 0.40905663721342844,
+          "rmse_bps": 0.5877558668260787,
+          "mae_bps": 0.3480842266215253,
+          "direction_hit": 0.8903316952781278,
+          "nonzero_return_share": 0.3000132125799459
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.2757056285900809,
+        "ci95": [
+          0.23558798036867848,
+          0.30441060533618325
+        ]
+      }
+    },
+    {
+      "day": "2026-10-01",
+      "horizon_ms": 5000,
+      "variant": "receive",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 763259,
+          "r2_zero": 0.0,
+          "rmse_bps": 1.3256964649250897,
+          "mae_bps": 0.7033495470481161,
+          "direction_hit": null,
+          "nonzero_return_share": 0.5024572261840345
+        },
+        "hyperliquid": {
+          "rows": 763259,
+          "r2_zero": 0.12006951857281234,
+          "rmse_bps": 1.2435643956696707,
+          "mae_bps": 0.7445694681670701,
+          "direction_hit": 0.7713458755426917,
+          "nonzero_return_share": 0.5024572261840345
+        },
+        "lighter": {
+          "rows": 763259,
+          "r2_zero": 0.2243638123309899,
+          "rmse_bps": 1.1675436596621909,
+          "mae_bps": 0.6868461879255313,
+          "direction_hit": 0.7354480384871123,
+          "nonzero_return_share": 0.5024572261840345
+        },
+        "two_venue": {
+          "rows": 763259,
+          "r2_zero": 0.27577425027398794,
+          "rmse_bps": 1.1281869691741417,
+          "mae_bps": 0.6793452456611732,
+          "direction_hit": 0.8085318313972438,
+          "nonzero_return_share": 0.5024572261840345
+        },
+        "no_trade_flow": {
+          "rows": 763259,
+          "r2_zero": 0.27429445866221613,
+          "rmse_bps": 1.129338978531855,
+          "mae_bps": 0.6795099329308308,
+          "direction_hit": 0.8083649496095227,
+          "nonzero_return_share": 0.5024572261840345
+        },
+        "no_basis": {
+          "rows": 763259,
+          "r2_zero": 0.27342197500623655,
+          "rmse_bps": 1.1300176517457206,
+          "mae_bps": 0.6810053648801581,
+          "direction_hit": 0.8077912934642313,
+          "nonzero_return_share": 0.5024572261840345
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.15570473170117566,
+        "ci95": [
+          0.1421929959807958,
+          0.16498858221968143
+        ]
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "horizon_ms": 500,
+      "variant": "receive",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 623524,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.16460215609344706,
+          "mae_bps": 0.022996754763799154,
+          "direction_hit": null,
+          "nonzero_return_share": 0.043823493562396953
+        },
+        "hyperliquid": {
+          "rows": 623524,
+          "r2_zero": -0.011162640389835055,
+          "rmse_bps": 0.1655183038695513,
+          "mae_bps": 0.07771154530279877,
+          "direction_hit": 0.9368344007319305,
+          "nonzero_return_share": 0.043823493562396953
+        },
+        "lighter": {
+          "rows": 623524,
+          "r2_zero": 0.1884405283198699,
+          "rmse_bps": 0.14828447880017284,
+          "mae_bps": 0.05366045685892551,
+          "direction_hit": 0.8521866422689844,
+          "nonzero_return_share": 0.043823493562396953
+        },
+        "two_venue": {
+          "rows": 623524,
+          "r2_zero": 0.1892173012968359,
+          "rmse_bps": 0.14821349758758184,
+          "mae_bps": 0.06839555990794835,
+          "direction_hit": 0.9428728270814273,
+          "nonzero_return_share": 0.043823493562396953
+        },
+        "no_trade_flow": {
+          "rows": 623524,
+          "r2_zero": 0.19408977040319841,
+          "rmse_bps": 0.14776747552698316,
+          "mae_bps": 0.06412215471715975,
+          "direction_hit": 0.9374565416285453,
+          "nonzero_return_share": 0.043823493562396953
+        },
+        "no_basis": {
+          "rows": 623524,
+          "r2_zero": 0.19065659052156447,
+          "rmse_bps": 0.1480818859695483,
+          "mae_bps": 0.06738350616661164,
+          "direction_hit": 0.9407502287282709,
+          "nonzero_return_share": 0.043823493562396953
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.20037994168667156,
+        "ci95": [
+          0.17209574178392334,
+          0.22766572349776598
+        ]
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "horizon_ms": 2000,
+      "variant": "receive",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 619854,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.3693673294517778,
+          "mae_bps": 0.08776716292439575,
+          "direction_hit": null,
+          "nonzero_return_share": 0.12260790444201376
+        },
+        "hyperliquid": {
+          "rows": 619854,
+          "r2_zero": -0.0232962558480998,
+          "rmse_bps": 0.37364499737600243,
+          "mae_bps": 0.2164331586443724,
+          "direction_hit": 0.8903801365807444,
+          "nonzero_return_share": 0.12260790444201376
+        },
+        "lighter": {
+          "rows": 619854,
+          "r2_zero": 0.24131993246665828,
+          "rmse_bps": 0.321727227583202,
+          "mae_bps": 0.15886160719482081,
+          "direction_hit": 0.8001552652008579,
+          "nonzero_return_share": 0.12260790444201376
+        },
+        "two_venue": {
+          "rows": 619854,
+          "r2_zero": 0.2322328809350458,
+          "rmse_bps": 0.3236482282031477,
+          "mae_bps": 0.18819135641738544,
+          "direction_hit": 0.9124988486690614,
+          "nonzero_return_share": 0.12260790444201376
+        },
+        "no_trade_flow": {
+          "rows": 619854,
+          "r2_zero": 0.23522458412878466,
+          "rmse_bps": 0.32301704428492406,
+          "mae_bps": 0.18628393136284468,
+          "direction_hit": 0.9112356741536073,
+          "nonzero_return_share": 0.12260790444201376
+        },
+        "no_basis": {
+          "rows": 619854,
+          "r2_zero": 0.2299430098251577,
+          "rmse_bps": 0.32413051048518104,
+          "mae_bps": 0.187456662383266,
+          "direction_hit": 0.9112488322214766,
+          "nonzero_return_share": 0.12260790444201376
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.2555291367831455,
+        "ci95": [
+          0.2301569320990121,
+          0.2816242815569498
+        ]
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "horizon_ms": 5000,
+      "variant": "receive",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 615767,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.6300991776806729,
+          "mae_bps": 0.20779563532304382,
+          "direction_hit": null,
+          "nonzero_return_share": 0.2322177057231063
+        },
+        "hyperliquid": {
+          "rows": 615767,
+          "r2_zero": 0.017182577461357207,
+          "rmse_bps": 0.6246623578773804,
+          "mae_bps": 0.3779691036545426,
+          "direction_hit": 0.8528589011972698,
+          "nonzero_return_share": 0.2322177057231063
+        },
+        "lighter": {
+          "rows": 615767,
+          "r2_zero": 0.15168146003104588,
+          "rmse_bps": 0.5803478663975206,
+          "mae_bps": 0.2849464214673873,
+          "direction_hit": 0.7366705829696766,
+          "nonzero_return_share": 0.2322177057231063
+        },
+        "two_venue": {
+          "rows": 615767,
+          "r2_zero": 0.1611533855453534,
+          "rmse_bps": 0.577098826072118,
+          "mae_bps": 0.3358032012578684,
+          "direction_hit": 0.8752377755398904,
+          "nonzero_return_share": 0.2322177057231063
+        },
+        "no_trade_flow": {
+          "rows": 615767,
+          "r2_zero": 0.1637260344507524,
+          "rmse_bps": 0.5762131976879528,
+          "mae_bps": 0.3340035760372411,
+          "direction_hit": 0.8741118384245272,
+          "nonzero_return_share": 0.2322177057231063
+        },
+        "no_basis": {
+          "rows": 615767,
+          "r2_zero": 0.15819177590792954,
+          "rmse_bps": 0.5781166733819961,
+          "mae_bps": 0.3355623085163625,
+          "direction_hit": 0.8723774756629742,
+          "nonzero_return_share": 0.2322177057231063
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.1439708080839962,
+        "ci95": [
+          0.12702762149576138,
+          0.1622543149808789
+        ]
+      }
+    },
+    {
+      "day": "2026-09-01",
+      "horizon_ms": 500,
+      "variant": "lighter_delay_100",
+      "train_days": [
+        "2026-08-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 781689,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.35465887158972187,
+          "mae_bps": 0.09192072778002923,
+          "direction_hit": null,
+          "nonzero_return_share": 0.13048028052076976
+        },
+        "hyperliquid": {
+          "rows": 781689,
+          "r2_zero": 0.07510423017049428,
+          "rmse_bps": 0.3410807619652587,
+          "mae_bps": 0.10494680515455955,
+          "direction_hit": 0.8058630325015932,
+          "nonzero_return_share": 0.13048028052076976
+        },
+        "lighter": {
+          "rows": 781689,
+          "r2_zero": 0.24833465566163615,
+          "rmse_bps": 0.3074844032852038,
+          "mae_bps": 0.1275785715934978,
+          "direction_hit": 0.8809549487719986,
+          "nonzero_return_share": 0.13048028052076976
+        },
+        "two_venue": {
+          "rows": 781689,
+          "r2_zero": 0.26823797078289313,
+          "rmse_bps": 0.303386158658591,
+          "mae_bps": 0.12620818234414719,
+          "direction_hit": 0.8789842639345066,
+          "nonzero_return_share": 0.13048028052076976
+        },
+        "no_trade_flow": {
+          "rows": 781689,
+          "r2_zero": 0.25802164335916467,
+          "rmse_bps": 0.305496645990725,
+          "mae_bps": 0.12861416294146769,
+          "direction_hit": 0.8676993970292661,
+          "nonzero_return_share": 0.13048028052076976
+        },
+        "no_basis": {
+          "rows": 781689,
+          "r2_zero": 0.2705728167187068,
+          "rmse_bps": 0.30290176218911724,
+          "mae_bps": 0.12142774980224538,
+          "direction_hit": 0.8945536545909113,
+          "nonzero_return_share": 0.13048028052076976
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.19313374061239902,
+        "ci95": [
+          0.18006766781601405,
+          0.20374768610618882
+        ]
+      }
+    },
+    {
+      "day": "2026-09-01",
+      "horizon_ms": 2000,
+      "variant": "lighter_delay_100",
+      "train_days": [
+        "2026-08-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 780466,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.8119822233490783,
+          "mae_bps": 0.3378458457903633,
+          "direction_hit": null,
+          "nonzero_return_share": 0.3234529114657141
+        },
+        "hyperliquid": {
+          "rows": 780466,
+          "r2_zero": 0.06123723154372085,
+          "rmse_bps": 0.7867277150929978,
+          "mae_bps": 0.3581421436468256,
+          "direction_hit": 0.7803829760263662,
+          "nonzero_return_share": 0.3234529114657141
+        },
+        "lighter": {
+          "rows": 780466,
+          "r2_zero": 0.2935866609002945,
+          "rmse_bps": 0.6824580596881632,
+          "mae_bps": 0.3546830562595831,
+          "direction_hit": 0.8021779087639239,
+          "nonzero_return_share": 0.3234529114657141
+        },
+        "two_venue": {
+          "rows": 780466,
+          "r2_zero": 0.2979109535424326,
+          "rmse_bps": 0.6803660277110755,
+          "mae_bps": 0.37000525349528657,
+          "direction_hit": 0.7919261301516376,
+          "nonzero_return_share": 0.3234529114657141
+        },
+        "no_trade_flow": {
+          "rows": 780466,
+          "r2_zero": 0.29284509230552547,
+          "rmse_bps": 0.6828161763085026,
+          "mae_bps": 0.3738971915445866,
+          "direction_hit": 0.7875766506631173,
+          "nonzero_return_share": 0.3234529114657141
+        },
+        "no_basis": {
+          "rows": 780466,
+          "r2_zero": 0.3065223164227243,
+          "rmse_bps": 0.6761806931712404,
+          "mae_bps": 0.34719007546922565,
+          "direction_hit": 0.829312639634929,
+          "nonzero_return_share": 0.3234529114657141
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.23667372199871203,
+        "ci95": [
+          0.21667845591589088,
+          0.25224342600070193
+        ]
+      }
+    },
+    {
+      "day": "2026-09-01",
+      "horizon_ms": 5000,
+      "variant": "lighter_delay_100",
+      "train_days": [
+        "2026-08-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 779118,
+          "r2_zero": 0.0,
+          "rmse_bps": 1.3814980686093523,
+          "mae_bps": 0.7381582157932811,
+          "direction_hit": null,
+          "nonzero_return_share": 0.5330578936695083
+        },
+        "hyperliquid": {
+          "rows": 779118,
+          "r2_zero": 0.05407104219169534,
+          "rmse_bps": 1.343629537332834,
+          "mae_bps": 0.7505029183040997,
+          "direction_hit": 0.7276067563174939,
+          "nonzero_return_share": 0.5330578936695083
+        },
+        "lighter": {
+          "rows": 779118,
+          "r2_zero": 0.16845086746082416,
+          "rmse_bps": 1.2597786372610347,
+          "mae_bps": 0.726820644840918,
+          "direction_hit": 0.7145395663532499,
+          "nonzero_return_share": 0.5330578936695083
+        },
+        "two_venue": {
+          "rows": 779118,
+          "r2_zero": 0.17588144462111477,
+          "rmse_bps": 1.2541374263212604,
+          "mae_bps": 0.7480521994635618,
+          "direction_hit": 0.7107472641248209,
+          "nonzero_return_share": 0.5330578936695083
+        },
+        "no_trade_flow": {
+          "rows": 779118,
+          "r2_zero": 0.17356022083583156,
+          "rmse_bps": 1.2559023948454704,
+          "mae_bps": 0.752289596438137,
+          "direction_hit": 0.7062591045351119,
+          "nonzero_return_share": 0.5330578936695083
+        },
+        "no_basis": {
+          "rows": 779118,
+          "r2_zero": 0.18434974832021955,
+          "rmse_bps": 1.2476772875606257,
+          "mae_bps": 0.7153478715639644,
+          "direction_hit": 0.7565173422582859,
+          "nonzero_return_share": 0.5330578936695083
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.1218104024294188,
+        "ci95": [
+          0.11195675642164649,
+          0.12952944198068211
+        ]
+      }
+    },
+    {
+      "day": "2026-10-01",
+      "horizon_ms": 500,
+      "variant": "lighter_delay_100",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 766275,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.33308359829921974,
+          "mae_bps": 0.08525608407878778,
+          "direction_hit": null,
+          "nonzero_return_share": 0.11464813546050699
+        },
+        "hyperliquid": {
+          "rows": 766275,
+          "r2_zero": 0.12290785916268432,
+          "rmse_bps": 0.31194344026906984,
+          "mae_bps": 0.12531870409173454,
+          "direction_hit": 0.913251832627601,
+          "nonzero_return_share": 0.11464813546050699
+        },
+        "lighter": {
+          "rows": 766275,
+          "r2_zero": 0.23360810574459046,
+          "rmse_bps": 0.29159407763426354,
+          "mae_bps": 0.1329479931022305,
+          "direction_hit": 0.8911692391749761,
+          "nonzero_return_share": 0.11464813546050699
+        },
+        "two_venue": {
+          "rows": 766275,
+          "r2_zero": 0.28457150597103453,
+          "rmse_bps": 0.2817321206490571,
+          "mae_bps": 0.13544944901170913,
+          "direction_hit": 0.9370418430997587,
+          "nonzero_return_share": 0.11464813546050699
+        },
+        "no_trade_flow": {
+          "rows": 766275,
+          "r2_zero": 0.2728134420138313,
+          "rmse_bps": 0.284037818765744,
+          "mae_bps": 0.1345090782896089,
+          "direction_hit": 0.9319309748212904,
+          "nonzero_return_share": 0.11464813546050699
+        },
+        "no_basis": {
+          "rows": 766275,
+          "r2_zero": 0.2823643123503833,
+          "rmse_bps": 0.2821663768115968,
+          "mae_bps": 0.13557774677923787,
+          "direction_hit": 0.9364271729727268,
+          "nonzero_return_share": 0.11464813546050699
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.1616636468083505,
+        "ci95": [
+          0.14007555757208323,
+          0.176707333247446
+        ]
+      }
+    },
+    {
+      "day": "2026-10-01",
+      "horizon_ms": 2000,
+      "variant": "lighter_delay_100",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 764529,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.7644962391597473,
+          "mae_bps": 0.31771622374029335,
+          "direction_hit": null,
+          "nonzero_return_share": 0.29992976067618105
+        },
+        "hyperliquid": {
+          "rows": 764529,
+          "r2_zero": 0.13641580402324016,
+          "rmse_bps": 0.7104404754793098,
+          "mae_bps": 0.38327387395165785,
+          "direction_hit": 0.844368853710124,
+          "nonzero_return_share": 0.29992976067618105
+        },
+        "lighter": {
+          "rows": 764529,
+          "r2_zero": 0.3390762756581318,
+          "rmse_bps": 0.6215141548211753,
+          "mae_bps": 0.3467325671247365,
+          "direction_hit": 0.8255118728331262,
+          "nonzero_return_share": 0.29992976067618105
+        },
+        "two_venue": {
+          "rows": 764529,
+          "r2_zero": 0.386757765847632,
+          "rmse_bps": 0.5986753570591749,
+          "mae_bps": 0.3495802318143031,
+          "direction_hit": 0.8850134100870021,
+          "nonzero_return_share": 0.29992976067618105
+        },
+        "no_trade_flow": {
+          "rows": 764529,
+          "r2_zero": 0.38330546398368637,
+          "rmse_bps": 0.6003581402034953,
+          "mae_bps": 0.34979308294067785,
+          "direction_hit": 0.8842066243649288,
+          "nonzero_return_share": 0.29992976067618105
+        },
+        "no_basis": {
+          "rows": 764529,
+          "r2_zero": 0.38383541923068465,
+          "rmse_bps": 0.6001001264621243,
+          "mae_bps": 0.3508593930834943,
+          "direction_hit": 0.8840147401931925,
+          "nonzero_return_share": 0.29992976067618105
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.2503419618243915,
+        "ci95": [
+          0.21199799121710758,
+          0.27778811164544315
+        ]
+      }
+    },
+    {
+      "day": "2026-10-01",
+      "horizon_ms": 5000,
+      "variant": "lighter_delay_100",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 763362,
+          "r2_zero": 0.0,
+          "rmse_bps": 1.3256479372616143,
+          "mae_bps": 0.7032592133790951,
+          "direction_hit": null,
+          "nonzero_return_share": 0.5023737099829438
+        },
+        "hyperliquid": {
+          "rows": 763362,
+          "r2_zero": 0.12003271044467001,
+          "rmse_bps": 1.2435448828590636,
+          "mae_bps": 0.7445239824293841,
+          "direction_hit": 0.7713569739212971,
+          "nonzero_return_share": 0.5023737099829438
+        },
+        "lighter": {
+          "rows": 763362,
+          "r2_zero": 0.2080295821473277,
+          "rmse_bps": 1.1797301544255296,
+          "mae_bps": 0.6915394128320927,
+          "direction_hit": 0.7296247910652868,
+          "nonzero_return_share": 0.5023737099829438
+        },
+        "two_venue": {
+          "rows": 763362,
+          "r2_zero": 0.25905405105205437,
+          "rmse_bps": 1.1410941117558844,
+          "mae_bps": 0.6853208117586338,
+          "direction_hit": 0.803511406987872,
+          "nonzero_return_share": 0.5023737099829438
+        },
+        "no_trade_flow": {
+          "rows": 763362,
+          "r2_zero": 0.25752798190417914,
+          "rmse_bps": 1.142268619014192,
+          "mae_bps": 0.6854791271495557,
+          "direction_hit": 0.8031958862352115,
+          "nonzero_return_share": 0.5023737099829438
+        },
+        "no_basis": {
+          "rows": 763362,
+          "r2_zero": 0.2568189554023066,
+          "rmse_bps": 1.1428138957665124,
+          "mae_bps": 0.6869082900364121,
+          "direction_hit": 0.802789099149137,
+          "nonzero_return_share": 0.5023737099829438
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.13902134060738555,
+        "ci95": [
+          0.12655017380192718,
+          0.14775677036136295
+        ]
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "horizon_ms": 500,
+      "variant": "lighter_delay_100",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 623539,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.1646061253326468,
+          "mae_bps": 0.022991163037448338,
+          "direction_hit": null,
+          "nonzero_return_share": 0.04382404308311108
+        },
+        "hyperliquid": {
+          "rows": 623539,
+          "r2_zero": -0.011193387098528573,
+          "rmse_bps": 0.16552481172338243,
+          "mae_bps": 0.0776869260801066,
+          "direction_hit": 0.9369464978408841,
+          "nonzero_return_share": 0.04382404308311108
+        },
+        "lighter": {
+          "rows": 623539,
+          "r2_zero": 0.18825617691644525,
+          "rmse_bps": 0.14830489593004134,
+          "mae_bps": 0.05420967035459991,
+          "direction_hit": 0.8483495571982727,
+          "nonzero_return_share": 0.04382404308311108
+        },
+        "two_venue": {
+          "rows": 623539,
+          "r2_zero": 0.19246610842451917,
+          "rmse_bps": 0.1479198205771246,
+          "mae_bps": 0.06769267909890715,
+          "direction_hit": 0.9389592329649418,
+          "nonzero_return_share": 0.04382404308311108
+        },
+        "no_trade_flow": {
+          "rows": 623539,
+          "r2_zero": 0.19690869928992671,
+          "rmse_bps": 0.14751237417913943,
+          "mae_bps": 0.06343586771562261,
+          "direction_hit": 0.9311278635731538,
+          "nonzero_return_share": 0.04382404308311108
+        },
+        "no_basis": {
+          "rows": 623539,
+          "r2_zero": 0.19356672284051368,
+          "rmse_bps": 0.14781898382045586,
+          "mae_bps": 0.06674468367160243,
+          "direction_hit": 0.9365439508160726,
+          "nonzero_return_share": 0.04382404308311108
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.20365949552304785,
+        "ci95": [
+          0.17558095360234308,
+          0.23220871003090326
+        ]
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "horizon_ms": 2000,
+      "variant": "lighter_delay_100",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 619914,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.3692203663338048,
+          "mae_bps": 0.08772164752494833,
+          "direction_hit": null,
+          "nonzero_return_share": 0.12257829311807766
+        },
+        "hyperliquid": {
+          "rows": 619914,
+          "r2_zero": -0.02342178294313335,
+          "rmse_bps": 0.3735192398434667,
+          "mae_bps": 0.21638744187888276,
+          "direction_hit": 0.8904563878507132,
+          "nonzero_return_share": 0.12257829311807766
+        },
+        "lighter": {
+          "rows": 619914,
+          "r2_zero": 0.21545086737041497,
+          "rmse_bps": 0.3270361204059303,
+          "mae_bps": 0.15868728710010901,
+          "direction_hit": 0.7935858293414749,
+          "nonzero_return_share": 0.12257829311807766
+        },
+        "two_venue": {
+          "rows": 619914,
+          "r2_zero": 0.20788464958405983,
+          "rmse_bps": 0.3286093101150289,
+          "mae_bps": 0.18781586690390822,
+          "direction_hit": 0.90836711059641,
+          "nonzero_return_share": 0.12257829311807766
+        },
+        "no_trade_flow": {
+          "rows": 619914,
+          "r2_zero": 0.2110511440323416,
+          "rmse_bps": 0.327951841772263,
+          "mae_bps": 0.18577638218643067,
+          "direction_hit": 0.907498552403011,
+          "nonzero_return_share": 0.12257829311807766
+        },
+        "no_basis": {
+          "rows": 619914,
+          "r2_zero": 0.2055493216938037,
+          "rmse_bps": 0.32909335937352086,
+          "mae_bps": 0.1871283805397661,
+          "direction_hit": 0.9065905142917303,
+          "nonzero_return_share": 0.12257829311807766
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.23130643252719335,
+        "ci95": [
+          0.2088637124081694,
+          0.25548631332860655
+        ]
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "horizon_ms": 5000,
+      "variant": "lighter_delay_100",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 615822,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.6300090246236848,
+          "mae_bps": 0.20773379209927417,
+          "direction_hit": null,
+          "nonzero_return_share": 0.23216286524352817
+        },
+        "hyperliquid": {
+          "rows": 615822,
+          "r2_zero": 0.017036469384377084,
+          "rmse_bps": 0.6246194062668132,
+          "mae_bps": 0.377945003097163,
+          "direction_hit": 0.8528722608081359,
+          "nonzero_return_share": 0.23216286524352817
+        },
+        "lighter": {
+          "rows": 615822,
+          "r2_zero": 0.1373248820213393,
+          "rmse_bps": 0.5851543077659521,
+          "mae_bps": 0.28499829477190586,
+          "direction_hit": 0.7321344888124165,
+          "nonzero_return_share": 0.23216286524352817
+        },
+        "two_venue": {
+          "rows": 615822,
+          "r2_zero": 0.1478772341310709,
+          "rmse_bps": 0.5815644550286495,
+          "mae_bps": 0.3359681360366572,
+          "direction_hit": 0.8722747969868015,
+          "nonzero_return_share": 0.23216286524352817
+        },
+        "no_trade_flow": {
+          "rows": 615822,
+          "r2_zero": 0.1505096491642598,
+          "rmse_bps": 0.5806654629755619,
+          "mae_bps": 0.33408712064109514,
+          "direction_hit": 0.8714214770827651,
+          "nonzero_return_share": 0.23216286524352817
+        },
+        "no_basis": {
+          "rows": 615822,
+          "r2_zero": 0.14496972095123462,
+          "rmse_bps": 0.5825557830761715,
+          "mae_bps": 0.3357142813951387,
+          "direction_hit": 0.8692881773226738,
+          "nonzero_return_share": 0.23216286524352817
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.13084076474669323,
+        "ci95": [
+          0.11377220198994838,
+          0.1495624768164563
+        ]
+      }
+    },
+    {
+      "day": "2026-09-01",
+      "horizon_ms": 500,
+      "variant": "lighter_delay_500",
+      "train_days": [
+        "2026-08-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 781784,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.3540104706943859,
+          "mae_bps": 0.09166151354119857,
+          "direction_hit": null,
+          "nonzero_return_share": 0.13015871391586423
+        },
+        "hyperliquid": {
+          "rows": 781784,
+          "r2_zero": 0.07464856444786039,
+          "rmse_bps": 0.34054104078970676,
+          "mae_bps": 0.10472035040820867,
+          "direction_hit": 0.806085144856323,
+          "nonzero_return_share": 0.13015871391586423
+        },
+        "lighter": {
+          "rows": 781784,
+          "r2_zero": 0.2081859601586653,
+          "rmse_bps": 0.3150124413738056,
+          "mae_bps": 0.12356804013950869,
+          "direction_hit": 0.8658555760839656,
+          "nonzero_return_share": 0.13015871391586423
+        },
+        "two_venue": {
+          "rows": 781784,
+          "r2_zero": 0.22898540860582806,
+          "rmse_bps": 0.3108475194445909,
+          "mae_bps": 0.122255423708387,
+          "direction_hit": 0.8608141043280003,
+          "nonzero_return_share": 0.13015871391586423
+        },
+        "no_trade_flow": {
+          "rows": 781784,
+          "r2_zero": 0.2183844526773807,
+          "rmse_bps": 0.3129772009694965,
+          "mae_bps": 0.1246283160099402,
+          "direction_hit": 0.8447069460277526,
+          "nonzero_return_share": 0.13015871391586423
+        },
+        "no_basis": {
+          "rows": 781784,
+          "r2_zero": 0.23166811691013245,
+          "rmse_bps": 0.31030625869148576,
+          "mae_bps": 0.11701943901542537,
+          "direction_hit": 0.875918864735249,
+          "nonzero_return_share": 0.13015871391586423
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.15433684415796808,
+        "ci95": [
+          0.14119629648560558,
+          0.16520435536067468
+        ]
+      }
+    },
+    {
+      "day": "2026-09-01",
+      "horizon_ms": 2000,
+      "variant": "lighter_delay_500",
+      "train_days": [
+        "2026-08-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 780616,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.8114358033007755,
+          "mae_bps": 0.3373514236767413,
+          "direction_hit": null,
+          "nonzero_return_share": 0.3229718581223034
+        },
+        "hyperliquid": {
+          "rows": 780616,
+          "r2_zero": 0.06114236862447875,
+          "rmse_bps": 0.7862380120200014,
+          "mae_bps": 0.357704942164769,
+          "direction_hit": 0.780181423704074,
+          "nonzero_return_share": 0.3229718581223034
+        },
+        "lighter": {
+          "rows": 780616,
+          "r2_zero": 0.17104522600521976,
+          "rmse_bps": 0.7387875784385957,
+          "mae_bps": 0.36534954082085097,
+          "direction_hit": 0.7650336946735048,
+          "nonzero_return_share": 0.3229718581223034
+        },
+        "two_venue": {
+          "rows": 780616,
+          "r2_zero": 0.18014746921592928,
+          "rmse_bps": 0.734720296228496,
+          "mae_bps": 0.3757866146300357,
+          "direction_hit": 0.7590364790950234,
+          "nonzero_return_share": 0.3229718581223034
+        },
+        "no_trade_flow": {
+          "rows": 780616,
+          "r2_zero": 0.17572068164615107,
+          "rmse_bps": 0.7367011842358012,
+          "mae_bps": 0.3796265817091439,
+          "direction_hit": 0.7523253092810084,
+          "nonzero_return_share": 0.3229718581223034
+        },
+        "no_basis": {
+          "rows": 780616,
+          "r2_zero": 0.18605502568792998,
+          "rmse_bps": 0.73206844811526,
+          "mae_bps": 0.3574294831060129,
+          "direction_hit": 0.8005648171285554,
+          "nonzero_return_share": 0.3229718581223034
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.11900510059144978,
+        "ci95": [
+          0.10708319590455201,
+          0.12790453222662346
+        ]
+      }
+    },
+    {
+      "day": "2026-09-01",
+      "horizon_ms": 5000,
+      "variant": "lighter_delay_500",
+      "train_days": [
+        "2026-08-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 779336,
+          "r2_zero": 0.0,
+          "rmse_bps": 1.3809777287504836,
+          "mae_bps": 0.7376214113836438,
+          "direction_hit": null,
+          "nonzero_return_share": 0.5327483909379267
+        },
+        "hyperliquid": {
+          "rows": 779336,
+          "r2_zero": 0.053929892215721975,
+          "rmse_bps": 1.3432236662260815,
+          "mae_bps": 0.7500735549375661,
+          "direction_hit": 0.7275512416002312,
+          "nonzero_return_share": 0.5327483909379267
+        },
+        "lighter": {
+          "rows": 779336,
+          "r2_zero": 0.10442052735588647,
+          "rmse_bps": 1.3068891127866709,
+          "mae_bps": 0.7462185079012305,
+          "direction_hit": 0.692617837616513,
+          "nonzero_return_share": 0.5327483909379267
+        },
+        "two_venue": {
+          "rows": 779336,
+          "r2_zero": 0.11548154013090073,
+          "rmse_bps": 1.298793556085042,
+          "mae_bps": 0.7613207431254368,
+          "direction_hit": 0.6954454587056529,
+          "nonzero_return_share": 0.5327483909379267
+        },
+        "no_trade_flow": {
+          "rows": 779336,
+          "r2_zero": 0.11329739613060097,
+          "rmse_bps": 1.3003961247370746,
+          "mae_bps": 0.7654800865666898,
+          "direction_hit": 0.6900768322936487,
+          "nonzero_return_share": 0.5327483909379267
+        },
+        "no_basis": {
+          "rows": 779336,
+          "r2_zero": 0.12147897357457682,
+          "rmse_bps": 1.294382864179857,
+          "mae_bps": 0.7351321343200198,
+          "direction_hit": 0.7388785857077482,
+          "nonzero_return_share": 0.5327483909379267
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.061551647915178906,
+        "ci95": [
+          0.05513064641378358,
+          0.06688831299632725
+        ]
+      }
+    },
+    {
+      "day": "2026-10-01",
+      "horizon_ms": 500,
+      "variant": "lighter_delay_500",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 766451,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.33292429021105996,
+          "mae_bps": 0.08514605465961689,
+          "direction_hit": null,
+          "nonzero_return_share": 0.11448350905667812
+        },
+        "hyperliquid": {
+          "rows": 766451,
+          "r2_zero": 0.12288133963749903,
+          "rmse_bps": 0.31179895677894,
+          "mae_bps": 0.1251701813550117,
+          "direction_hit": 0.913466140906708,
+          "nonzero_return_share": 0.11448350905667812
+        },
+        "lighter": {
+          "rows": 766451,
+          "r2_zero": 0.2121633981535742,
+          "rmse_bps": 0.29550413295598926,
+          "mae_bps": 0.12966823688079654,
+          "direction_hit": 0.8859207257310875,
+          "nonzero_return_share": 0.11448350905667812
+        },
+        "two_venue": {
+          "rows": 766451,
+          "r2_zero": 0.26389834897889075,
+          "rmse_bps": 0.28563694430582603,
+          "mae_bps": 0.13283505086469555,
+          "direction_hit": 0.930116472545757,
+          "nonzero_return_share": 0.11448350905667812
+        },
+        "no_trade_flow": {
+          "rows": 766451,
+          "r2_zero": 0.2512010083303249,
+          "rmse_bps": 0.2880899498383866,
+          "mae_bps": 0.13191574168085587,
+          "direction_hit": 0.9245093793449274,
+          "nonzero_return_share": 0.11448350905667812
+        },
+        "no_basis": {
+          "rows": 766451,
+          "r2_zero": 0.26223067511804965,
+          "rmse_bps": 0.2859603234017479,
+          "mae_bps": 0.13323961624275288,
+          "direction_hit": 0.9294098876302054,
+          "nonzero_return_share": 0.11448350905667812
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.1410170093413922,
+        "ci95": [
+          0.11595372140492301,
+          0.15945545975673286
+        ]
+      }
+    },
+    {
+      "day": "2026-10-01",
+      "horizon_ms": 2000,
+      "variant": "lighter_delay_500",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 764751,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.7641847403225216,
+          "mae_bps": 0.31746832997506585,
+          "direction_hit": null,
+          "nonzero_return_share": 0.2996936257683874
+        },
+        "hyperliquid": {
+          "rows": 764751,
+          "r2_zero": 0.1363360030980565,
+          "rmse_bps": 0.7101838125862137,
+          "mae_bps": 0.3829653202277011,
+          "direction_hit": 0.8444659694316095,
+          "nonzero_return_share": 0.2996936257683874
+        },
+        "lighter": {
+          "rows": 764751,
+          "r2_zero": 0.22271052726749774,
+          "rmse_bps": 0.6737360005030318,
+          "mae_bps": 0.3543815006413844,
+          "direction_hit": 0.7896732419684892,
+          "nonzero_return_share": 0.2996936257683874
+        },
+        "two_venue": {
+          "rows": 764751,
+          "r2_zero": 0.2732655486644845,
+          "rmse_bps": 0.651457720842443,
+          "mae_bps": 0.3622204480986357,
+          "direction_hit": 0.8588862564411343,
+          "nonzero_return_share": 0.2996936257683874
+        },
+        "no_trade_flow": {
+          "rows": 764751,
+          "r2_zero": 0.26926496173414416,
+          "rmse_bps": 0.6532483586425535,
+          "mae_bps": 0.36260286182030405,
+          "direction_hit": 0.8590040621141318,
+          "nonzero_return_share": 0.2996936257683874
+        },
+        "no_basis": {
+          "rows": 764751,
+          "r2_zero": 0.2713243288547925,
+          "rmse_bps": 0.6523272126190083,
+          "mae_bps": 0.36318757894754894,
+          "direction_hit": 0.8579569005763752,
+          "nonzero_return_share": 0.2996936257683874
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.13692954556642709,
+        "ci95": [
+          0.11119144016107724,
+          0.15554997763069742
+        ]
+      }
+    },
+    {
+      "day": "2026-10-01",
+      "horizon_ms": 5000,
+      "variant": "lighter_delay_500",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 763522,
+          "r2_zero": 0.0,
+          "rmse_bps": 1.3254804273285528,
+          "mae_bps": 0.7029909718657039,
+          "direction_hit": null,
+          "nonzero_return_share": 0.5021309143678898
+        },
+        "hyperliquid": {
+          "rows": 763522,
+          "r2_zero": 0.11993134995992216,
+          "rmse_bps": 1.243459356306591,
+          "mae_bps": 0.7442535432878911,
+          "direction_hit": 0.7713960791678404,
+          "nonzero_return_share": 0.5021309143678898
+        },
+        "lighter": {
+          "rows": 763522,
+          "r2_zero": 0.1396774804624994,
+          "rmse_bps": 1.229430447982429,
+          "mae_bps": 0.71011267729971,
+          "direction_hit": 0.7058802049099085,
+          "nonzero_return_share": 0.5021309143678898
+        },
+        "two_venue": {
+          "rows": 763522,
+          "r2_zero": 0.19304379800057514,
+          "rmse_bps": 1.190688889043633,
+          "mae_bps": 0.7091558369837705,
+          "direction_hit": 0.7854132106377874,
+          "nonzero_return_share": 0.5021309143678898
+        },
+        "no_trade_flow": {
+          "rows": 763522,
+          "r2_zero": 0.19127817259136437,
+          "rmse_bps": 1.1919907947981319,
+          "mae_bps": 0.7093719486037415,
+          "direction_hit": 0.7848654626644548,
+          "nonzero_return_share": 0.5021309143678898
+        },
+        "no_basis": {
+          "rows": 763522,
+          "r2_zero": 0.19146260928981362,
+          "rmse_bps": 1.191854864633214,
+          "mae_bps": 0.710320606540236,
+          "direction_hit": 0.7846124552672489,
+          "nonzero_return_share": 0.5021309143678898
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.07311244804065184,
+        "ci95": [
+          0.0649406303292729,
+          0.0791351178925691
+        ]
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "horizon_ms": 500,
+      "variant": "lighter_delay_500",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 623426,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.16444313077491282,
+          "mae_bps": 0.02296171165041864,
+          "direction_hit": null,
+          "nonzero_return_share": 0.043820758197444444
+        },
+        "hyperliquid": {
+          "rows": 623426,
+          "r2_zero": -0.01105375817957821,
+          "rmse_bps": 0.16534949028963855,
+          "mae_bps": 0.07759506674911848,
+          "direction_hit": 0.9371133643251949,
+          "nonzero_return_share": 0.043820758197444444
+        },
+        "lighter": {
+          "rows": 623426,
+          "r2_zero": 0.13299395242965006,
+          "rmse_bps": 0.15311819467730142,
+          "mae_bps": 0.05638115248262388,
+          "direction_hit": 0.834840221091548,
+          "nonzero_return_share": 0.043820758197444444
+        },
+        "two_venue": {
+          "rows": 623426,
+          "r2_zero": 0.13756593408589946,
+          "rmse_bps": 0.15271394206652814,
+          "mae_bps": 0.06866923981662484,
+          "direction_hit": 0.9262784142904206,
+          "nonzero_return_share": 0.043820758197444444
+        },
+        "no_trade_flow": {
+          "rows": 623426,
+          "r2_zero": 0.14217165410107868,
+          "rmse_bps": 0.15230562144736925,
+          "mae_bps": 0.0640850725826514,
+          "direction_hit": 0.918920897543834,
+          "nonzero_return_share": 0.043820758197444444
+        },
+        "no_basis": {
+          "rows": 623426,
+          "r2_zero": 0.13752125462504572,
+          "rmse_bps": 0.15271789778238953,
+          "mae_bps": 0.06812668482148096,
+          "direction_hit": 0.922947399245946,
+          "nonzero_return_share": 0.043820758197444444
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.14861969226547794,
+        "ci95": [
+          0.12730127488392118,
+          0.172331115099267
+        ]
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "horizon_ms": 2000,
+      "variant": "lighter_delay_500",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 619925,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.36863248767819723,
+          "mae_bps": 0.0875529467230262,
+          "direction_hit": null,
+          "nonzero_return_share": 0.12242287373472598
+        },
+        "hyperliquid": {
+          "rows": 619925,
+          "r2_zero": -0.02367323231032903,
+          "rmse_bps": 0.3729703264374821,
+          "mae_bps": 0.2161356704226624,
+          "direction_hit": 0.8904115004018816,
+          "nonzero_return_share": 0.12242287373472598
+        },
+        "lighter": {
+          "rows": 619925,
+          "r2_zero": 0.11240117473987543,
+          "rmse_bps": 0.3472977473916106,
+          "mae_bps": 0.15565284657891265,
+          "direction_hit": 0.7696757276692185,
+          "nonzero_return_share": 0.12242287373472598
+        },
+        "two_venue": {
+          "rows": 619925,
+          "r2_zero": 0.10328751547137471,
+          "rmse_bps": 0.34907618035310145,
+          "mae_bps": 0.18927810266649944,
+          "direction_hit": 0.8964858419090035,
+          "nonzero_return_share": 0.12242287373472598
+        },
+        "no_trade_flow": {
+          "rows": 619925,
+          "r2_zero": 0.10649832094325118,
+          "rmse_bps": 0.3484506616727681,
+          "mae_bps": 0.18693824878687532,
+          "direction_hit": 0.8963277245595773,
+          "nonzero_return_share": 0.12242287373472598
+        },
+        "no_basis": {
+          "rows": 619925,
+          "r2_zero": 0.10185006812565323,
+          "rmse_bps": 0.3493558562293579,
+          "mae_bps": 0.1886787561321213,
+          "direction_hit": 0.8938769056434718,
+          "nonzero_return_share": 0.12242287373472598
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.12696074778170374,
+        "ci95": [
+          0.11004200753793204,
+          0.14848258570326497
+        ]
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "horizon_ms": 5000,
+      "variant": "lighter_delay_500",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 615911,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.6297693470959128,
+          "mae_bps": 0.20757942982524913,
+          "direction_hit": null,
+          "nonzero_return_share": 0.23197345070959927
+        },
+        "hyperliquid": {
+          "rows": 615911,
+          "r2_zero": 0.016862288160524153,
+          "rmse_bps": 0.6244370969414279,
+          "mae_bps": 0.3777713099527684,
+          "direction_hit": 0.8528083989501313,
+          "nonzero_return_share": 0.23197345070959927
+        },
+        "lighter": {
+          "rows": 615911,
+          "r2_zero": 0.08364517575270425,
+          "rmse_bps": 0.6028556751153457,
+          "mae_bps": 0.2831581344590434,
+          "direction_hit": 0.7187191601049869,
+          "nonzero_return_share": 0.23197345070959927
+        },
+        "two_venue": {
+          "rows": 615911,
+          "r2_zero": 0.09557835890084188,
+          "rmse_bps": 0.5989174835032348,
+          "mae_bps": 0.34001098917963535,
+          "direction_hit": 0.8629781277340333,
+          "nonzero_return_share": 0.23197345070959927
+        },
+        "no_trade_flow": {
+          "rows": 615911,
+          "r2_zero": 0.09809227598570014,
+          "rmse_bps": 0.5980845331743608,
+          "mae_bps": 0.3380268567419557,
+          "direction_hit": 0.8616902887139107,
+          "nonzero_return_share": 0.23197345070959927
+        },
+        "no_basis": {
+          "rows": 615911,
+          "r2_zero": 0.09359571425500246,
+          "rmse_bps": 0.5995735881522803,
+          "mae_bps": 0.33966605974315794,
+          "direction_hit": 0.860570428696413,
+          "nonzero_return_share": 0.23197345070959927
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.07871607074031799,
+        "ci95": [
+          0.06329909728242107,
+          0.09914694083441289
+        ]
+      }
+    },
+    {
+      "day": "2026-09-01",
+      "horizon_ms": 500,
+      "variant": "lighter_delay_1500",
+      "train_days": [
+        "2026-08-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 781466,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.3538127271329824,
+          "mae_bps": 0.09143852272934112,
+          "direction_hit": null,
+          "nonzero_return_share": 0.12969854094739885
+        },
+        "hyperliquid": {
+          "rows": 781466,
+          "r2_zero": 0.0743619133187915,
+          "rmse_bps": 0.34040353307465393,
+          "mae_bps": 0.10445748647291449,
+          "direction_hit": 0.8058803216417543,
+          "nonzero_return_share": 0.12969854094739885
+        },
+        "lighter": {
+          "rows": 781466,
+          "r2_zero": 0.020588072682373504,
+          "rmse_bps": 0.35015162429845237,
+          "mae_bps": 0.1103707507728792,
+          "direction_hit": 0.7083814316017957,
+          "nonzero_return_share": 0.12969854094739885
+        },
+        "two_venue": {
+          "rows": 781466,
+          "r2_zero": 0.0786544846484466,
+          "rmse_bps": 0.3396133190246955,
+          "mae_bps": 0.10659209382101043,
+          "direction_hit": 0.8130432637758374,
+          "nonzero_return_share": 0.12969854094739885
+        },
+        "no_trade_flow": {
+          "rows": 781466,
+          "r2_zero": 0.06744340563869577,
+          "rmse_bps": 0.3416733058953501,
+          "mae_bps": 0.10250374724521293,
+          "direction_hit": 0.8213802969759755,
+          "nonzero_return_share": 0.12969854094739885
+        },
+        "no_basis": {
+          "rows": 781466,
+          "r2_zero": 0.07865157873433137,
+          "rmse_bps": 0.3396138545927006,
+          "mae_bps": 0.10653464638237162,
+          "direction_hit": 0.8133688520546594,
+          "nonzero_return_share": 0.12969854094739885
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.004292571329655295,
+        "ci95": [
+          0.003706534415632741,
+          0.004916448466995949
+        ]
+      }
+    },
+    {
+      "day": "2026-09-01",
+      "horizon_ms": 2000,
+      "variant": "lighter_delay_1500",
+      "train_days": [
+        "2026-08-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 780404,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.8116280800107181,
+          "mae_bps": 0.33731301595628743,
+          "direction_hit": null,
+          "nonzero_return_share": 0.32270593179942697
+        },
+        "hyperliquid": {
+          "rows": 780404,
+          "r2_zero": 0.06083157370781023,
+          "rmse_bps": 0.7865544741880568,
+          "mae_bps": 0.3576457945209212,
+          "direction_hit": 0.779642711075639,
+          "nonzero_return_share": 0.32270593179942697
+        },
+        "lighter": {
+          "rows": 780404,
+          "r2_zero": 0.0280344385768021,
+          "rmse_bps": 0.8001704382577745,
+          "mae_bps": 0.37104391979835416,
+          "direction_hit": 0.6783248160545741,
+          "nonzero_return_share": 0.32270593179942697
+        },
+        "two_venue": {
+          "rows": 780404,
+          "r2_zero": 0.06799637833227556,
+          "rmse_bps": 0.7835484646542173,
+          "mae_bps": 0.3635644546478054,
+          "direction_hit": 0.7708315961261272,
+          "nonzero_return_share": 0.32270593179942697
+        },
+        "no_trade_flow": {
+          "rows": 780404,
+          "r2_zero": 0.06308032167308164,
+          "rmse_bps": 0.785612245522684,
+          "mae_bps": 0.3643729286239029,
+          "direction_hit": 0.768159275098177,
+          "nonzero_return_share": 0.32270593179942697
+        },
+        "no_basis": {
+          "rows": 780404,
+          "r2_zero": 0.06877213489299716,
+          "rmse_bps": 0.7832223020805539,
+          "mae_bps": 0.3627149849587443,
+          "direction_hit": 0.7751795775906226,
+          "nonzero_return_share": 0.32270593179942697
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.007164804624466237,
+        "ci95": [
+          0.005775643981113159,
+          0.008821632371463434
+        ]
+      }
+    },
+    {
+      "day": "2026-09-01",
+      "horizon_ms": 5000,
+      "variant": "lighter_delay_1500",
+      "train_days": [
+        "2026-08-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 779093,
+          "r2_zero": 0.0,
+          "rmse_bps": 1.381177179151886,
+          "mae_bps": 0.7375083080273838,
+          "direction_hit": null,
+          "nonzero_return_share": 0.5325346268032186
+        },
+        "hyperliquid": {
+          "rows": 779093,
+          "r2_zero": 0.053765856728154704,
+          "rmse_bps": 1.3435341239078618,
+          "mae_bps": 0.7500821391150907,
+          "direction_hit": 0.727115841636659,
+          "nonzero_return_share": 0.5325346268032186
+        },
+        "lighter": {
+          "rows": 779093,
+          "r2_zero": 0.02554213924810722,
+          "rmse_bps": 1.363423972229875,
+          "mae_bps": 0.7675633435626181,
+          "direction_hit": 0.6442223796921623,
+          "nonzero_return_share": 0.5325346268032186
+        },
+        "two_venue": {
+          "rows": 779093,
+          "r2_zero": 0.059756871999778194,
+          "rmse_bps": 1.3392741240777741,
+          "mae_bps": 0.7578849063019527,
+          "direction_hit": 0.7161636466181723,
+          "nonzero_return_share": 0.5325346268032186
+        },
+        "no_trade_flow": {
+          "rows": 779093,
+          "r2_zero": 0.05718568253283418,
+          "rmse_bps": 1.341104063836927,
+          "mae_bps": 0.7604975545659785,
+          "direction_hit": 0.7115986251910127,
+          "nonzero_return_share": 0.5325346268032186
+        },
+        "no_basis": {
+          "rows": 779093,
+          "r2_zero": 0.06102388485719423,
+          "rmse_bps": 1.3383714588408437,
+          "mae_bps": 0.7526801771309269,
+          "direction_hit": 0.7254045611650205,
+          "nonzero_return_share": 0.5325346268032186
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.005991015271623984,
+        "ci95": [
+          0.004040435265426562,
+          0.008545009032496689
+        ]
+      }
+    },
+    {
+      "day": "2026-10-01",
+      "horizon_ms": 500,
+      "variant": "lighter_delay_1500",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 766127,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.33272903839979256,
+          "mae_bps": 0.08505019872330478,
+          "direction_hit": null,
+          "nonzero_return_share": 0.11433482960396905
+        },
+        "hyperliquid": {
+          "rows": 766127,
+          "r2_zero": 0.12264989159269535,
+          "rmse_bps": 0.31165720529502217,
+          "mae_bps": 0.1250090782270065,
+          "direction_hit": 0.9133968833837548,
+          "nonzero_return_share": 0.11433482960396905
+        },
+        "lighter": {
+          "rows": 766127,
+          "r2_zero": 0.034339752117995226,
+          "rmse_bps": 0.32696621639994267,
+          "mae_bps": 0.10776179185076673,
+          "direction_hit": 0.7416062560648439,
+          "nonzero_return_share": 0.11433482960396905
+        },
+        "two_venue": {
+          "rows": 766127,
+          "r2_zero": 0.1270813376391693,
+          "rmse_bps": 0.3108691273943727,
+          "mae_bps": 0.12566856508794833,
+          "direction_hit": 0.9123694274787374,
+          "nonzero_return_share": 0.11433482960396905
+        },
+        "no_trade_flow": {
+          "rows": 766127,
+          "r2_zero": 0.10872838915276717,
+          "rmse_bps": 0.31412011052816546,
+          "mae_bps": 0.1243310597539922,
+          "direction_hit": 0.91810034819339,
+          "nonzero_return_share": 0.11433482960396905
+        },
+        "no_basis": {
+          "rows": 766127,
+          "r2_zero": 0.12710514243586657,
+          "rmse_bps": 0.3108648886106531,
+          "mae_bps": 0.1255531124600016,
+          "direction_hit": 0.9124835892459615,
+          "nonzero_return_share": 0.11433482960396905
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.004431446046473643,
+        "ci95": [
+          0.003324940896978658,
+          0.005466086274810442
+        ]
+      }
+    },
+    {
+      "day": "2026-10-01",
+      "horizon_ms": 2000,
+      "variant": "lighter_delay_1500",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 764564,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.7639920757344242,
+          "mae_bps": 0.31733651427756715,
+          "direction_hit": null,
+          "nonzero_return_share": 0.29952888182022697
+        },
+        "hyperliquid": {
+          "rows": 764564,
+          "r2_zero": 0.13622460658444846,
+          "rmse_bps": 0.7100505497898749,
+          "mae_bps": 0.3827441226209481,
+          "direction_hit": 0.8443074289656738,
+          "nonzero_return_share": 0.29952888182022697
+        },
+        "lighter": {
+          "rows": 764564,
+          "r2_zero": 0.048549069999605066,
+          "rmse_bps": 0.7452157953674107,
+          "mae_bps": 0.3515925729986314,
+          "direction_hit": 0.7019549450021615,
+          "nonzero_return_share": 0.29952888182022697
+        },
+        "two_venue": {
+          "rows": 764564,
+          "r2_zero": 0.1430072734809099,
+          "rmse_bps": 0.7072572727417483,
+          "mae_bps": 0.3816346944493304,
+          "direction_hit": 0.842713605142156,
+          "nonzero_return_share": 0.29952888182022697
+        },
+        "no_trade_flow": {
+          "rows": 764564,
+          "r2_zero": 0.13673381178898392,
+          "rmse_bps": 0.7098412275864252,
+          "mae_bps": 0.3821890557457969,
+          "direction_hit": 0.8441938963097521,
+          "nonzero_return_share": 0.29952888182022697
+        },
+        "no_basis": {
+          "rows": 764564,
+          "r2_zero": 0.14300790533338315,
+          "rmse_bps": 0.7072570120147167,
+          "mae_bps": 0.3816380635082653,
+          "direction_hit": 0.8427048718609312,
+          "nonzero_return_share": 0.29952888182022697
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.0067826668964609945,
+        "ci95": [
+          0.0057583386831052625,
+          0.0077977330852873625
+        ]
+      }
+    },
+    {
+      "day": "2026-10-01",
+      "horizon_ms": 5000,
+      "variant": "lighter_delay_1500",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 763267,
+          "r2_zero": 0.0,
+          "rmse_bps": 1.3256684909936478,
+          "mae_bps": 0.7028577407811615,
+          "direction_hit": null,
+          "nonzero_return_share": 0.501893832695505
+        },
+        "hyperliquid": {
+          "rows": 763267,
+          "r2_zero": 0.11973126828747838,
+          "rmse_bps": 1.2437771434397684,
+          "mae_bps": 0.744134813903789,
+          "direction_hit": 0.771107265081093,
+          "nonzero_return_share": 0.501893832695505
+        },
+        "lighter": {
+          "rows": 763267,
+          "r2_zero": 0.04104769906125194,
+          "rmse_bps": 1.2981755840255815,
+          "mae_bps": 0.7278343484967489,
+          "direction_hit": 0.6557211436805463,
+          "nonzero_return_share": 0.501893832695505
+        },
+        "two_venue": {
+          "rows": 763267,
+          "r2_zero": 0.12564883939988347,
+          "rmse_bps": 1.2395894728217876,
+          "mae_bps": 0.7400711408396738,
+          "direction_hit": 0.7710393939631252,
+          "nonzero_return_share": 0.501893832695505
+        },
+        "no_trade_flow": {
+          "rows": 763267,
+          "r2_zero": 0.12290590517147504,
+          "rmse_bps": 1.2415323134627643,
+          "mae_bps": 0.7406672923156868,
+          "direction_hit": 0.771232565606572,
+          "nonzero_return_share": 0.501893832695505
+        },
+        "no_basis": {
+          "rows": 763267,
+          "r2_zero": 0.12565716399641735,
+          "rmse_bps": 1.2395835718135566,
+          "mae_bps": 0.7401584389007604,
+          "direction_hit": 0.7709271455757167,
+          "nonzero_return_share": 0.501893832695505
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.005917571112405839,
+        "ci95": [
+          0.004633506097378414,
+          0.007537828975647788
+        ]
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "horizon_ms": 500,
+      "variant": "lighter_delay_1500",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 622643,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.16397795450307723,
+          "mae_bps": 0.022869206285154098,
+          "direction_hit": null,
+          "nonzero_return_share": 0.043655834884516485
+        },
+        "hyperliquid": {
+          "rows": 622643,
+          "r2_zero": -0.011632914383898907,
+          "rmse_bps": 0.1649289674897293,
+          "mae_bps": 0.07744489321958603,
+          "direction_hit": 0.9372010889559267,
+          "nonzero_return_share": 0.043655834884516485
+        },
+        "lighter": {
+          "rows": 622643,
+          "r2_zero": 0.014158564396277384,
+          "rmse_bps": 0.1628129699612985,
+          "mae_bps": 0.040872209336987465,
+          "direction_hit": 0.7578176734603782,
+          "nonzero_return_share": 0.043655834884516485
+        },
+        "two_venue": {
+          "rows": 622643,
+          "r2_zero": -0.004353188704889321,
+          "rmse_bps": 0.16433448040798787,
+          "mae_bps": 0.07589958610001629,
+          "direction_hit": 0.93503053491281,
+          "nonzero_return_share": 0.043655834884516485
+        },
+        "no_trade_flow": {
+          "rows": 622643,
+          "r2_zero": -5.07855640528021e-05,
+          "rmse_bps": 0.16398211830666848,
+          "mae_bps": 0.07181286741955996,
+          "direction_hit": 0.9345154881907144,
+          "nonzero_return_share": 0.043655834884516485
+        },
+        "no_basis": {
+          "rows": 622643,
+          "r2_zero": -0.005068537056181821,
+          "rmse_bps": 0.16439299342714864,
+          "mae_bps": 0.07603948015551343,
+          "direction_hit": 0.9349937458612317,
+          "nonzero_return_share": 0.043655834884516485
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.007279725679009593,
+        "ci95": [
+          0.0038533314389277537,
+          0.011869985813375415
+        ]
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "horizon_ms": 2000,
+      "variant": "lighter_delay_1500",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 619460,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.3676200066660828,
+          "mae_bps": 0.08726650380759761,
+          "direction_hit": null,
+          "nonzero_return_share": 0.12214832273270268
+        },
+        "hyperliquid": {
+          "rows": 619460,
+          "r2_zero": -0.024549761398058534,
+          "rmse_bps": 0.37210513806823703,
+          "mae_bps": 0.21583389406448628,
+          "direction_hit": 0.8901223799328628,
+          "nonzero_return_share": 0.12214832273270268
+        },
+        "lighter": {
+          "rows": 619460,
+          "r2_zero": 0.024340459885424992,
+          "rmse_bps": 0.3631184252656543,
+          "mae_bps": 0.12750026726678174,
+          "direction_hit": 0.7326672481695874,
+          "nonzero_return_share": 0.12214832273270268
+        },
+        "two_venue": {
+          "rows": 619460,
+          "r2_zero": -0.011748322387024723,
+          "rmse_bps": 0.36977316032311525,
+          "mae_bps": 0.21035023941086195,
+          "direction_hit": 0.8929902466101023,
+          "nonzero_return_share": 0.12214832273270268
+        },
+        "no_trade_flow": {
+          "rows": 619460,
+          "r2_zero": -0.010715638119778603,
+          "rmse_bps": 0.3695843997358271,
+          "mae_bps": 0.20866136513210104,
+          "direction_hit": 0.8919990484497661,
+          "nonzero_return_share": 0.12214832273270268
+        },
+        "no_basis": {
+          "rows": 619460,
+          "r2_zero": -0.011597778464066621,
+          "rmse_bps": 0.3697456489490709,
+          "mae_bps": 0.21029136712732138,
+          "direction_hit": 0.8929770306346312,
+          "nonzero_return_share": 0.12214832273270268
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.012801439011034428,
+        "ci95": [
+          0.007223306838588249,
+          0.021375565074861852
+        ]
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "horizon_ms": 5000,
+      "variant": "lighter_delay_1500",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 615428,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.6288632135561246,
+          "mae_bps": 0.20711921438094605,
+          "direction_hit": null,
+          "nonzero_return_share": 0.2317281631644969
+        },
+        "hyperliquid": {
+          "rows": 615428,
+          "r2_zero": 0.016397260725516616,
+          "rmse_bps": 0.623686086123255,
+          "mae_bps": 0.37740631055223633,
+          "direction_hit": 0.8524528090202788,
+          "nonzero_return_share": 0.2317281631644969
+        },
+        "lighter": {
+          "rows": 615428,
+          "r2_zero": 0.0314206717893436,
+          "rmse_bps": 0.6189047112073509,
+          "mae_bps": 0.2596773549216364,
+          "direction_hit": 0.7005651698314307,
+          "nonzero_return_share": 0.2317281631644969
+        },
+        "two_venue": {
+          "rows": 615428,
+          "r2_zero": 0.028801490403571717,
+          "rmse_bps": 0.6197409510791797,
+          "mae_bps": 0.368732744350287,
+          "direction_hit": 0.8538411914845876,
+          "nonzero_return_share": 0.2317281631644969
+        },
+        "no_trade_flow": {
+          "rows": 615428,
+          "r2_zero": 0.029892410384366852,
+          "rmse_bps": 0.6193927844870395,
+          "mae_bps": 0.36750575735519087,
+          "direction_hit": 0.8536168064398508,
+          "nonzero_return_share": 0.2317281631644969
+        },
+        "no_basis": {
+          "rows": 615428,
+          "r2_zero": 0.029343131207556716,
+          "rmse_bps": 0.6195681111299828,
+          "mae_bps": 0.3682635176231358,
+          "direction_hit": 0.8536168064398508,
+          "nonzero_return_share": 0.2317281631644969
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.012404229678054865,
+        "ci95": [
+          0.007433988302684259,
+          0.020050550489455837
+        ]
+      }
+    },
+    {
+      "day": "2026-09-01",
+      "horizon_ms": 500,
+      "variant": "exchange_clock",
+      "train_days": [
+        "2026-08-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 793947,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.35634334243800303,
+          "mae_bps": 0.09313262210394951,
+          "direction_hit": null,
+          "nonzero_return_share": 0.132840101417349
+        },
+        "hyperliquid": {
+          "rows": 793947,
+          "r2_zero": 0.0783903965307704,
+          "rmse_bps": 0.3420913910964252,
+          "mae_bps": 0.1058328259529537,
+          "direction_hit": 0.8088424925095764,
+          "nonzero_return_share": 0.132840101417349
+        },
+        "lighter": {
+          "rows": 793947,
+          "r2_zero": 0.24128452968097303,
+          "rmse_bps": 0.3103902845305442,
+          "mae_bps": 0.1261654294989824,
+          "direction_hit": 0.8803997421018698,
+          "nonzero_return_share": 0.132840101417349
+        },
+        "two_venue": {
+          "rows": 793947,
+          "r2_zero": 0.2623487560983031,
+          "rmse_bps": 0.3060512719981382,
+          "mae_bps": 0.12550011701967265,
+          "direction_hit": 0.8751943717525695,
+          "nonzero_return_share": 0.132840101417349
+        },
+        "no_trade_flow": {
+          "rows": 793947,
+          "r2_zero": 0.2522702419971009,
+          "rmse_bps": 0.3081349649660121,
+          "mae_bps": 0.12781479805904955,
+          "direction_hit": 0.8637122160276103,
+          "nonzero_return_share": 0.132840101417349
+        },
+        "no_basis": {
+          "rows": 793947,
+          "r2_zero": 0.26509002838935125,
+          "rmse_bps": 0.3054820661716959,
+          "mae_bps": 0.12012787967161873,
+          "direction_hit": 0.8911707816588917,
+          "nonzero_return_share": 0.132840101417349
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.18395835956753182,
+        "ci95": [
+          0.16919231488918898,
+          0.19580668511599764
+        ]
+      }
+    },
+    {
+      "day": "2026-09-01",
+      "horizon_ms": 2000,
+      "variant": "exchange_clock",
+      "train_days": [
+        "2026-08-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 793123,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.8194623620537961,
+          "mae_bps": 0.34072193542441864,
+          "direction_hit": null,
+          "nonzero_return_share": 0.325118550338346
+        },
+        "hyperliquid": {
+          "rows": 793123,
+          "r2_zero": 0.06301086047631,
+          "rmse_bps": 0.7932248107273927,
+          "mae_bps": 0.3621652563443906,
+          "direction_hit": 0.7778786080765069,
+          "nonzero_return_share": 0.325118550338346
+        },
+        "lighter": {
+          "rows": 793123,
+          "r2_zero": 0.2249288474396589,
+          "rmse_bps": 0.7214393019878533,
+          "mae_bps": 0.36330928657663764,
+          "direction_hit": 0.7851267553197678,
+          "nonzero_return_share": 0.325118550338346
+        },
+        "two_venue": {
+          "rows": 793123,
+          "r2_zero": 0.23385855080342388,
+          "rmse_bps": 0.7172713607021068,
+          "mae_bps": 0.3769854071650718,
+          "direction_hit": 0.775268654574787,
+          "nonzero_return_share": 0.325118550338346
+        },
+        "no_trade_flow": {
+          "rows": 793123,
+          "r2_zero": 0.23022301945729085,
+          "rmse_bps": 0.7189711619168772,
+          "mae_bps": 0.38030345829698226,
+          "direction_hit": 0.770905805110545,
+          "nonzero_return_share": 0.325118550338346
+        },
+        "no_basis": {
+          "rows": 793123,
+          "r2_zero": 0.24133202490181782,
+          "rmse_bps": 0.7137644067180746,
+          "mae_bps": 0.3557237143017242,
+          "direction_hit": 0.8148755715332798,
+          "nonzero_return_share": 0.325118550338346
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.17084769032711417,
+        "ci95": [
+          0.15758235293888895,
+          0.1806616476272222
+        ]
+      }
+    },
+    {
+      "day": "2026-09-01",
+      "horizon_ms": 5000,
+      "variant": "exchange_clock",
+      "train_days": [
+        "2026-08-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 792107,
+          "r2_zero": 0.0,
+          "rmse_bps": 1.3930604867972045,
+          "mae_bps": 0.7429771847238861,
+          "direction_hit": null,
+          "nonzero_return_share": 0.5343482635553025
+        },
+        "hyperliquid": {
+          "rows": 792107,
+          "r2_zero": 0.05416333187418976,
+          "rmse_bps": 1.3548089197764281,
+          "mae_bps": 0.7555426810579403,
+          "direction_hit": 0.7262847273904282,
+          "nonzero_return_share": 0.5343482635553025
+        },
+        "lighter": {
+          "rows": 792107,
+          "r2_zero": 0.13023266527947142,
+          "rmse_bps": 1.2991865639600109,
+          "mae_bps": 0.7415237721591149,
+          "direction_hit": 0.7040785709054225,
+          "nonzero_return_share": 0.5343482635553025
+        },
+        "two_venue": {
+          "rows": 792107,
+          "r2_zero": 0.14072192025496744,
+          "rmse_bps": 1.2913288101790066,
+          "mae_bps": 0.7612046796650621,
+          "direction_hit": 0.7013710216627566,
+          "nonzero_return_share": 0.5343482635553025
+        },
+        "no_trade_flow": {
+          "rows": 792107,
+          "r2_zero": 0.13899450760487264,
+          "rmse_bps": 1.2926261421041882,
+          "mae_bps": 0.7648605117035178,
+          "direction_hit": 0.6974136525689822,
+          "nonzero_return_share": 0.5343482635553025
+        },
+        "no_basis": {
+          "rows": 792107,
+          "r2_zero": 0.14843292599863034,
+          "rmse_bps": 1.2855216774353961,
+          "mae_bps": 0.7302138724441735,
+          "direction_hit": 0.7478482543867732,
+          "nonzero_return_share": 0.5343482635553025
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.08655858838077878,
+        "ci95": [
+          0.07947982171969349,
+          0.09261038206580295
+        ]
+      }
+    },
+    {
+      "day": "2026-10-01",
+      "horizon_ms": 500,
+      "variant": "exchange_clock",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 788821,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.33877479460279225,
+          "mae_bps": 0.0879385997826559,
+          "direction_hit": null,
+          "nonzero_return_share": 0.11856809085965003
+        },
+        "hyperliquid": {
+          "rows": 788821,
+          "r2_zero": 0.12917804143663325,
+          "rmse_bps": 0.3161373266574304,
+          "mae_bps": 0.12795843931497972,
+          "direction_hit": 0.9122090474612152,
+          "nonzero_return_share": 0.11856809085965003
+        },
+        "lighter": {
+          "rows": 788821,
+          "r2_zero": 0.23235286024393997,
+          "rmse_bps": 0.29681914427450484,
+          "mae_bps": 0.1338009297804391,
+          "direction_hit": 0.8971014337798972,
+          "nonzero_return_share": 0.11856809085965003
+        },
+        "two_venue": {
+          "rows": 788821,
+          "r2_zero": 0.2847800144870747,
+          "rmse_bps": 0.28650414625176074,
+          "mae_bps": 0.13632921647627433,
+          "direction_hit": 0.9386928118551465,
+          "nonzero_return_share": 0.11856809085965003
+        },
+        "no_trade_flow": {
+          "rows": 788821,
+          "r2_zero": 0.2720522245364241,
+          "rmse_bps": 0.2890421654656465,
+          "mae_bps": 0.13555114573183286,
+          "direction_hit": 0.933496562563483,
+          "nonzero_return_share": 0.11856809085965003
+        },
+        "no_basis": {
+          "rows": 788821,
+          "r2_zero": 0.2830687387692671,
+          "rmse_bps": 0.2868466944721278,
+          "mae_bps": 0.1366410770001689,
+          "direction_hit": 0.9377733109516835,
+          "nonzero_return_share": 0.11856809085965003
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.15560197305044104,
+        "ci95": [
+          0.131206806687404,
+          0.17343392710891595
+        ]
+      }
+    },
+    {
+      "day": "2026-10-01",
+      "horizon_ms": 2000,
+      "variant": "exchange_clock",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 787203,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.7772062933122877,
+          "mae_bps": 0.3241015525614292,
+          "direction_hit": null,
+          "nonzero_return_share": 0.3043535149129259
+        },
+        "hyperliquid": {
+          "rows": 787203,
+          "r2_zero": 0.13633814697322066,
+          "rmse_bps": 0.7222843042536737,
+          "mae_bps": 0.3886732424906073,
+          "direction_hit": 0.8437651301400738,
+          "nonzero_return_share": 0.3043535149129259
+        },
+        "lighter": {
+          "rows": 787203,
+          "r2_zero": 0.2551549845752018,
+          "rmse_bps": 0.6707632594941565,
+          "mae_bps": 0.35925564627959844,
+          "direction_hit": 0.8037965173547924,
+          "nonzero_return_share": 0.3043535149129259
+        },
+        "two_venue": {
+          "rows": 787203,
+          "r2_zero": 0.3055958491678924,
+          "rmse_bps": 0.6476531209515518,
+          "mae_bps": 0.3637548289465921,
+          "direction_hit": 0.8679942234168656,
+          "nonzero_return_share": 0.3043535149129259
+        },
+        "no_trade_flow": {
+          "rows": 787203,
+          "r2_zero": 0.30202878770103414,
+          "rmse_bps": 0.6493144440179127,
+          "mae_bps": 0.36417280478688513,
+          "direction_hit": 0.8675726664106717,
+          "nonzero_return_share": 0.3043535149129259
+        },
+        "no_basis": {
+          "rows": 787203,
+          "r2_zero": 0.3033647711577594,
+          "rmse_bps": 0.6486927214851199,
+          "mae_bps": 0.36493715116750985,
+          "direction_hit": 0.8671594570679667,
+          "nonzero_return_share": 0.3043535149129259
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.169257702194671,
+        "ci95": [
+          0.14484926550348054,
+          0.18563696332902319
+        ]
+      }
+    },
+    {
+      "day": "2026-10-01",
+      "horizon_ms": 5000,
+      "variant": "exchange_clock",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 785151,
+          "r2_zero": 0.0,
+          "rmse_bps": 1.3428362298686822,
+          "mae_bps": 0.7136642524181451,
+          "direction_hit": null,
+          "nonzero_return_share": 0.5063828486494955
+        },
+        "hyperliquid": {
+          "rows": 785151,
+          "r2_zero": 0.1189875715643387,
+          "rmse_bps": 1.2604164643589895,
+          "mae_bps": 0.7537524239106533,
+          "direction_hit": 0.7699321154866734,
+          "nonzero_return_share": 0.5063828486494955
+        },
+        "lighter": {
+          "rows": 785151,
+          "r2_zero": 0.15630152894655147,
+          "rmse_bps": 1.2334361737101711,
+          "mae_bps": 0.7144745882474239,
+          "direction_hit": 0.7138563383611637,
+          "nonzero_return_share": 0.5063828486494955
+        },
+        "two_venue": {
+          "rows": 785151,
+          "r2_zero": 0.210068827408608,
+          "rmse_bps": 1.1934869545091678,
+          "mae_bps": 0.7100881970056159,
+          "direction_hit": 0.7905716233176638,
+          "nonzero_return_share": 0.5063828486494955
+        },
+        "no_trade_flow": {
+          "rows": 785151,
+          "r2_zero": 0.20849521201583698,
+          "rmse_bps": 1.194675130838107,
+          "mae_bps": 0.7103451615824575,
+          "direction_hit": 0.790264772238529,
+          "nonzero_return_share": 0.5063828486494955
+        },
+        "no_basis": {
+          "rows": 785151,
+          "r2_zero": 0.20817180491905218,
+          "rmse_bps": 1.1949191767127982,
+          "mae_bps": 0.711554416717799,
+          "direction_hit": 0.7896812521536167,
+          "nonzero_return_share": 0.5063828486494955
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.09108125584426985,
+        "ci95": [
+          0.08432992753964776,
+          0.09582452362113812
+        ]
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "horizon_ms": 500,
+      "variant": "exchange_clock",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 657699,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.16634399867206096,
+          "mae_bps": 0.023527242210970443,
+          "direction_hit": null,
+          "nonzero_return_share": 0.04502515588437872
+        },
+        "hyperliquid": {
+          "rows": 657699,
+          "r2_zero": -0.007749666044208237,
+          "rmse_bps": 0.1669873099346928,
+          "mae_bps": 0.07906440955098464,
+          "direction_hit": 0.9357714517272819,
+          "nonzero_return_share": 0.04502515588437872
+        },
+        "lighter": {
+          "rows": 657699,
+          "r2_zero": 0.17022540499911565,
+          "rmse_bps": 0.15152601579402494,
+          "mae_bps": 0.05584939212879552,
+          "direction_hit": 0.8447303549116942,
+          "nonzero_return_share": 0.04502515588437872
+        },
+        "two_venue": {
+          "rows": 657699,
+          "r2_zero": 0.17497681422548217,
+          "rmse_bps": 0.15109156303599738,
+          "mae_bps": 0.06892575406678762,
+          "direction_hit": 0.9316178705298349,
+          "nonzero_return_share": 0.04502515588437872
+        },
+        "no_trade_flow": {
+          "rows": 657699,
+          "r2_zero": 0.17967774047862928,
+          "rmse_bps": 0.15066049335918008,
+          "mae_bps": 0.06450758621313414,
+          "direction_hit": 0.9266200655117685,
+          "nonzero_return_share": 0.04502515588437872
+        },
+        "no_basis": {
+          "rows": 657699,
+          "r2_zero": 0.1752561335619217,
+          "rmse_bps": 0.15106598413803465,
+          "mae_bps": 0.06825611025762116,
+          "direction_hit": 0.9293215817377503,
+          "nonzero_return_share": 0.04502515588437872
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.1827264802696908,
+        "ci95": [
+          0.1609068594087705,
+          0.2049418285795491
+        ]
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "horizon_ms": 2000,
+      "variant": "exchange_clock",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 653996,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.37424861118087016,
+          "mae_bps": 0.0889801470651984,
+          "direction_hit": null,
+          "nonzero_return_share": 0.12357567936195328
+        },
+        "hyperliquid": {
+          "rows": 653996,
+          "r2_zero": -0.019487694738931527,
+          "rmse_bps": 0.377877637495238,
+          "mae_bps": 0.2188336544705184,
+          "direction_hit": 0.8918434012224999,
+          "nonzero_return_share": 0.12357567936195328
+        },
+        "lighter": {
+          "rows": 653996,
+          "r2_zero": 0.15558983877919297,
+          "rmse_bps": 0.3439037589176573,
+          "mae_bps": 0.15869374887421564,
+          "direction_hit": 0.7790714939741147,
+          "nonzero_return_share": 0.12357567936195328
+        },
+        "two_venue": {
+          "rows": 653996,
+          "r2_zero": 0.1458630862699528,
+          "rmse_bps": 0.34587879962650897,
+          "mae_bps": 0.19160364879939215,
+          "direction_hit": 0.9027939320448415,
+          "nonzero_return_share": 0.12357567936195328
+        },
+        "no_trade_flow": {
+          "rows": 653996,
+          "r2_zero": 0.14923521643964988,
+          "rmse_bps": 0.34519536013362934,
+          "mae_bps": 0.18938472020669314,
+          "direction_hit": 0.9026949441956,
+          "nonzero_return_share": 0.12357567936195328
+        },
+        "no_basis": {
+          "rows": 653996,
+          "r2_zero": 0.14385072965308188,
+          "rmse_bps": 0.346286007181596,
+          "mae_bps": 0.19108036946839357,
+          "direction_hit": 0.901309114306219,
+          "nonzero_return_share": 0.12357567936195328
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.16535078100888442,
+        "ci95": [
+          0.14985435705619057,
+          0.18333828703431113
+        ]
+      }
+    },
+    {
+      "day": "2026-11-01",
+      "horizon_ms": 5000,
+      "variant": "exchange_clock",
+      "train_days": [
+        "2026-08-01",
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "models": {
+        "zero": {
+          "rows": 647536,
+          "r2_zero": 0.0,
+          "rmse_bps": 0.6367421804390653,
+          "mae_bps": 0.20965756899999272,
+          "direction_hit": null,
+          "nonzero_return_share": 0.23311599663956908
+        },
+        "hyperliquid": {
+          "rows": 647536,
+          "r2_zero": 0.01745049360384443,
+          "rmse_bps": 0.6311619963823405,
+          "mae_bps": 0.3810380550959532,
+          "direction_hit": 0.8526740465449053,
+          "nonzero_return_share": 0.23311599663956908
+        },
+        "lighter": {
+          "rows": 647536,
+          "r2_zero": 0.10592586298364781,
+          "rmse_bps": 0.602074711681099,
+          "mae_bps": 0.2853638620146928,
+          "direction_hit": 0.724923981954409,
+          "nonzero_return_share": 0.23311599663956908
+        },
+        "two_venue": {
+          "rows": 647536,
+          "r2_zero": 0.11559638924111515,
+          "rmse_bps": 0.5988097648132215,
+          "mae_bps": 0.3416052197290728,
+          "direction_hit": 0.8677451623374473,
+          "nonzero_return_share": 0.23311599663956908
+        },
+        "no_trade_flow": {
+          "rows": 647536,
+          "r2_zero": 0.11843048539155343,
+          "rmse_bps": 0.5978495435974214,
+          "mae_bps": 0.33960460943062415,
+          "direction_hit": 0.8669369530509901,
+          "nonzero_return_share": 0.23311599663956908
+        },
+        "no_basis": {
+          "rows": 647536,
+          "r2_zero": 0.11316754902484316,
+          "rmse_bps": 0.5996314575477351,
+          "mae_bps": 0.3413990917168524,
+          "direction_hit": 0.8652476631489688,
+          "nonzero_return_share": 0.23311599663956908
+        }
+      },
+      "two_vs_hl": {
+        "blocks": 48,
+        "estimate": 0.09814589563727051,
+        "ci95": [
+          0.08376432384576371,
+          0.11718107757006418
+        ]
+      }
+    }
+  ],
+  "threshold_bps": 0.5281596174901341,
+  "common_holdout_delay": [
+    {
+      "variant": "receive",
+      "horizon_ms": 500,
+      "rows": 594871,
+      "two_venue_r2": 0.1921954716740658,
+      "incremental_r2": {
+        "blocks": 48,
+        "estimate": 0.19937049242320315,
+        "ci95": [
+          0.17079758961878355,
+          0.22735505529886962
+        ]
+      }
+    },
+    {
+      "variant": "receive",
+      "horizon_ms": 2000,
+      "rows": 591358,
+      "two_venue_r2": 0.23764091162748313,
+      "incremental_r2": {
+        "blocks": 48,
+        "estimate": 0.25576128662696207,
+        "ci95": [
+          0.2285720641569972,
+          0.28291988948862745
+        ]
+      }
+    },
+    {
+      "variant": "receive",
+      "horizon_ms": 5000,
+      "rows": 587661,
+      "two_venue_r2": 0.16497537231499848,
+      "incremental_r2": {
+        "blocks": 48,
+        "estimate": 0.14330475084762478,
+        "ci95": [
+          0.1265397229895322,
+          0.161076125386782
+        ]
+      }
+    },
+    {
+      "variant": "lighter_delay_100",
+      "horizon_ms": 500,
+      "rows": 594871,
+      "two_venue_r2": 0.195523553054048,
+      "incremental_r2": {
+        "blocks": 48,
+        "estimate": 0.20260774739891613,
+        "ci95": [
+          0.17389801764939258,
+          0.23122888553107543
+        ]
+      }
+    },
+    {
+      "variant": "lighter_delay_100",
+      "horizon_ms": 2000,
+      "rows": 591358,
+      "two_venue_r2": 0.21340539264515035,
+      "incremental_r2": {
+        "blocks": 48,
+        "estimate": 0.231440353994865,
+        "ci95": [
+          0.2072091389814522,
+          0.2560197653068567
+        ]
+      }
+    },
+    {
+      "variant": "lighter_delay_100",
+      "horizon_ms": 5000,
+      "rows": 587661,
+      "two_venue_r2": 0.15195751644028643,
+      "incremental_r2": {
+        "blocks": 48,
+        "estimate": 0.13024540630676218,
+        "ci95": [
+          0.11303179497298323,
+          0.1487833086025059
+        ]
+      }
+    },
+    {
+      "variant": "lighter_delay_500",
+      "horizon_ms": 500,
+      "rows": 594871,
+      "two_venue_r2": 0.14002879819147918,
+      "incremental_r2": {
+        "blocks": 48,
+        "estimate": 0.14679234845182493,
+        "ci95": [
+          0.12473121031933396,
+          0.17086242404711396
+        ]
+      }
+    },
+    {
+      "variant": "lighter_delay_500",
+      "horizon_ms": 2000,
+      "rows": 591358,
+      "two_venue_r2": 0.10784695726982318,
+      "incremental_r2": {
+        "blocks": 48,
+        "estimate": 0.1255542185970068,
+        "ci95": [
+          0.10852937976434214,
+          0.1466127480049341
+        ]
+      }
+    },
+    {
+      "variant": "lighter_delay_500",
+      "horizon_ms": 5000,
+      "rows": 587661,
+      "two_venue_r2": 0.09948958129619567,
+      "incremental_r2": {
+        "blocks": 48,
+        "estimate": 0.07756481265799325,
+        "ci95": [
+          0.06238405268244623,
+          0.097505271679753
+        ]
+      }
+    },
+    {
+      "variant": "lighter_delay_1500",
+      "horizon_ms": 500,
+      "rows": 594871,
+      "two_venue_r2": 0.00044379070595668146,
+      "incremental_r2": {
+        "blocks": 48,
+        "estimate": 0.006816471865285874,
+        "ci95": [
+          0.003550272506413178,
+          0.011265006372828143
+        ]
+      }
+    },
+    {
+      "variant": "lighter_delay_1500",
+      "horizon_ms": 2000,
+      "rows": 591358,
+      "two_venue_r2": -0.005316590974844715,
+      "incremental_r2": {
+        "blocks": 48,
+        "estimate": 0.012025410733792626,
+        "ci95": [
+          0.0065884529894101205,
+          0.020201235789570754
+        ]
+      }
+    },
+    {
+      "variant": "lighter_delay_1500",
+      "horizon_ms": 5000,
+      "rows": 587661,
+      "two_venue_r2": 0.033871174299334394,
+      "incremental_r2": {
+        "blocks": 48,
+        "estimate": 0.011747956551550903,
+        "ci95": [
+          0.006928336014602435,
+          0.019074251863717424
+        ]
+      }
+    }
+  ]
+}
