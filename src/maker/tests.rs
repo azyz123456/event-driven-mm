@@ -340,10 +340,19 @@ fn inventory_skew_and_cap_are_symmetric() -> Result<()> {
         let quotes = fixture.warm(venue, 1)?;
         let quote = &quotes[usize::from(side == Side::Sell)];
         fixture.apply(5, fill("cap", venue, quote, 10, d(3, 1)))?;
-        let desired = strategy::desired(&fixture.engine.config, &fixture.engine.state);
+        let desired = strategy::desired(&fixture.engine.config, &fixture.engine.state, true);
         assert!(desired[usize::from(side == Side::Sell)].is_none());
         let reducing = desired[usize::from(side == Side::Buy)].unwrap();
         assert_eq!(reducing.price, d(100, 0));
+        let unskewed = strategy::desired(&fixture.engine.config, &fixture.engine.state, false);
+        assert!(unskewed[usize::from(side == Side::Sell)].is_none());
+        let reducing = unskewed[usize::from(side == Side::Buy)].unwrap();
+        let flat = if side == Side::Buy {
+            d(1001, 1)
+        } else {
+            d(999, 1)
+        };
+        assert_eq!(reducing.price, flat);
     }
     Ok(())
 }
@@ -450,7 +459,10 @@ fn fixed_fill_simulator_uses_lighter_flow_without_copying_historical_hyperliquid
         77,
         None,
         &mut report,
-        &mut trace,
+        crate::sim::Diagnostics {
+            trace: Some(&mut trace),
+            measure_processing: false,
+        },
     )?;
     let report: serde_json::Value = serde_json::from_slice(&report)?;
     assert_eq!(report["fixed_lighter_fills"], 1);
@@ -574,7 +586,7 @@ fn aged_subminimum_residual_recovery_obeys_direction_size_and_age() -> Result<()
     );
     fixture.apply(511, Input::Tick)?;
     assert!(
-        strategy::desired(&fixture.engine.config, &fixture.engine.state)
+        strategy::desired(&fixture.engine.config, &fixture.engine.state, true)
             .iter()
             .all(Option::is_none)
     );
@@ -583,7 +595,7 @@ fn aged_subminimum_residual_recovery_obeys_direction_size_and_age() -> Result<()
         max_base: d(12, 2),
         max_age_ms: 1000,
     };
-    let [bid, ask] = strategy::desired(&fixture.engine.config, &fixture.engine.state);
+    let [bid, ask] = strategy::desired(&fixture.engine.config, &fixture.engine.state, true);
     assert!(bid.is_none());
     assert_eq!(ask.unwrap().size, d(2, 1));
 
@@ -592,13 +604,13 @@ fn aged_subminimum_residual_recovery_obeys_direction_size_and_age() -> Result<()
         max_age_ms: 1000,
     };
     assert!(
-        strategy::desired(&fixture.engine.config, &fixture.engine.state)
+        strategy::desired(&fixture.engine.config, &fixture.engine.state, true)
             .iter()
             .all(Option::is_some)
     );
     fixture.apply(1010, Input::Tick)?;
     assert!(
-        strategy::desired(&fixture.engine.config, &fixture.engine.state)
+        strategy::desired(&fixture.engine.config, &fixture.engine.state, true)
             .iter()
             .all(Option::is_none)
     );
@@ -641,7 +653,7 @@ fn aged_hedgeable_residual_still_blocks_quotes_with_recovery_enabled() -> Result
     );
     fixture.apply(511, Input::Tick)?;
     assert!(
-        strategy::desired(&fixture.engine.config, &fixture.engine.state)
+        strategy::desired(&fixture.engine.config, &fixture.engine.state, true)
             .iter()
             .all(Option::is_none)
     );

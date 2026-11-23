@@ -1,12 +1,13 @@
 """Convert the archive to a v5 observe journal for closed-loop simulation."""
 import argparse
+from datetime import date
 import heapq
 import json
 from pathlib import Path
 
 import numpy as np
 
-from .features import DAY_US, VENUES, read_source, start_us, study_config, valid_book
+from .features import DAY_US, VENUES, read_source, start_us, valid_book
 
 # Fixed before the economic comparison. Dollar limits cover one small BTC order at these dates.
 MAKER = dict(mode="hedged", coin="BTC", lighter_market=1, size="0.00030", max_inventory="0.0015",
@@ -98,10 +99,10 @@ def write_archive(raw, day, out):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--raw", required=True, type=Path)
-    parser.add_argument("--day", required=True, choices=study_config()["days"])
+    parser.add_argument("--day", required=True, type=date.fromisoformat, metavar="YYYY-MM-DD")
     parser.add_argument("--out", required=True, type=Path)
     args = parser.parse_args()
-    write_archive(args.raw, args.day, args.out)
+    write_archive(args.raw, args.day.isoformat(), args.out)
 
 
 if __name__ == "__main__":

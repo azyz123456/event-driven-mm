@@ -13,8 +13,7 @@ pub struct Quote {
     pub guard_price: Decimal,
 }
 
-// TODO: Extract desired-order helpers once there is a second quoting policy to share them.
-pub fn desired(config: &Config, state: &State) -> [Option<Quote>; 2] {
+pub fn desired(config: &Config, state: &State, inventory_skew: bool) -> [Option<Quote>; 2] {
     let venue = config.mode.maker();
     if state.stop_ms.is_some()
         || (config.mode == Mode::Hyperliquid
@@ -41,6 +40,11 @@ pub fn desired(config: &Config, state: &State) -> [Option<Quote>; 2] {
         return [None; 2];
     };
     let mid = (bid + ask) / Decimal::TWO;
+    let quote_inventory = if inventory_skew {
+        maker.position
+    } else {
+        Decimal::ZERO
+    };
 
     let hedge = state.venue(Venue::Hyperliquid);
     let lot_decimals = hedge
@@ -127,10 +131,10 @@ pub fn desired(config: &Config, state: &State) -> [Option<Quote>; 2] {
             }
             guard = select_bound(side, guard, hedge_limit);
             let flat = skewed(mid, side, Decimal::ZERO, config)?;
-            let skew = skewed(mid, side, maker.position, config)? - flat;
+            let skew = skewed(mid, side, quote_inventory, config)? - flat;
             select_bound(side, hedge_limit, flat) + skew
         } else {
-            skewed(mid, side, maker.position, config)?
+            skewed(mid, side, quote_inventory, config)?
         };
         let price = round_price(
             instrument,

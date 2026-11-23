@@ -309,3 +309,56 @@ python -m research.followup calibrate --report signed-calibration.json
 ```
 
 Signed fill calibration remains pending. This run had no funded testnet credentials, and the direct capture used only public feeds. The offline signer test exercised signing without submitting orders.
+
+## Inventory skew benchmark
+
+The comparison replays BTC perpetual books and trades from Lighter and Hyperliquid with two quoting policies. Both start each day flat and use the same 0.00030 BTC order lot, hedge IOC, fees, price and inventory limits, order lifetime settings, and modeled 12 ms one-way delay with up to 2 ms of seeded jitter. The fixed-spread baseline applies the configured 0.25 bps nominal half-spread with zero price skew. Both policies still obey the executable hedge bound, exchange rules, and inventory limits. Each policy receives its own simulated fills and carries its own inventory through the day.
+
+September through November 1 were pilot tapes. The separate evaluation uses May through August 1, all selected before running this comparison. Those dates were used in earlier signal research. They are new to this paired inventory experiment. The archive provider’s Lighter BTC data starts on April 17, 2026, and the public sample files are available for the first of each month. [Lighter dataset coverage](https://api.tardis.dev/v1/exchanges/lighter) · [Archive access](https://docs.tardis.dev/downloadable-csv-files/api)
+
+Market-event counts include nonempty book updates and eligible deduplicated trade prints submitted to the simulator. The shared tape is counted once per day across policies. The report tracks empty book inputs, timer ticks, order updates, and fill messages separately.
+
+The primary outcome is time-weighted mean absolute Lighter inventory. For each interval, the simulator multiplies the magnitude of the Lighter position by the elapsed time. It sums the products and divides by the total replay duration, including the flat periods and the interval after the last fill. The same calculation on the sum of both venues’ signed positions measures net unhedged inventory. Relative reduction is the difference from baseline divided by baseline. The 95% interval resamples whole paired days and has limited resolution with four evaluation days. The report also keeps filled orders, volume, after-fee marked PnL, and leave-one-day-out estimates.
+
+The processing benchmark uses the skewed scenario on the full May 1 tape, repeated three times on one host. A monotonic clock brackets one scenario's handling of each already-decoded market event, including any due simulated messages, matching, quote decisions, and scheduling. Trace serialization is disabled. Journal parsing, source verification, and network or exchange time are outside the measured interval. The simulator advances its market clock without sleeping. This measures elapsed host processing time during replay.
+
+### Historical comparison
+
+The seven days contained **15,445,257 historical market events**. The four evaluation days accounted for **9,366,648**, including **4,947,187 book updates** and **4,419,461 trade prints**. Each evaluation day contributes about 24 hours of exposure, including time without a position.
+
+| Evaluation date (UTC) | Historical events | Fixed-spread mean absolute Lighter inventory (µBTC) | Skewed mean absolute Lighter inventory (µBTC) | Reduction |
+|---|---:|---:|---:|---:|
+| May 1 | 2,225,710 | 1,214.99 | 1,081.08 | +11.02% |
+| Jun 1 | 2,468,194 | 646.05 | 646.05 | 0.00% |
+| Jul 1 | 2,774,868 | 132.15 | 132.15 | 0.00% |
+| Aug 1 | 1,897,876 | 889.41 | 989.85 | −11.29% |
+| **Pooled** | **9,366,648** | **720.65** | **712.28** | **+1.16%** |
+
+The paired 95% interval for the pooled reduction was **−9.83% to +9.94%**. Omitting May reversed the result to a **6.02% increase**. Mean absolute net unhedged inventory fell from **49.53 to 42.47 µBTC** in the evaluation and rose from **32.95 to 45.52 µBTC** in the pilot. The pilot Lighter inventory point estimate was **17.61% lower**, with an interval of **−31.21% to +57.91%**. The sample shows an observed reduction with substantial day-to-day variation.
+
+On the four evaluation days, filled Lighter orders went from **39 to 45**, Lighter volume went from **0.01105 to 0.01308 BTC**, and marked PnL after fees went from **+0.0612 to +0.1262 USDC**. The economic outcomes are modeled from public depth and trade data.
+
+![Daily time-weighted absolute inventory on Lighter and across both venues](artifacts/research/inventory/inventory-benchmark.png)
+
+### Measured processing time
+
+Three serial release-mode runs on an Intel Core i5-1038NG7 Mac produced **6,677,130 timing samples** from **2,225,710 distinct May 1 market events**. The pooled median was **0.000572 ms**. The three individual medians were **0.563–0.582 µs**.
+
+| Market input | Samples across three runs | p50 (µs) | p95 (µs) | p99 (µs) |
+|---|---:|---:|---:|---:|
+| Books and trades | 6,677,130 | 0.572 | 6.315 | 12.464 |
+| Book updates | 3,288,417 | 5.607 | 7.250 | 22.131 |
+| Trade prints | 3,388,713 | 0.147 | 0.284 | 0.723 |
+
+Trade prints made up slightly more than half the timed input and processed faster than book updates. Benchmarked and untimed runs produced identical inventory, fill, and PnL results for May 1. [Full metrics, timings, and archive hashes](artifacts/research/inventory/inventory_benchmark.json)
+
+### Reproduce the benchmark
+
+Use the pinned Python 3.11 research dependencies installed above. The benchmark runner downloads the archive on request, builds missing v5 journals, runs the economic comparisons, then times three serial replays. It writes source and journal SHA-256 hashes, settings, counts, and results to JSON.
+
+```sh
+work=$(mktemp -d)
+cargo build --release --locked
+python -m research.inventory_benchmark --download --raw "$work/raw" \
+  --journals "$work/journals" --out "$work/inventory"
+```

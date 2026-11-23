@@ -111,6 +111,9 @@ enum Command {
         trace: Option<PathBuf>,
         #[arg(long)]
         quote_signal: Option<PathBuf>,
+        /// Time each replayed market event using the host's monotonic clock.
+        #[arg(long, conflicts_with = "trace")]
+        measure_processing: bool,
     },
     /// Export point-in-time books, trades, and quote lifecycle observations as JSONL.
     ResearchExport {
@@ -223,11 +226,11 @@ fn main() -> Result<()> {
             seed,
             trace,
             quote_signal,
+            measure_processing,
         } => {
-            let trace: Box<dyn Write> = match trace {
-                Some(path) => Box::new(io::BufWriter::new(create_journal(&path)?)),
-                None => Box::new(io::sink()),
-            };
+            let trace = trace
+                .map(|path| create_journal(&path).map(io::BufWriter::new))
+                .transpose()?;
             sim::run(
                 &log,
                 &config,
@@ -235,7 +238,10 @@ fn main() -> Result<()> {
                 seed,
                 quote_signal.as_deref(),
                 io::stdout().lock(),
-                trace,
+                sim::Diagnostics {
+                    trace,
+                    measure_processing,
+                },
             )
         }
         Command::ResearchExport { log } => research_export::run(

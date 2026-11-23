@@ -45,6 +45,7 @@ fn closed_loop_compares_policies_with_byte_identical_reports_and_traces() -> Res
     let report: Value = serde_json::from_slice(&first.stdout)?;
     assert_eq!(report["detailed_trade_counts"]["lighter"], 1);
     assert_eq!(report["detailed_trade_counts"]["hyperliquid"], 1);
+    assert!(report["scenarios"][0]["processing_ns_histograms"].is_null());
     assert!(report["observed"].is_null());
     let ioc = &report["scenarios"][0]["metrics"];
     let passive = &report["scenarios"][1]["metrics"];
@@ -69,6 +70,95 @@ fn closed_loop_compares_policies_with_byte_identical_reports_and_traces() -> Res
     assert_eq!(pnl(&scenarios[1]), Decimal::new(652455, 6));
     assert!(pnl(&scenarios[3]) > pnl(&scenarios[4]));
     assert!(trace.contains("order_update") && trace.contains("fill"));
+    let events = trace
+        .lines()
+        .map(serde_json::from_str::<Value>)
+        .collect::<Result<Vec<_>, _>>()?;
+    for scenario in scenarios.as_array().unwrap() {
+        let mut positions = [Decimal::ZERO; 2];
+        let mut area = [Decimal::ZERO; 2];
+        let mut last = 0;
+        let mut add_interval = |end: u64, positions: [Decimal; 2]| {
+            let elapsed = Decimal::from(end - last);
+            area[0] += positions[0].abs() * elapsed;
+            area[1] += (positions[0] + positions[1]).abs() * elapsed;
+            last = end;
+        };
+        for fill in events.iter().filter(|event| {
+            event["scenario"] == scenario["scenario"]["name"] && event["event"] == "fill"
+        }) {
+            add_interval(fill["at_us"].as_u64().unwrap(), positions);
+            let index = usize::from(fill["data"]["venue"] == "hyperliquid");
+            let fill = &fill["data"]["fill"];
+            let size = fill["size"].as_str().unwrap().parse::<Decimal>()?;
+            positions[index] += if fill["side"] == "buy" { size } else { -size };
+        }
+        add_interval(report["duration_us"].as_u64().unwrap(), positions);
+        for (key, area) in ["abs_maker_inventory_base_us", "abs_net_inventory_base_us"]
+            .into_iter()
+            .zip(area)
+        {
+            assert_eq!(
+                scenario["metrics"][key]
+                    .as_str()
+                    .unwrap()
+                    .parse::<Decimal>()?,
+                area
+            );
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn replay_processing_samples_count_market_events_and_preserve_results() -> Result<()> {
+    let run = |measured| {
+        let mut command = Command::new(env!("CARGO_BIN_EXE_event-driven-mm"));
+        command.args([
+            "simulate",
+            "--mode",
+            "closed-loop",
+            "--config",
+            SIM_CONFIG,
+            "--log",
+            CAPTURE,
+        ]);
+        if measured {
+            command.arg("--measure-processing");
+        }
+        command.output()
+    };
+    let ordinary = run(false)?;
+    let timed = run(true)?;
+    assert!(ordinary.status.success() && timed.status.success());
+    let ordinary: Value = serde_json::from_slice(&ordinary.stdout)?;
+    let mut timed: Value = serde_json::from_slice(&timed.stdout)?;
+    let total = |key: &str| -> u64 {
+        timed[key]
+            .as_object()
+            .unwrap()
+            .values()
+            .map(|v| v.as_u64().unwrap())
+            .sum()
+    };
+    let books = total("book_events");
+    let trades = total("trade_events");
+    assert!(books > 0);
+    assert_eq!(trades, 2);
+    for scenario in timed["scenarios"].as_array_mut().unwrap() {
+        let histograms = scenario["processing_ns_histograms"].take();
+        for (kind, count) in [("books", books), ("trades", trades)] {
+            let frequencies = histograms[kind].as_object().unwrap();
+            assert_eq!(
+                frequencies
+                    .values()
+                    .map(|v| v.as_u64().unwrap())
+                    .sum::<u64>(),
+                count
+            );
+        }
+    }
+    assert_eq!(ordinary, timed);
     Ok(())
 }
 

@@ -353,6 +353,7 @@ pub struct Engine {
     pub observe: bool,
     next_id: u64,
     fixed_lighter_fills: bool,
+    inventory_skew: bool,
     quote_filter: Option<Side>,
     quote_widen_bps: [Decimal; 2],
     pub quote_opportunities: [Option<(Decimal, Decimal)>; 2],
@@ -369,6 +370,7 @@ impl Engine {
             observe,
             next_id: 1,
             fixed_lighter_fills: false,
+            inventory_skew: true,
             quote_filter: None,
             quote_widen_bps: [Decimal::ZERO; 2],
             quote_opportunities: [None; 2],
@@ -377,6 +379,11 @@ impl Engine {
 
     pub fn with_fixed_lighter_fills(mut self) -> Self {
         self.fixed_lighter_fills = true;
+        self
+    }
+
+    pub fn with_inventory_skew(mut self, enabled: bool) -> Self {
+        self.inventory_skew = enabled;
         self
     }
 
@@ -404,7 +411,7 @@ impl Engine {
         if self.fixed_lighter_fills {
             return Ok(intents);
         }
-        let mut quotes = strategy::desired(&self.config, &self.state);
+        let mut quotes = strategy::desired(&self.config, &self.state, self.inventory_skew);
         let venue = self.config.mode.maker();
         let baseline = execution::reconcile(&self.config, &self.state, quotes);
         for (_, action) in &baseline {

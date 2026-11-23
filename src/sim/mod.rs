@@ -7,6 +7,7 @@ use std::fs::File;
 use std::io::{self, BufRead, BufReader, Write};
 use std::path::Path;
 use std::sync::Arc;
+use std::time::Instant;
 
 use anyhow::{Context, Result, ensure};
 use clap::ValueEnum;
@@ -22,9 +23,14 @@ use crate::maker::{Action, Engine, HedgePolicy, Input, Intent, Mode, Venue};
 
 use self::clock::{Clock, jitter};
 use self::execution::Exchange;
-use self::report::{Exposure, LatencySummary, Marks, metrics};
+use self::report::{Exposure, LatencySummary, MarketEvent, Marks, ProcessingTimes, metrics};
 
 const VENUES: [Venue; 2] = [Venue::Hyperliquid, Venue::Lighter];
+
+pub struct Diagnostics<W> {
+    pub trace: Option<W>,
+    pub measure_processing: bool,
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, ValueEnum)]
 #[serde(rename_all = "snake_case")]
@@ -160,6 +166,8 @@ pub struct Scenario {
     maker_size: Option<Decimal>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     residual_policy: Option<crate::maker::ResidualPolicy>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    inventory_skew: Option<bool>,
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     respect_trade_time: bool,
 }
@@ -241,6 +249,9 @@ struct Simulation {
     opportunity_bucket: [Option<u64>; 2],
     opportunities: Opportunities,
     capture_wall_ms: u64,
+    processing: ProcessingTimes,
+    order_updates: u64,
+    fill_messages: u64,
 }
 
 impl Simulation {
@@ -253,7 +264,8 @@ impl Simulation {
         flow: Flow,
     ) -> Result<Self> {
         let config = scenario.strategy(config);
-        let engine = Engine::new(config, session_seed, false)?;
+        let engine = Engine::new(config, session_seed, false)?
+            .with_inventory_skew(scenario.inventory_skew.unwrap_or(true));
         let engine = if flow == Flow::FixedFills {
             engine.with_fixed_lighter_fills()
         } else {
@@ -278,10 +290,13 @@ impl Simulation {
             opportunity_bucket: [None; 2],
             opportunities: Opportunities::default(),
             capture_wall_ms: 0,
+            processing: ProcessingTimes::default(),
+            order_updates: 0,
+            fill_messages: 0,
         })
     }
 
-    fn drain(&mut self, until_us: u64, trace: &mut impl Write) -> Result<()> {
+    fn drain(&mut self, until_us: u64, trace: &mut Option<impl Write>) -> Result<()> {
         while let Some((at, event)) = self.clock.before(until_us) {
             self.current_us = at;
             match event {
@@ -311,7 +326,7 @@ impl Simulation {
         seq: u64,
         input: &Input,
         own_print: bool,
-        trace: &mut impl Write,
+        trace: &mut Option<impl Write>,
     ) -> Result<()> {
         self.drain(at_us, trace)?;
         self.current_us = at_us;
@@ -376,7 +391,12 @@ impl Simulation {
         self.refresh_accounts(trace)
     }
 
-    fn update_market(&mut self, venue: Venue, input: &Input, trace: &mut impl Write) -> Result<()> {
+    fn update_market(
+        &mut self,
+        venue: Venue,
+        input: &Input,
+        trace: &mut Option<impl Write>,
+    ) -> Result<()> {
         let mut input = input.clone();
         if let Input::Instrument { instrument, .. } = &mut input
             && let Some(fees) = self.fees
@@ -391,7 +411,7 @@ impl Simulation {
         self.decision(input, trace)
     }
 
-    fn refresh_accounts(&mut self, trace: &mut impl Write) -> Result<()> {
+    fn refresh_accounts(&mut self, trace: &mut Option<impl Write>) -> Result<()> {
         let now_ms = self.current_us / 1000;
         for venue in VENUES {
             let index = venue_index(venue);
@@ -434,11 +454,13 @@ impl Simulation {
         }
     }
 
-    fn decision(&mut self, input: Input, trace: &mut impl Write) -> Result<()> {
+    fn decision(&mut self, input: Input, trace: &mut Option<impl Write>) -> Result<()> {
         let now = self.current_us;
         if matches!(input, Input::Order { .. }) {
+            self.order_updates += 1;
             trace_line(trace, &self.scenario.name, now, "order_update", &input)?;
         }
+        self.fill_messages += u64::from(matches!(input, Input::Fill { .. }));
         let point = self.signals.as_ref().and_then(|source| {
             let samples = &source.points;
             samples
@@ -595,8 +617,16 @@ pub fn run(
     seed: u64,
     signal_path: Option<&Path>,
     mut output: impl Write,
-    mut trace: impl Write,
+    diagnostics: Diagnostics<impl Write>,
 ) -> Result<()> {
+    let Diagnostics {
+        mut trace,
+        measure_processing,
+    } = diagnostics;
+    ensure!(
+        !measure_processing || trace.is_none(),
+        "event processing measurement requires tracing to be disabled"
+    );
     let Model {
         scenarios,
         fees_bps,
@@ -710,6 +740,10 @@ pub fn run(
     let mut original = Replay::new(Engine::new(config, session_seed, observe)?);
     let mut marks = Marks::new();
     let mut observed_prints = BTreeSet::new();
+    let mut books = [0_u64; 2];
+    let mut empty_books = [0_u64; 2];
+    let mut trades = [0_u64; 2];
+    let mut ticks = 0_u64;
     let mut now_us = 0;
     let mut last_seq = 0;
     while let Some(record) = reader.next_record()? {
@@ -804,8 +838,42 @@ pub fn run(
         } else {
             false
         };
+        let market_event = match &input {
+            Input::Book {
+                venue, bids, asks, ..
+            } => {
+                let index = venue_index(*venue);
+                if bids.is_empty() && asks.is_empty() {
+                    empty_books[index] += 1;
+                    None
+                } else {
+                    books[index] += 1;
+                    Some(MarketEvent::Book)
+                }
+            }
+            Input::PublicTrade {
+                venue,
+                trade: Some(_),
+                ..
+            } if !own_print => {
+                trades[venue_index(*venue)] += 1;
+                Some(MarketEvent::Trade)
+            }
+            Input::Tick => {
+                ticks += 1;
+                None
+            }
+            _ => None,
+        };
         for sim in &mut sims {
+            let start = market_event
+                .filter(|_| measure_processing)
+                .map(|kind| (kind, Instant::now()));
             sim.feed(now_us, seq, &input, own_print, &mut trace)?;
+            if let Some((kind, start)) = start {
+                sim.processing
+                    .record(kind, start.elapsed().as_nanos().try_into()?);
+            }
         }
     }
     reader.finish()?;
@@ -826,7 +894,8 @@ pub fn run(
     );
     let source_end = original.finish()?;
 
-    let mut results = Vec::new();
+    let mut rows = Vec::new();
+    let mut baseline = None;
     for mut sim in sims {
         // Stop at the last real observation. Orders still in flight remain explicit in the report.
         sim.drain(now_us + 1, &mut trace)?;
@@ -835,33 +904,38 @@ pub fn run(
         }
         let pending = sim.clock.len();
         let metrics = metrics(&sim.engine, &marks, now_us, sim.exposure, sim.cancels);
-        results.push((
-            sim.scenario,
-            metrics,
-            pending,
-            sim.hyper_taker_notional,
-            sim.opportunities,
-        ));
-    }
-    let baseline = results[0].1.net_pnl;
-    let calibration = (!observe).then_some(&observed);
-    let rows = results.iter().map(|(scenario, metrics, pending, taker_notional, opportunities)| {
-        let delta = metrics.net_pnl.zip(baseline).map(|(pnl, baseline)| pnl - baseline);
-        let break_even = delta.filter(|gain| *gain > Decimal::ZERO
-            && !taker_notional.is_zero() && scenario.extra_taker_fee_bps.is_zero())
-            .map(|gain| gain * Decimal::from(10_000) / *taker_notional);
-        json!({
-            "scenario": scenario, "metrics": metrics, "pending_events": pending, "quote_opportunities": opportunities,
+        if rows.is_empty() {
+            baseline = metrics.net_pnl;
+        }
+        let delta = metrics.net_pnl.zip(baseline).map(|(pnl, base)| pnl - base);
+        let break_even = delta
+            .filter(|gain| {
+                *gain > Decimal::ZERO
+                    && !sim.hyper_taker_notional.is_zero()
+                    && sim.scenario.extra_taker_fee_bps.is_zero()
+            })
+            .map(|gain| gain * Decimal::from(10_000) / sim.hyper_taker_notional);
+        rows.push(json!({
+            "scenario": sim.scenario, "metrics": metrics, "pending_events": pending,
+            "quote_opportunities": sim.opportunities,
             "delta_pnl_vs_first": delta,
-            "delta_pnl_vs_observed": calibration.and_then(|observed| metrics.net_pnl.zip(observed.net_pnl).map(|(sim, actual)| sim - actual)),
-            "hyperliquid_taker_notional": taker_notional,
+            "delta_pnl_vs_observed": (!observe).then_some(observed.net_pnl).flatten()
+                .zip(metrics.net_pnl).map(|(actual, sim)| sim - actual),
+            "hyperliquid_taker_notional": sim.hyper_taker_notional,
             "additional_fee_break_even_bps": break_even,
-        })
-    }).collect::<Vec<_>>();
+            "order_updates": sim.order_updates, "fill_messages": sim.fill_messages,
+            "processing_ns_histograms": measure_processing.then(|| sim.processing.summarize()),
+        }));
+    }
+    let calibration = (!observe).then_some(&observed);
     let report = json!({
         "version": 1, "journal_version": version, "capture": capture, "mode": flow, "seed": seed,
         "duration_us": now_us, "fixed_lighter_fills": reference.maker_fills,
         "detailed_trade_counts": {"hyperliquid": detailed_prints[0], "lighter": detailed_prints[1]},
+        "book_events": {"hyperliquid": books[0], "lighter": books[1]},
+        "trade_events": {"hyperliquid": trades[0], "lighter": trades[1]},
+        "empty_book_inputs": {"hyperliquid": empty_books[0], "lighter": empty_books[1]},
+        "tick_events": ticks,
         "signal_rows": signals.as_ref().map(|s| s.points.len()), "fees_bps_override": fees_bps, "funding": "excluded", "end_valuation": "last_valid_venue_mid",
         "observed": calibration, "source_end": source_end,
         "recorded_timing": {
@@ -873,7 +947,9 @@ pub fn run(
     serde_json::to_writer_pretty(&mut output, &report)?;
     writeln!(output)?;
     output.flush()?;
-    trace.flush()?;
+    if let Some(trace) = trace.as_mut() {
+        trace.flush()?;
+    }
     Ok(())
 }
 
@@ -888,12 +964,15 @@ fn venue_index(venue: Venue) -> usize {
 }
 
 fn trace_line(
-    trace: &mut impl Write,
+    trace: &mut Option<impl Write>,
     name: &str,
     at_us: u64,
     event: &str,
     data: &impl Serialize,
 ) -> Result<()> {
+    let Some(trace) = trace.as_mut() else {
+        return Ok(());
+    };
     #[derive(Serialize)]
     struct Line<'a, T> {
         scenario: &'a str,

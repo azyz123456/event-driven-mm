@@ -31,6 +31,48 @@ impl LatencySummary {
     }
 }
 
+#[derive(Clone, Copy)]
+pub enum MarketEvent {
+    Book,
+    Trade,
+}
+
+#[derive(Default)]
+pub struct ProcessingTimes {
+    book_ns: Vec<u64>,
+    trade_ns: Vec<u64>,
+}
+
+#[derive(Serialize)]
+pub struct ProcessingSummary {
+    // Exact frequency tables allow pooling events without averaging per-day medians.
+    books: BTreeMap<u64, u64>,
+    trades: BTreeMap<u64, u64>,
+}
+
+impl ProcessingTimes {
+    pub fn record(&mut self, kind: MarketEvent, ns: u64) {
+        match kind {
+            MarketEvent::Book => self.book_ns.push(ns),
+            MarketEvent::Trade => self.trade_ns.push(ns),
+        }
+    }
+
+    pub fn summarize(self) -> ProcessingSummary {
+        fn histogram(values: Vec<u64>) -> BTreeMap<u64, u64> {
+            let mut counts = BTreeMap::new();
+            for value in values {
+                *counts.entry(value).or_insert(0) += 1;
+            }
+            counts
+        }
+        ProcessingSummary {
+            books: histogram(self.book_ns),
+            trades: histogram(self.trade_ns),
+        }
+    }
+}
+
 #[derive(Default, Serialize)]
 pub struct Outcomes {
     placements: usize,
@@ -38,6 +80,7 @@ pub struct Outcomes {
     partial: usize,
     full: usize,
     unresolved: usize,
+    filled_orders: usize,
     requested_base: Decimal,
     filled_base: Decimal,
     fill_fraction: Option<Decimal>,
@@ -52,6 +95,7 @@ impl Outcomes {
             .filter(|order| order.role == role && order.kind == kind)
         {
             counts.placements += 1;
+            counts.filled_orders += usize::from(!order.filled.is_zero());
             counts.requested_base += order.size;
             counts.filled_base += order.filled;
             if !order.done() {
@@ -71,6 +115,27 @@ impl Outcomes {
 }
 
 #[derive(Default)]
+struct AbsoluteInventory {
+    since: u64,
+    quantity: Decimal,
+    area: Decimal,
+}
+
+impl AbsoluteInventory {
+    fn observe(&mut self, at: u64, quantity: Decimal) {
+        if self.quantity != quantity {
+            self.area = self.area_at(at);
+            self.since = at;
+            self.quantity = quantity;
+        }
+    }
+
+    fn area_at(&self, at: u64) -> Decimal {
+        self.area + self.quantity * Decimal::from(at - self.since)
+    }
+}
+
+#[derive(Default)]
 pub struct Exposure {
     residual: Decimal,
     since: Option<u64>,
@@ -80,11 +145,31 @@ pub struct Exposure {
     max_age_us: u64,
     exposed_us: u64,
     hedge_samples: Vec<u64>,
+    maker_inventory: AbsoluteInventory,
+    net_inventory: AbsoluteInventory,
+    filled_notional: Decimal,
 }
 
 impl Exposure {
     pub fn observe(&mut self, now: u64, engine: &Engine, current_input: bool) {
         let positions = engine.state.residual();
+        self.maker_inventory.observe(
+            now,
+            engine
+                .state
+                .venue(engine.config.mode.maker())
+                .position
+                .abs(),
+        );
+        self.net_inventory.observe(now, positions.abs());
+        if current_input {
+            self.filled_notional += engine
+                .state
+                .applied_fills
+                .iter()
+                .map(|fill| fill.fill.size * fill.fill.price)
+                .sum::<Decimal>();
+        }
         if let Some(since) = self.since {
             self.exposed_us += now - self.at;
             self.max_age_us = self.max_age_us.max(now - since);
@@ -129,6 +214,9 @@ pub struct Metrics {
     pub max_residual_age_us: u64,
     pub exposed_us: u64,
     pub exposure_to_first_hedge_fill: LatencySummary,
+    pub abs_maker_inventory_base_us: Decimal,
+    pub abs_net_inventory_base_us: Decimal,
+    pub filled_notional: Decimal,
 }
 
 #[derive(Serialize)]
@@ -197,5 +285,26 @@ pub fn metrics(
         max_residual_age_us: exposure.max_age_us,
         exposed_us: exposure.exposed_us,
         exposure_to_first_hedge_fill: LatencySummary::of(exposure.hedge_samples),
+        abs_maker_inventory_base_us: exposure.maker_inventory.area_at(now),
+        abs_net_inventory_base_us: exposure.net_inventory.area_at(now),
+        filled_notional: exposure.filled_notional,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::AbsoluteInventory;
+    use rust_decimal::Decimal;
+
+    #[test]
+    fn inventory_area_uses_the_previous_position_and_includes_the_final_interval() {
+        let mut inventory = AbsoluteInventory::default();
+        inventory.observe(100, Decimal::new(5, 4));
+        inventory.observe(110, Decimal::new(5, 4));
+        inventory.observe(120, Decimal::new(2, 4));
+        inventory.observe(120, Decimal::new(1, 4));
+        assert_eq!(inventory.area_at(180), Decimal::new(16, 3));
+        inventory.observe(180, Decimal::ZERO);
+        assert_eq!(inventory.area_at(200), Decimal::new(16, 3));
     }
 }

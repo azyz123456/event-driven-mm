@@ -1,0 +1,685 @@
+{
+  "seed": 71,
+  "model": {
+    "fees_bps": {
+      "hyperliquid_maker": "1.5",
+      "hyperliquid_taker": "4.5",
+      "lighter_maker": "0",
+      "lighter_taker": "0"
+    },
+    "scenarios": [
+      {
+        "name": "fixed_spread",
+        "inventory_skew": false,
+        "hedge": {
+          "kind": "ioc"
+        },
+        "outbound_us": 12000,
+        "inbound_us": 12000,
+        "jitter_us": 2000,
+        "cancel_ahead": "0",
+        "extra_taker_fee_bps": "0",
+        "respect_trade_time": true
+      },
+      {
+        "name": "inventory_skew",
+        "inventory_skew": true,
+        "hedge": {
+          "kind": "ioc"
+        },
+        "outbound_us": 12000,
+        "inbound_us": 12000,
+        "jitter_us": 2000,
+        "cancel_ahead": "0",
+        "extra_taker_fee_bps": "0",
+        "respect_trade_time": true
+      }
+    ]
+  },
+  "environment": {
+    "cpu": "Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz",
+    "os": "macOS-26.7.1-x86_64-i386-64bit",
+    "rustc": "rustc 1.100.0 (0ef1bc386 2026-11-09)\nbinary: rustc\ncommit-hash: 0ef1bc386059596dada8fb65b50425aab2ea637a\ncommit-date: 2026-11-09\nhost: x86_64-apple-darwin\nrelease: 1.100.0\nLLVM version: 23.1.5",
+    "binary_sha256": "b8cdba4a113c251b693c090bca7d9c5f88458fc48fd346778c754256c04156e7"
+  },
+  "sources": {
+    "2026-09-01_hyperliquid_book_snapshot_5.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/09/01/BTC.csv.gz",
+      "sha256": "adcd298d9da20ba97cafbc880dc86d1e3dd637e2f7c704de6dc5acf30908e89b"
+    },
+    "2026-09-01_hyperliquid_trades.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/09/01/BTC.csv.gz",
+      "sha256": "fbfd47e521fb50d18056f3f9e65a1b6fa2dd63296d8753cd8f75c85bb4ce0f00"
+    },
+    "2026-09-01_lighter_book_snapshot_5.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/09/01/1.csv.gz",
+      "sha256": "589ea1530fa10b9bab723e74427c892a1917b15d7dd60129487dee73868ff365"
+    },
+    "2026-09-01_lighter_trades.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/09/01/1.csv.gz",
+      "sha256": "81ce57639275736aba815f0b6782fee61cd2e612f46efff302285d0c0df16e95"
+    },
+    "2026-10-01_hyperliquid_book_snapshot_5.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/10/01/BTC.csv.gz",
+      "sha256": "700ea994a0b98d497ea053ecd2c1fb9bbd06513c037eff9be30c39af99950442"
+    },
+    "2026-10-01_hyperliquid_trades.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/10/01/BTC.csv.gz",
+      "sha256": "7e52fb675620d586737436f14ab217eda9948d518f6d1ac00bb7566b0427230c"
+    },
+    "2026-10-01_lighter_book_snapshot_5.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/10/01/1.csv.gz",
+      "sha256": "45ea59607e157b32e2f0d34cd8b1a38f43a8652a87ad0c511b4dd006c502168c"
+    },
+    "2026-10-01_lighter_trades.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/10/01/1.csv.gz",
+      "sha256": "d66d4608f72193f22296f9275fddec6f3ba89e53becdb4356f42bd898ed9a6fb"
+    },
+    "2026-11-01_hyperliquid_book_snapshot_5.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/11/01/BTC.csv.gz",
+      "sha256": "c18d6e3535f6bf1de1610904eddacbff7ecb0e6307c716d4d12b60b9a0bdcff6"
+    },
+    "2026-11-01_hyperliquid_trades.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/11/01/BTC.csv.gz",
+      "sha256": "1efd9636d444e5887012255657b019e4ce8ada70bdb124a0675f6c906f6b7259"
+    },
+    "2026-11-01_lighter_book_snapshot_5.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/11/01/1.csv.gz",
+      "sha256": "c7d64bd87de5a68e128aec3f229afd397f7af15c6fd23a565ccd8ffbbb556672"
+    },
+    "2026-11-01_lighter_trades.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/11/01/1.csv.gz",
+      "sha256": "839442af30e24306da5223f91f0823cc519a2cd30a2729d7643daa0730cb77d6"
+    },
+    "2026-05-01_hyperliquid_book_snapshot_5.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/05/01/BTC.csv.gz",
+      "sha256": "32d0571862324851b099f4c0fc4bfc4cbb62986bcbdf51d9da2e861238611cb5"
+    },
+    "2026-05-01_hyperliquid_trades.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/05/01/BTC.csv.gz",
+      "sha256": "567d74d0e7bbc34d9e9f3e5b3f60f61ebce444e5e763e8c1140377d06574df56"
+    },
+    "2026-05-01_lighter_book_snapshot_5.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/05/01/1.csv.gz",
+      "sha256": "3ad126ac99bda08254b8034cc345ab55ded8ae5afe0078aa22d9875dbb4f69fc"
+    },
+    "2026-05-01_lighter_trades.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/05/01/1.csv.gz",
+      "sha256": "d084201f83659fc985ee7e7f38bc1a80e12ef9bf7c92d90775eb4f3aac3d2aba"
+    },
+    "2026-06-01_hyperliquid_book_snapshot_5.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/06/01/BTC.csv.gz",
+      "sha256": "019fcf53b036549175c881e1dca4683ddf0c458bc14dc503f4f4ce0a1079d18c"
+    },
+    "2026-06-01_hyperliquid_trades.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/06/01/BTC.csv.gz",
+      "sha256": "67008343c092c9b431f2daecdc3e4f40f2307d851bf3fe5f765d88d23f1c81a2"
+    },
+    "2026-06-01_lighter_book_snapshot_5.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/06/01/1.csv.gz",
+      "sha256": "ccc1e939b0f443178a1c77c6995ab3301fd838f17f976e856bde39fb1cf67b2c"
+    },
+    "2026-06-01_lighter_trades.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/06/01/1.csv.gz",
+      "sha256": "2ed7610f2fa2799c148abe8b2b8662c2685bc6957c2c0aa812f51e2b3d2a987f"
+    },
+    "2026-07-01_hyperliquid_book_snapshot_5.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/07/01/BTC.csv.gz",
+      "sha256": "8929e11a5b45376d9badc73575defc5ab27dba7ca76caa2766d0e9ab5400bd9c"
+    },
+    "2026-07-01_hyperliquid_trades.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/07/01/BTC.csv.gz",
+      "sha256": "4bab18c838df764be0d8892f77b419d2f1eff13a875cefce0740b276b2081173"
+    },
+    "2026-07-01_lighter_book_snapshot_5.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/07/01/1.csv.gz",
+      "sha256": "d2164ad35f368012a40e53ecccfdc6e38c30574a90fbca46d546f25af2156e55"
+    },
+    "2026-07-01_lighter_trades.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/07/01/1.csv.gz",
+      "sha256": "7f789a8eb99382b9315da6809147156f329905f5f61a94b2853e9ed81a14f70f"
+    },
+    "2026-08-01_hyperliquid_book_snapshot_5.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/book_snapshot_5/2026/08/01/BTC.csv.gz",
+      "sha256": "af60db9615909ac766d5c4563444da194dc147190f4fad8a57cb80035cc2d1be"
+    },
+    "2026-08-01_hyperliquid_trades.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/hyperliquid/trades/2026/08/01/BTC.csv.gz",
+      "sha256": "242ebfce4bbffedbfedd1c4dba041740ec42b891579f68d31131ffe238c62d2f"
+    },
+    "2026-08-01_lighter_book_snapshot_5.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/lighter/book_snapshot_5/2026/08/01/1.csv.gz",
+      "sha256": "d2194713b6d36423890b02feb2889efdda6f477b9b517034eda73bde460bc96c"
+    },
+    "2026-08-01_lighter_trades.csv.gz": {
+      "url": "https://datasets.tardis.dev/v1/lighter/trades/2026/08/01/1.csv.gz",
+      "sha256": "093cfeb6d7055481535a248bf9f37f01a3d0bc79c6f21ab31e44eeb7f5c34493"
+    }
+  },
+  "pilot": {
+    "market_events": 6078609,
+    "duration_us": 259199836566,
+    "lighter_inventory": {
+      "average_btc": {
+        "fixed_spread": 0.0009186502713099477,
+        "inventory_skew": 0.000756842414289827
+      },
+      "reduction_pct": 17.61365147036762,
+      "paired_day_bootstrap_ci95_pct": [
+        -31.20601011457453,
+        57.90682343316361
+      ],
+      "bootstrap_draws_with_positive_baseline": 20000,
+      "leave_one_day_out_pct": {
+        "2026-09-01": -23.58354176366115,
+        "2026-10-01": 46.74049068325007,
+        "2026-11-01": 20.033152870562503
+      }
+    },
+    "net_inventory": {
+      "average_btc": {
+        "fixed_spread": 3.294836429877689e-05,
+        "inventory_skew": 4.552408763431226e-05
+      },
+      "reduction_pct": -38.16797465724939,
+      "paired_day_bootstrap_ci95_pct": [
+        -338.2873521887993,
+        99.98027498418179
+      ],
+      "bootstrap_draws_with_positive_baseline": 20000,
+      "leave_one_day_out_pct": {
+        "2026-09-01": 49.133022517841916,
+        "2026-10-01": -123.08755452458747,
+        "2026-11-01": -62.98045089085329
+      }
+    },
+    "other_totals": {
+      "fixed_spread": {
+        "filled_lighter_orders": 32,
+        "lighter_filled_btc": 0.009219999999999999,
+        "filled_notional_usdc": 1466.203996,
+        "net_pnl_usdc": -0.052423472
+      },
+      "inventory_skew": {
+        "filled_lighter_orders": 28,
+        "lighter_filled_btc": 0.0084,
+        "filled_notional_usdc": 1364.38998,
+        "net_pnl_usdc": -0.034250854500000004
+      }
+    },
+    "days": [
+      {
+        "day": "2026-09-01",
+        "duration_us": 86399962065,
+        "books": {
+          "hyperliquid": 156735,
+          "lighter": 1051743
+        },
+        "trades": {
+          "hyperliquid": 360024,
+          "lighter": 656952
+        },
+        "market_events": 2225454,
+        "empty_book_inputs": {
+          "hyperliquid": 0,
+          "lighter": 0
+        },
+        "timer_ticks": 864000,
+        "policies": {
+          "fixed_spread": {
+            "mean_abs_lighter_btc": 0.0013932618440438433,
+            "mean_abs_net_btc": 2.2273669860551693e-05,
+            "abs_lighter_btc_us": "120377770.47200",
+            "abs_net_btc_us": "1924444.23100",
+            "filled_lighter_orders": 10,
+            "lighter_filled_btc": 0.0028,
+            "filled_notional_usdc": 430.14109,
+            "net_pnl_usdc": -0.060551545,
+            "end_residual_btc": -0.0001,
+            "order_updates": 19312,
+            "fill_messages": 25
+          },
+          "inventory_skew": {
+            "mean_abs_lighter_btc": 0.0005864681680517355,
+            "mean_abs_net_btc": 9.762267786708664e-05,
+            "abs_lighter_btc_us": "50670827.47200",
+            "abs_net_btc_us": "8434595.66440",
+            "filled_lighter_orders": 2,
+            "lighter_filled_btc": 0.0006,
+            "filled_notional_usdc": 86.66111,
+            "net_pnl_usdc": -0.12856342,
+            "end_residual_btc": 0.0001,
+            "order_updates": 640,
+            "fill_messages": 7
+          }
+        },
+        "journal_sha256": "a3b92a1677bd25a4415d285ffbe6cb6a65248ba08be7b3a0a25c94576ca7d87e"
+      },
+      {
+        "day": "2026-10-01",
+        "duration_us": 86399902881,
+        "books": {
+          "hyperliquid": 155773,
+          "lighter": 1091732
+        },
+        "trades": {
+          "hyperliquid": 294078,
+          "lighter": 575837
+        },
+        "market_events": 2117420,
+        "empty_book_inputs": {
+          "hyperliquid": 0,
+          "lighter": 0
+        },
+        "timer_ticks": 864000,
+        "policies": {
+          "fixed_spread": {
+            "mean_abs_lighter_btc": 0.0010298368115448067,
+            "mean_abs_net_btc": 3.7629307291096006e-05,
+            "abs_lighter_btc_us": "88977800.50075",
+            "abs_net_btc_us": "3251168.49543",
+            "filled_lighter_orders": 15,
+            "lighter_filled_btc": 0.00432,
+            "filled_notional_usdc": 715.329186,
+            "net_pnl_usdc": -0.0227131,
+            "end_residual_btc": -0.0001,
+            "order_updates": 14789,
+            "fill_messages": 34
+          },
+          "inventory_skew": {
+            "mean_abs_lighter_btc": 0.0013512077911190911,
+            "mean_abs_net_btc": 7.422386815448902e-09,
+            "abs_lighter_btc_us": "116744221.92474",
+            "abs_net_btc_us": "641.29350",
+            "filled_lighter_orders": 19,
+            "lighter_filled_btc": 0.0057,
+            "filled_notional_usdc": 956.99371,
+            "net_pnl_usdc": 0.0620313925,
+            "end_residual_btc": 0.0,
+            "order_updates": 24492,
+            "fill_messages": 47
+          }
+        },
+        "journal_sha256": "bf7eecb4e5e24e8497076cb3672732338438807d6d317d84724cf997117daba8"
+      },
+      {
+        "day": "2026-11-01",
+        "duration_us": 86399971620,
+        "books": {
+          "hyperliquid": 147340,
+          "lighter": 899210
+        },
+        "trades": {
+          "hyperliquid": 163640,
+          "lighter": 525545
+        },
+        "market_events": 1735735,
+        "empty_book_inputs": {
+          "hyperliquid": 0,
+          "lighter": 0
+        },
+        "timer_ticks": 864000,
+        "policies": {
+          "fixed_spread": {
+            "mean_abs_lighter_btc": 0.00033285229928759554,
+            "mean_abs_net_btc": 3.894211828827913e-05,
+            "abs_lighter_btc_us": "28758429.21210",
+            "abs_net_btc_us": "3364597.91493",
+            "filled_lighter_orders": 7,
+            "lighter_filled_btc": 0.0021,
+            "filled_notional_usdc": 320.73372,
+            "net_pnl_usdc": 0.030841173,
+            "end_residual_btc": 9e-05,
+            "order_updates": 8957,
+            "fill_messages": 15
+          },
+          "inventory_skew": {
+            "mean_abs_lighter_btc": 0.0003328517377283833,
+            "mean_abs_net_btc": 3.894213219800592e-05,
+            "abs_lighter_btc_us": "28758380.69340",
+            "abs_net_btc_us": "3364599.11673",
+            "filled_lighter_orders": 7,
+            "lighter_filled_btc": 0.0021,
+            "filled_notional_usdc": 320.73516,
+            "net_pnl_usdc": 0.032281173,
+            "end_residual_btc": 9e-05,
+            "order_updates": 8957,
+            "fill_messages": 15
+          }
+        },
+        "journal_sha256": "d70f5bee00a40b0dfee3d28881a111691287f3c9c6b307dc66106b69ef403e34"
+      }
+    ]
+  },
+  "evaluation": {
+    "market_events": 9366648,
+    "duration_us": 345599783328,
+    "lighter_inventory": {
+      "average_btc": {
+        "fixed_spread": 0.0007206490436221921,
+        "inventory_skew": 0.0007122822835306335
+      },
+      "reduction_pct": 1.1610034267866167,
+      "paired_day_bootstrap_ci95_pct": [
+        -9.83290634213206,
+        9.940700782519999
+      ],
+      "bootstrap_draws_with_positive_baseline": 20000,
+      "leave_one_day_out_pct": {
+        "2026-05-01": -6.023542048560817,
+        "2026-06-01": 1.4963684584829677,
+        "2026-07-01": 1.2167867255769103,
+        "2026-08-01": 6.718660005234146
+      }
+    },
+    "net_inventory": {
+      "average_btc": {
+        "fixed_spread": 4.952782148539392e-05,
+        "inventory_skew": 4.247181480125306e-05
+      },
+      "reduction_pct": 14.246551680496834,
+      "paired_day_bootstrap_ci95_pct": [
+        -0.001849369819655852,
+        99.95794604542903
+      ],
+      "bootstrap_draws_with_positive_baseline": 20000,
+      "leave_one_day_out_pct": {
+        "2026-05-01": -0.0004370896393668737,
+        "2026-06-01": 18.98282353910233,
+        "2026-07-01": 36.34060406572499,
+        "2026-08-01": 14.246978712916215
+      }
+    },
+    "other_totals": {
+      "fixed_spread": {
+        "filled_lighter_orders": 39,
+        "lighter_filled_btc": 0.01105,
+        "filled_notional_usdc": 1526.6354589999999,
+        "net_pnl_usdc": 0.061209262
+      },
+      "inventory_skew": {
+        "filled_lighter_orders": 45,
+        "lighter_filled_btc": 0.013079999999999998,
+        "filled_notional_usdc": 1849.4578280000003,
+        "net_pnl_usdc": 0.12621335699999997
+      }
+    },
+    "days": [
+      {
+        "day": "2026-05-01",
+        "duration_us": 86399925843,
+        "books": {
+          "hyperliquid": 157885,
+          "lighter": 938254
+        },
+        "trades": {
+          "hyperliquid": 468679,
+          "lighter": 660892
+        },
+        "market_events": 2225710,
+        "empty_book_inputs": {
+          "hyperliquid": 0,
+          "lighter": 0
+        },
+        "timer_ticks": 864000,
+        "policies": {
+          "fixed_spread": {
+            "mean_abs_lighter_btc": 0.0012149943548036618,
+            "mean_abs_net_btc": 2.8235181192550137e-05,
+            "abs_lighter_btc_us": "104975422.15470",
+            "abs_net_btc_us": "2439517.56120",
+            "filled_lighter_orders": 19,
+            "lighter_filled_btc": 0.00547,
+            "filled_notional_usdc": 844.884296,
+            "net_pnl_usdc": 0.009337232,
+            "end_residual_btc": 7e-05,
+            "order_updates": 13388,
+            "fill_messages": 39
+          },
+          "inventory_skew": {
+            "mean_abs_lighter_btc": 0.0010810785697123089,
+            "mean_abs_net_btc": 1.0405415180953398e-08,
+            "abs_lighter_btc_us": "93405108.25360",
+            "abs_net_btc_us": "899.02710",
+            "filled_lighter_orders": 25,
+            "lighter_filled_btc": 0.0075,
+            "filled_notional_usdc": 1167.44828,
+            "net_pnl_usdc": 0.072444107,
+            "end_residual_btc": 0.0,
+            "order_updates": 25039,
+            "fill_messages": 54
+          }
+        },
+        "journal_sha256": "11f6a1c71bb88ec8c00820c11f803f00b58e8448326a228ed247022f1323fecb"
+      },
+      {
+        "day": "2026-06-01",
+        "duration_us": 86399959767,
+        "books": {
+          "hyperliquid": 157751,
+          "lighter": 1020966
+        },
+        "trades": {
+          "hyperliquid": 538693,
+          "lighter": 750784
+        },
+        "market_events": 2468194,
+        "empty_book_inputs": {
+          "hyperliquid": 0,
+          "lighter": 0
+        },
+        "timer_ticks": 864000,
+        "policies": {
+          "fixed_spread": {
+            "mean_abs_lighter_btc": 0.0006460452945444483,
+            "mean_abs_net_btc": 4.9429356766103135e-05,
+            "abs_lighter_btc_us": "55818287.45630",
+            "abs_net_btc_us": "4270694.43590",
+            "filled_lighter_orders": 3,
+            "lighter_filled_btc": 0.00065,
+            "filled_notional_usdc": 92.150915,
+            "net_pnl_usdc": -0.123772435,
+            "end_residual_btc": 5e-05,
+            "order_updates": 384,
+            "fill_messages": 5
+          },
+          "inventory_skew": {
+            "mean_abs_lighter_btc": 0.0006460452945444483,
+            "mean_abs_net_btc": 4.9429356766103135e-05,
+            "abs_lighter_btc_us": "55818287.45630",
+            "abs_net_btc_us": "4270694.43590",
+            "filled_lighter_orders": 3,
+            "lighter_filled_btc": 0.00065,
+            "filled_notional_usdc": 92.15073,
+            "net_pnl_usdc": -0.123587435,
+            "end_residual_btc": 5e-05,
+            "order_updates": 386,
+            "fill_messages": 5
+          }
+        },
+        "journal_sha256": "17de400b6fa2a22e1c678068a74cf96eea122dbbe73eecde9a954c89160c721b"
+      },
+      {
+        "day": "2026-07-01",
+        "duration_us": 86399997718,
+        "books": {
+          "hyperliquid": 159278,
+          "lighter": 1459257
+        },
+        "trades": {
+          "hyperliquid": 564473,
+          "lighter": 591860
+        },
+        "market_events": 2774868,
+        "empty_book_inputs": {
+          "hyperliquid": 0,
+          "lighter": 0
+        },
+        "timer_ticks": 864000,
+        "policies": {
+          "fixed_spread": {
+            "mean_abs_lighter_btc": 0.0001321518584540572,
+            "mean_abs_net_btc": 0.00012044594782196358,
+            "abs_lighter_btc_us": "11417920.26886",
+            "abs_net_btc_us": "10406529.61696",
+            "filled_lighter_orders": 9,
+            "lighter_filled_btc": 0.00253,
+            "filled_notional_usdc": 288.199518,
+            "net_pnl_usdc": 0.159599295,
+            "end_residual_btc": 0.00013,
+            "order_updates": 2506,
+            "fill_messages": 17
+          },
+          "inventory_skew": {
+            "mean_abs_lighter_btc": 0.0001321518584540572,
+            "mean_abs_net_btc": 0.00012044594782196358,
+            "abs_lighter_btc_us": "11417920.26886",
+            "abs_net_btc_us": "10406529.61696",
+            "filled_lighter_orders": 9,
+            "lighter_filled_btc": 0.00253,
+            "filled_notional_usdc": 288.199698,
+            "net_pnl_usdc": 0.159779295,
+            "end_residual_btc": 0.00013,
+            "order_updates": 2505,
+            "fill_messages": 17
+          }
+        },
+        "journal_sha256": "adc2cd39cd31b8c7ce75ca64c09417864098dbd8d34c44e9d8e7aeed702d893c"
+      },
+      {
+        "day": "2026-08-01",
+        "duration_us": 86399900000,
+        "books": {
+          "hyperliquid": 148632,
+          "lighter": 905164
+        },
+        "trades": {
+          "hyperliquid": 125555,
+          "lighter": 718525
+        },
+        "market_events": 1897876,
+        "empty_book_inputs": {
+          "hyperliquid": 0,
+          "lighter": 0
+        },
+        "timer_ticks": 864000,
+        "policies": {
+          "fixed_spread": {
+            "mean_abs_lighter_btc": 0.0008894052360187917,
+            "mean_abs_net_btc": 7.263897296177426e-10,
+            "abs_lighter_btc_us": "76844523.45150",
+            "abs_net_btc_us": "62.76000",
+            "filled_lighter_orders": 8,
+            "lighter_filled_btc": 0.0024,
+            "filled_notional_usdc": 301.40073,
+            "net_pnl_usdc": 0.01604517,
+            "end_residual_btc": 0.0,
+            "order_updates": 12628,
+            "fill_messages": 16
+          },
+          "inventory_skew": {
+            "mean_abs_lighter_btc": 0.0009898540030462998,
+            "mean_abs_net_btc": 1.4689010056724602e-09,
+            "abs_lighter_btc_us": "85523286.87780",
+            "abs_net_btc_us": "126.91290",
+            "filled_lighter_orders": 8,
+            "lighter_filled_btc": 0.0024,
+            "filled_notional_usdc": 301.65912,
+            "net_pnl_usdc": 0.01757739,
+            "end_residual_btc": 0.0,
+            "order_updates": 12578,
+            "fill_messages": 16
+          }
+        },
+        "journal_sha256": "14638598f186e30343bf2d00a05d8e14b83f3ae22a2ceed8af6ea59a2e959a9b"
+      }
+    ]
+  },
+  "processing": {
+    "day": "2026-05-01",
+    "unique_market_events": 2225710,
+    "policy": "inventory_skew",
+    "runs": [
+      {
+        "books": {
+          "samples": 1096139,
+          "p50_ns": 5583,
+          "p95_ns": 7154,
+          "p99_ns": 22728
+        },
+        "trades": {
+          "samples": 1129571,
+          "p50_ns": 143,
+          "p95_ns": 284,
+          "p99_ns": 728
+        },
+        "all": {
+          "samples": 2225710,
+          "p50_ns": 571,
+          "p95_ns": 6285,
+          "p99_ns": 12444
+        }
+      },
+      {
+        "books": {
+          "samples": 1096139,
+          "p50_ns": 5624,
+          "p95_ns": 7143,
+          "p99_ns": 21652
+        },
+        "trades": {
+          "samples": 1129571,
+          "p50_ns": 151,
+          "p95_ns": 286,
+          "p99_ns": 713
+        },
+        "all": {
+          "samples": 2225710,
+          "p50_ns": 563,
+          "p95_ns": 6318,
+          "p99_ns": 12019
+        }
+      },
+      {
+        "books": {
+          "samples": 1096139,
+          "p50_ns": 5615,
+          "p95_ns": 7503,
+          "p99_ns": 22040
+        },
+        "trades": {
+          "samples": 1129571,
+          "p50_ns": 143,
+          "p95_ns": 282,
+          "p99_ns": 728
+        },
+        "all": {
+          "samples": 2225710,
+          "p50_ns": 582,
+          "p95_ns": 6346,
+          "p99_ns": 12837
+        }
+      }
+    ],
+    "pooled": {
+      "books": {
+        "samples": 3288417,
+        "p50_ns": 5607,
+        "p95_ns": 7250,
+        "p99_ns": 22131
+      },
+      "trades": {
+        "samples": 3388713,
+        "p50_ns": 147,
+        "p95_ns": 284,
+        "p99_ns": 723
+      },
+      "all": {
+        "samples": 6677130,
+        "p50_ns": 572,
+        "p95_ns": 6315,
+        "p99_ns": 12464
+      }
+    }
+  }
+}
