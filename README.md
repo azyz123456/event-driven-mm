@@ -87,7 +87,7 @@ Duration expiry, Ctrl-C, and SIGTERM start cancellation and reconciliation. A he
 
 For a soak test, run an observe session with `--duration-secs 86400`, check the journal with `replay` and `inspect-maker`, then repeat with dedicated testnet accounts. Check both venue fill totals, residual size and age, and any unresolved orders. The offline signer ABI test can be run with `LIGHTER_TESTNET_SIGNER_LIB` set using `cargo test --locked signs_with_the_official_lighter_library -- --ignored`.
 
-### Step 10 · Inventory skew
+### Inventory skew
 
 Let `m` be the midpoint of the maker venue's best bid and ask, `q` the signed position on that venue, and `I` the configured `max_inventory`. The flat distance from midpoint to either quote is the **half-spread** `s = m × half_spread_bps / 10,000`. The inventory fraction is `x = min(|q| / I, 1)`.
 
@@ -100,7 +100,7 @@ The bid subtracts its distance from `m`. The ask adds its distance to `m`. A lon
 
 In single-venue mode the skewed midpoint prices are the raw quotes. In hedged mode `q` is the Lighter position. The strategy applies the difference between the skewed and flat midpoint prices to a flat quote first bounded by the executable Hyperliquid hedge price, fees, required edge, and slippage allowance. The final price still respects the hedge and post-only bounds, with bids rounded down and asks up to valid prices. Size also respects inventory, venue lot, and notional limits. [Skew and quote calculation](src/maker/strategy.rs)
 
-### Step 11 · Maker state-machine separation
+### Maker state-machine separation
 
 | Component | Input and responsibility | Output |
 |---|---|---|
