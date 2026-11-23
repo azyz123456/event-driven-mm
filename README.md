@@ -1,91 +1,66 @@
 # Event-Driven MM
 
-A Rust recorder and replayer for one public Hyperliquid `l2Book` subscription.
+Event-Driven MM is a Rust market-making and execution research stack for **Lighter and Hyperliquid**, with Python tools for analyzing BTC perpetual markets. It records market data and order events, replays trading decisions deterministically, and lets you compare quote and hedge policies on the same historical tape. Use it to trace why an order was placed or canceled, see how partial fills affect inventory, and test how fees, latency, and queue assumptions change simulated execution.
 
-## Run a capture and replay it
+The maker supports either venue on its own or a hedged mode that posts on Lighter and sends price-limited Hyperliquid immediate-or-cancel (IOC) orders after confirmed fills. Signed execution uses **testnet**. Historical studies use public market data, and calibration against signed fills remains open.
 
-With a stable Rust toolchain installed, run these commands from the project root. Choose a new journal path for each capture.
+[Quick start](#quick-start) · [Architecture](#architecture) · [Execution simulator](#execution-simulator) · [Testnet workflows](#testnet-workflows) · [Research](#btc-short-horizon-research) · [Inventory benchmark](#inventory-skew-benchmark)
 
-```sh
-cargo run --locked -- capture --coin BTC --duration-secs 30 --log btc.jsonl > live.csv
-cargo run --locked -- replay --log btc.jsonl > replay.csv
-test -s live.csv && cmp live.csv replay.csv
-```
+## Results at a glance
 
-Standard output contains `local_time_unix_ms,mid_price` rows without a header. Each usable snapshot produces a row, including snapshots where the midpoint stays the same. A snapshot needs bid and ask levels with positive prices and sizes and a best bid below the best ask. Diagnostics go to stderr. The capture duration starts when the client queues the subscription. At the end of the capture, it waits up to one second for the WebSocket close response. If the peer closes first, the journal records the close and the capture ends.
+| Experiment | Finding |
+|---|---|
+| Replay performance | **15,445,257** historical book updates and trade prints across seven days. On three runs of a 2.23-million-event tape, median local processing after decoding was **0.572 µs** across both input types and **5.607 µs** for books alone. [Benchmark](#inventory-skew-benchmark) |
+| Inventory skew | Time-weighted absolute Lighter inventory was **1.16% lower** than an unskewed fixed-spread baseline across four evaluation days. The paired 95% interval spanned **−9.83% to +9.94%**. [Inventory comparison](#historical-comparison) |
+| Cross-venue signals | In a 15-minute same-host capture, adding Lighter data raised two-second Hyperliquid midpoint forecast R² from **10.09% to 25.15%** using exchange-timestamped outcomes. All **420** selected directional round trips lost money after modeled fees, and quote widening showed mixed PnL effects in closed-loop replay. [Timing study](#direct-feed-timing) · [Policy replay](#closed-loop-replay) |
 
-## Data flow
+## Quick start
 
-The network thread uses Mio to drive nonblocking TCP, TLS, and WebSocket I/O. The command queue wakes the reactor after publishing a command. The reactor appends each outbound HTTP request or WebSocket message to the journal before sending it and preserves partial writes across readiness notifications. The reactor also records a strategy timer once per second and separate timers for order deadlines and Hyperliquid heartbeats. Timer records include the scheduled time, firing time, and skipped intervals after a delay.
-
-The main thread follows the file-backed queue, passes records to the order book, and prints midpoint rows. The queue waits at temporary EOF, including after a partial record, and drains remaining records once the network worker has exited. Replay runs the same processing loop against a completed journal with fresh state and no network worker.
-
-## Journal format
-
-The journal is newline-delimited JSON. The first record, `session_start`, has sequence zero and stores the format version, endpoint, and coin. Each subsequent record includes a sequence number, `local_time_unix_ms`, `connection_id`, and an event type. File order is authoritative even if timestamps move backward.
-
-TCP events include addresses, connection failures, or the close reason. HTTP events store the raw request and response heads as text or Base64 if a head contains non-UTF-8 bytes. WebSocket events identify their direction and opcode. Public capture preserves the original text payload, and non-text payloads are arrays of byte values. The journal captures application messages above TLS. Appending makes records available to the reader through the filesystem. Signed actions also use an explicit sync before dispatch.
-
-## Latency measurements
-
-Pass `--latency` to `capture` or `order-test` to print sample counts and approximate p50, p95, and p99 upper bounds in nanoseconds to stderr. The measurements cover kernel receive batch to read return, read to decode, journal append to engine consumption, intent enqueue to first socket write, and the signed-action journal sync.
-
-New v3 journals record optional receive timing on HTTP responses and WebSocket messages. On Linux, the reactor requests software timestamps via `SO_TIMESTAMPING` and reads them through `recvmsg`. The timestamp belongs to the read batch that completed the TLS record needed by the message. TCP and TLS can combine multiple messages into one receive batch, so treat the kernel value as an estimate of local receive-to-read delay. macOS provides userspace timing. The summary counts missing samples and invalid wall-clock deltas as unavailable.
-
-## Testnet order lifecycle
-
-Use an isolated, funded Hyperliquid testnet account and its approved API wallet. Set `HYPERLIQUID_TESTNET_AGENT_KEY` in your environment and use the account's public address for `--account`. Choose explicit size and price for a default-dex perpetual on testnet. The order must meet exchange precision and minimum-notional rules and the configured `--max-notional` limit.
+From the repository root with a stable Rust toolchain, try these commands with the bundled journals. Both run offline and require no exchange credentials.
 
 ```sh
-cargo run --locked -- order-test --account "$TESTNET_ACCOUNT" --coin "$TESTNET_COIN" \
-  --price "$TESTNET_PRICE" --size "$TESTNET_SIZE" --max-notional "$TESTNET_MAX_NOTIONAL" \
-  --log order-test.jsonl > order-test.txt
-cargo run --locked -- replay --log order-test.jsonl > order-replay.txt
-cmp order-test.txt order-replay.txt
+# Verify a recorded place, rest, and cancel sequence.
+cargo run --locked -- replay --log tests/fixtures/order-session.jsonl
+
+# Compare five execution scenarios on the same sample tape.
+cargo run --locked -- simulate --log tests/fixtures/sim-public.jsonl \
+  --config examples/simulation.json --mode closed-loop --seed 71
 ```
 
-The command checks the API wallet's account, the instrument metadata, open orders, position, and book before placing one post-only buy. It cancels by client order ID after receiving evidence that the order rested. Success requires verified cancellation, a flat position, and exactly one cancel intent. A fill, rejection, cleanup retry, or unresolved order returns a nonzero status. After an ambiguous reply or disconnect, the command queries the original client order ID and can reconnect once for cleanup. If the process is interrupted or reports an unresolved order, use the printed client order ID to check the order and position on testnet before starting another run.
+The first command regenerates the placement and cancellation intents and reports `verified_canceled`. The simulator prints JSON with per-scenario fills, hedging outcomes, inventory exposure, and modeled PnL.
 
-Order tests write v3 journals with the effective settings, recorded inputs and timers, trade intents, unsigned action details, and the final outcome. The signing key and request signatures stay out of the journal. Replay uses the recorded timer firing times to regenerate the intents and final result, and fails if they differ from the recorded outputs. Replay also accepts v1 capture journals and v2 order journals.
+| To | Use |
+|---|---|
+| Record public Hyperliquid order-book snapshots and print midpoints | `capture` |
+| Verify a session offline and regenerate recorded order intents | `replay` |
+| Record Lighter and Hyperliquid feeds without submitting orders | `maker --observe` |
+| Exercise signed execution on testnet | `order-test` for one Hyperliquid order or `maker` for market making |
+| Inspect feed timing, fills, and hedge completion in a maker journal | `inspect-maker` |
+| Compare alternative execution policies on a finished hedged journal | `simulate` |
+| Export receipt-timed books, trades, order events, and fills for analysis | `research-export` |
 
-To exercise the verifier without a testnet account, replay `tests/fixtures/order-session.jsonl`. The fixture contains a book snapshot from the original replay fixture and a scripted lifecycle.
+### Capture a public Hyperliquid book
 
-## Tests
+The `capture` command is the single-feed workflow. It records one public `l2Book` subscription. Each usable snapshot emits a `local_time_unix_ms,mid_price` row, even when the midpoint stays the same. A capture requires a new journal path and writes diagnostics to stderr.
 
 ```sh
-cargo test --locked
+work=$(mktemp -d)
+cargo run --locked -- capture --coin BTC --duration-secs 30 --log "$work/btc.jsonl" > "$work/live.csv"
+cargo run --locked -- replay --log "$work/btc.jsonl" > "$work/replay.csv"
+test -s "$work/live.csv" && cmp "$work/live.csv" "$work/replay.csv"
 ```
 
-The tests use temporary files and local TLS peers, so running the suite requires no exchange access. They cover idle timers, command wakeups, short writes and backpressure, receive-batch attribution, capture and replay parity, and lost-reply recovery. On Linux the loopback test also checks that kernel timestamps reach the journal.
+## Architecture
 
-## Market maker and IOC hedge
+- **Transport.** A Mio reactor handles nonblocking TCP, TLS, and WebSocket I/O. Command queues wake the reactor when work arrives, and connections retain unwritten bytes until the socket is ready. Public capture follows the journal through a file-backed queue that handles partial records and temporary EOF. [Reactor](src/network/reactor.rs) · [Queues](src/queue.rs)
+- **Maker engine.** The testnet maker journals normalized books, account snapshots, fills, order updates, and timers, then applies each input to the engine. It records the resulting intents before dispatch. The same engine powers offline verification and the execution simulator. [Maker runtime](src/network/maker.rs) · [Maker engine](src/maker.rs)
+- **Research export.** `research-export --log maker.jsonl` verifies a maker journal and emits top-five books, detailed trades, order intents, updates, and confirmed fills as JSONL. Records retain source sequence IDs and monotonic availability timestamps for point-in-time analysis. [Research export](src/research_export.rs)
 
-The `maker` command uses testnet endpoints. Start from [examples/maker-testnet.json](examples/maker-testnet.json), which configures one matching perpetual, inventory and collateral limits, pricing, and timeouts. The three modes are `hyperliquid`, `lighter`, and `hedged`. The Hyperliquid-only mode takes `"lighter_market": null`.
+### Journals and timing
 
-```sh
-cargo run --locked -- maker --config examples/maker-testnet.json \
-  --observe --feed-copies 5 --duration-secs 30 --log observe.jsonl
-cargo run --locked -- replay --log observe.jsonl
-cargo run --locked -- inspect-maker --log observe.jsonl
-cargo run --locked -- inspect-maker --log observe.jsonl --step
-```
+Journals are newline-delimited JSON and replay follows their recorded sequence order. Public capture journals begin with `session_start` and preserve WebSocket payloads above TLS. Maker journals begin with `maker_start` and record the effective config, normalized inputs, intents, and terminal state. Current maker journals use v5, which adds trade price, size, and aggressor side. Replay also reads v4 maker journals and earlier capture and order-test formats. Signing keys, request signatures, and authentication tokens stay out of the journal. [Event schema](src/event.rs) · [Journal](src/journal.rs)
 
-In the viewer, press Enter for the next record or type `q` to quit. The report shows book and trade arrival spreads, matched public and account trade timing, maker fill markouts at 100 ms, 1 second, and 5 seconds, and IOC completion and latency. Trade edge matches opposite fills in FIFO order and subtracts both fill fees. Trade edge and mark-to-market exclude funding. In observe mode, optional account identifiers enable account stream timing comparisons. Observe mode submits zero orders.
-
-Signed sessions run on macOS and Linux. Use dedicated funded testnet accounts with no working orders and flat positions in the configured instrument. Set `HYPERLIQUID_TESTNET_AGENT_KEY` to the approved API wallet key. Set `LIGHTER_TESTNET_API_KEY` to the private API key associated with `--lighter-key-index` and `LIGHTER_TESTNET_SIGNER_LIB` to the matching platform library from the [official Lighter v1.1.9 SDK](https://github.com/elliottech/lighter-python/tree/v1.1.9/lighter/signers). Trade with one process per account and Lighter API key index.
-
-```sh
-cargo run --locked -- maker --config examples/maker-testnet.json \
-  --hyperliquid-account "$TESTNET_ACCOUNT" \
-  --lighter-account "$LIGHTER_ACCOUNT_INDEX" --lighter-key-index "$LIGHTER_API_KEY_INDEX" \
-  --duration-secs 60 --log hedged-testnet.jsonl
-```
-
-The maker keeps one post-only order per side. In hedged mode it prices Lighter quotes against executable Hyperliquid depth, and account fills trigger price-bounded Hyperliquid IOCs. Partial fills leave a residual for subsequent attempts. If a connection or book goes stale, the engine cancels resting maker quotes and waits for account and book reconciliation before replacing them. A standalone Hyperliquid session requires an acknowledged scheduled cancel. Lighter post-only orders carry an exchange expiry. Signed wire payloads and auth tokens stay out of the journal.
-
-Duration expiry, Ctrl-C, and SIGTERM start cancellation and reconciliation. A hedged run reports failure if it reaches the recovery deadline with residual exposure, unresolved orders, or unverified accounts. A single-venue run can end with confirmed inventory from fills. Inspect the journal and venue positions before starting another session.
-
-For a soak test, run an observe session with `--duration-secs 86400`, check the journal with `replay` and `inspect-maker`, then repeat with dedicated testnet accounts. Check both venue fill totals, residual size and age, and any unresolved orders. The offline signer ABI test can be run with `LIGHTER_TESTNET_SIGNER_LIB` set using `cargo test --locked signs_with_the_official_lighter_library -- --ignored`.
+`capture --latency` and `order-test --latency` show sample counts and approximate p50, p95, and p99 for available stages such as receive-to-read, read-to-decode, journal-to-engine, first socket write, and signed journal sync. Linux can supply a kernel timestamp for the receive batch that completed the message. macOS uses userspace timestamps. Recorded timer events carry scheduled and actual firing times and skipped intervals where applicable. Replay processing time is measured separately with `simulate --measure-processing`, which times local handling of already-decoded market events without trace output. [Latency instrumentation](src/latency.rs) · [Receive timestamps](src/network/rx_timestamp.rs)
 
 ### Inventory skew
 
@@ -112,20 +87,72 @@ In single-venue mode the skewed midpoint prices are the raw quotes. In hedged mo
 
 ## Execution simulator
 
-Run `simulate` against a finished hedged maker journal. It verifies the original intents before comparing policies. Version 5 captures include price, size, and aggressor side for public trades. Version 4 remains replayable and can drive a fixed-fill IOC comparison when the signed journal contains Lighter maker fills. Passive hedging needs detailed Hyperliquid trades, and closed-loop quoting also needs detailed Lighter trades.
+The simulator verifies the source journal's recorded intents and replays the market tape under a configurable set of execution policies.
+
+- **Closed loop** (`--mode closed-loop`) simulates Lighter orders and fills as well as Hyperliquid hedges. Acknowledgments, partial fills, and cancellations change the strategy's next decisions. Use a finished v5 hedged maker journal with detailed Lighter trades.
+- **Fixed fills** (`--mode fixed-fills`) keeps the recorded Lighter maker fills from a signed capture and simulates Hyperliquid execution. V4 journals can support the IOC comparison. Passive hedging requires detailed Hyperliquid trades.
+
+The example model compares IOC and passive-then-IOC hedges with different latency, fee, and queue assumptions. The first scenario is the reference for PnL deltas. Choose explicit `fees_bps` for an observe-only tape or use `null` to use the recorded instrument fees from a signed capture. Set `inventory_skew` to `false` in a simulation scenario for an unskewed baseline with the same risk bounds. An optional `--trace` captures intents, acknowledgments, and fills, while `--measure-processing` records timing distributions with tracing off. [Example simulation model](examples/simulation.json)
+
+An IOC consumes displayed depth within its price limit. Passive orders join behind displayed size and fill against eligible prints. At the same simulated timestamp, prints precede order arrivals and cancels. The `cancel_ahead` setting controls how much unexplained displayed size reduction is credited ahead of a resting order. Gaps pause matching until a snapshot restores the book. [Matching model](src/sim/execution.rs)
+
+The simulator uses recorded public quotes as a proxy for venue state, assumes small orders, and excludes market impact, margin dynamics, and funding. Ending positions are marked to the last valid venue mids. Results include quote and hedge fills, time-weighted inventory, unresolved orders, in-flight events, modeled PnL, and the extra taker fee that would offset a scenario’s positive PnL difference from the baseline. [Report metrics](src/sim/report.rs)
+
+For comparison with recorded testnet fills, see [calibration](#reproduce-and-calibrate).
+
+## Testnet workflows
+
+### Observe and inspect both venues
+
+The sample maker configuration sets `coin` to `BTC` and `lighter_market` to `4096` on testnet. The supported modes are `hyperliquid`, `lighter`, and `hedged`. For Hyperliquid-only mode, set `"lighter_market": null`. Observe mode reads the configured testnet feeds and submits zero orders. [Example maker configuration](examples/maker-testnet.json)
 
 ```sh
-cargo run --locked -- simulate --log tests/fixtures/sim-public.jsonl \
-  --config examples/simulation.json --mode closed-loop --seed 71 --trace simulated.jsonl
+work=$(mktemp -d)
+cargo run --locked -- maker --config examples/maker-testnet.json \
+  --observe --duration-secs 30 --log "$work/observe.jsonl"
+cargo run --locked -- replay --log "$work/observe.jsonl"
+cargo run --locked -- inspect-maker --log "$work/observe.jsonl"
 ```
 
-Use `--mode fixed-fills` on signed captures to keep the recorded Lighter fills and simulate Hyperliquid execution. Use `--mode closed-loop` to simulate Lighter orders and fills as well. In closed-loop mode, simulated acknowledgment and fill timing changes the next strategy decision. Historical private fills are used for calibration and to exclude identifiable own public prints. Snapshot trade history and duplicate print IDs are excluded from matching.
+Use `inspect-maker --step` to walk the journal, or `--feed-copies` on the observe command to compare redundant feed arrivals. The inspection report includes book and trade timing, maker fill markouts at 100 ms, 1 second, and 5 seconds, hedge completion and latency, and matched fill edge after fees. A 24-hour observe soak can use `--duration-secs 86400`.
 
-The model file defines common fee assumptions and a list of scenarios. The first scenario is the comparison baseline. Specify `fees_bps` for observe-only captures. Set it to `null` to use the instrument fees in a signed capture. The sample configuration uses illustrative rates, separate outbound and inbound delays, bounded seeded jitter, and alternative queue-cancellation assumptions. `cancel_ahead` is the fraction of an unexplained displayed size decrease credited ahead of a resting order. The reported break-even extra fee is the gain over baseline divided by that scenario's Hyperliquid taker notional, expressed in basis points.
+### Test one Hyperliquid order
 
-Arrival-time matching uses the recorded public feed timeline as a proxy for venue state. An IOC consumes available displayed depth within its limit. A passive order joins behind displayed size and needs eligible prints to fill. Prints at the same simulated timestamp are processed before order arrivals and cancels. Gaps suspend matching and a new snapshot rebuilds queue-ahead estimates. The model assumes small orders and omits market impact, margin dynamics, and funding. PnL marks ending positions at the last valid venue mids and reports mark age, open orders, and in-flight events at the capture boundary.
+Set `HYPERLIQUID_TESTNET_AGENT_KEY` to the approved API wallet key for an isolated funded testnet account. Use its public address for `--account` and choose a price and size that meet the venue limits and your configured notional cap. Run each capture with a fresh journal path.
 
-To calibrate, run the IOC baseline on a signed testnet capture with Lighter fills. Compare the simulated and recorded hedge completion, fill prices, fees, exposure, and recorded timing. Check the chosen assumptions on a separate signed capture. The optional trace records model intents, acknowledgments, and fills with order IDs. For a passive testnet calibration, set `"hedge_policy": {"kind": "passive_then_ioc", "wait_ms": 150}` in a copy of the maker config. The same policy waits for confirmed cancellation and outstanding fill reports before sending an IOC for the remainder. It needs acknowledged Hyperliquid scheduled cancellation before posting a hedge. The default maker policy stays IOC.
+```sh
+work=$(mktemp -d)
+cargo run --locked -- order-test --account "$TESTNET_ACCOUNT" --coin "$TESTNET_COIN" \
+  --price "$TESTNET_PRICE" --size "$TESTNET_SIZE" --max-notional "$TESTNET_MAX_NOTIONAL" \
+  --log "$work/order-test.jsonl" > "$work/order-test.txt"
+cargo run --locked -- replay --log "$work/order-test.jsonl" > "$work/order-replay.txt"
+cmp "$work/order-test.txt" "$work/order-replay.txt"
+```
+
+The smoke test waits for evidence that the order rested, cancels by client order ID, and checks the authoritative outcome. Success requires a verified cancellation, exactly one cancel intent, and a flat position. After an ambiguous response, it queries the original client order ID and can reconnect for cleanup. If the test returns an unresolved order, use the reported client order ID to check testnet before starting another run.
+
+### Run the hedged maker on testnet
+
+Signed sessions run on macOS and Linux. Use dedicated funded testnet accounts with flat positions and no working orders in the configured instrument. Set `HYPERLIQUID_TESTNET_AGENT_KEY` for Hyperliquid. For Lighter, set `LIGHTER_TESTNET_API_KEY` for the chosen API key index and `LIGHTER_TESTNET_SIGNER_LIB` to the matching platform library. Run one process per account and Lighter API key index. [Official Lighter signer library](https://github.com/elliottech/lighter-python/tree/v1.1.9/lighter/signers)
+
+```sh
+work=$(mktemp -d)
+cargo run --locked -- maker --config examples/maker-testnet.json \
+  --hyperliquid-account "$TESTNET_ACCOUNT" \
+  --lighter-account "$LIGHTER_ACCOUNT_INDEX" --lighter-key-index "$LIGHTER_API_KEY_INDEX" \
+  --duration-secs 60 --log "$work/hedged-testnet.jsonl"
+```
+
+The maker prices against executable hedge depth and manages one post-only maker order per side. It cancels resting quotes when books or connections go stale and reconciles accounts and orders before quoting again. Shutdown cancels and reconciles orders on duration expiry, Ctrl-C, or SIGTERM. Hedged sessions report failure if residual exposure, unresolved orders, or unverified accounts persist past the recovery deadline. IOC hedging is the default. The optional passive-then-IOC policy requires acknowledged Hyperliquid scheduled cancellation, then waits for confirmed cancellation and outstanding fill reports before taking the remainder.
+
+## Tests
+
+```sh
+cargo test --locked
+python -m unittest research.test_research
+```
+
+Rust tests use local TLS peers and fixture journals to exercise replay parity, order lifecycle races, partial writes, timers, receive timestamps, and lost replies. Install the [pinned Python dependencies](research/requirements.txt) before running the research tests. The optional Lighter signer ABI test uses the official shared library and signs without submitting an order. Run it with `LIGHTER_TESTNET_SIGNER_LIB` set and `cargo test --locked signs_with_the_official_lighter_library -- --ignored`.
 
 ## BTC short-horizon research
 
