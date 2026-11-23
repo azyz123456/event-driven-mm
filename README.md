@@ -173,35 +173,3 @@ The markout is the side-signed Hyperliquid mid move from the modeled Lighter fil
 Residual inventory dominated several paths. The October filter left **0.00010 BTC** unhedged for **23.85 hours**, and the November baseline left **0.00009 BTC** for **10.38 hours**. Those amounts were below the modeled $10 Hyperliquid minimum. The residual-age guard stopped new maker exposure, which explains much of the difference in quoting activity. The November filter finished flat and sent **9,170** cancels against **4,470** for the baseline in the primary case.
 
 **Decision.** Keep the filter out of live quoting. Lighter adds short-horizon predictive information on this archive, but the fixed filter reduced primary holdout PnL, increased cancellation churn, and failed to consistently separate adverse fills. The holdout sample of strategy fills is small. The archive also showed median exchange-to-receipt book lags of about **274 ms** on Hyperliquid and **2.6 ms** on Lighter, so archive predictability is sensitive to routing and feed construction. Signed fill and hedge calibration remains open. These replays use aggregate public depth and assumptions about queue position, fee rates, latency, collateral, and small-order market impact. The study covers four first-of-month days and one instrument.
-
-### Reproduce the study
-
-Python 3.11.5 was used with the versions in [research/requirements.txt](research/requirements.txt). The raw compressed files are retrieved from the public endpoints in the manifest. Generated journals, forecasts, and detailed traces stay in the working directory. The journal converter preserves the archived arrival time in the v5 receive timestamp fields.
-
-```sh
-python3.11 -m venv .venv
-. .venv/bin/activate
-python -m pip install -r research/requirements.txt
-
-work=$(mktemp -d)
-python -m research.features --download --raw "$work/raw" --work "$work/features" \
-  --verify-manifest artifacts/research/data_manifest.json \
-  --variants receive lighter_delay_100 lighter_delay_500 lighter_delay_1500 exchange_clock
-python -m research.train --work "$work/features" --out "$work/models" \
-  --variants receive lighter_delay_100 lighter_delay_500 lighter_delay_1500 exchange_clock
-
-for day in 2026-10-01 2026-11-01; do
-  python -m research.archive --raw "$work/raw" --day "$day" --out "$work/$day.jsonl"
-done
-cargo build --release --locked
-python -m research.evaluate --raw "$work/raw" --models "$work/models" \
-  --work "$work" --out "$work/execution" --binary target/release/event-driven-mm
-
-mkdir "$work/figures"
-cp artifacts/research/data_manifest.json "$work/figures/"
-cp "$work/models/forecast_results.json" "$work/execution/execution_results.json" "$work/figures/"
-python -m research.render --out "$work/figures"
-python -m unittest research.test_research
-```
-
-For a locally captured maker journal, `research-export --log session.jsonl` exports receipt-timed top-five books, trades, quote intents, order updates, and confirmed fills with original sequence IDs. The simulator accepts an out-of-sample `available_us,prediction_bps` CSV via `--quote-signal`. [Study configuration](research/study.json)
