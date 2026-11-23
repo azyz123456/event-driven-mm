@@ -104,7 +104,7 @@ Arrival-time matching uses the recorded public feed timeline as a proxy for venu
 
 To calibrate, run the IOC baseline on a signed testnet capture with Lighter fills. Compare the simulated and recorded hedge completion, fill prices, fees, exposure, and recorded timing. Check the chosen assumptions on a separate signed capture. The optional trace records model intents, acknowledgments, and fills with order IDs. For a passive testnet calibration, set `"hedge_policy": {"kind": "passive_then_ioc", "wait_ms": 150}` in a copy of the maker config. The same policy waits for confirmed cancellation and outstanding fill reports before sending an IOC for the remainder. It needs acknowledged Hyperliquid scheduled cancellation before posting a hedge. The default maker policy stays IOC.
 
-## Step 15 · BTC short-horizon research
+## BTC short-horizon research
 
 The November holdout forecast reduced squared error by **23.2%** versus the zero-return baseline at a two-second horizon. Lighter alone scored **24.1%** and Hyperliquid alone scored **−2.3%**. The forecast advantage shrank sharply when Lighter data was delayed. Execution results below use the frozen forecast to test whether that information improves Lighter quoting.
 
