@@ -17,7 +17,9 @@ pub fn upgrade_request(host: &str, path: &str) -> Result<(String, String)> {
     let key = STANDARD.encode(random_bytes::<16>()?);
     let request = format!(
         "GET {path} HTTP/1.1\r\nHost: {host}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\
-         Sec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\n\r\n"
+         Sec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\n\
+         User-Agent: event-driven-mm/{}\r\n\r\n",
+        env!("CARGO_PKG_VERSION")
     );
     Ok((request, key))
 }

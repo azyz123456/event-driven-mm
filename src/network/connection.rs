@@ -75,13 +75,35 @@ pub struct Connection {
 
 impl Connection {
     pub fn open(
-        mut stream: TcpStream,
+        stream: TcpStream,
         reactor: &mut Reactor,
         id: u64,
         host: &'static str,
         config: Arc<ClientConfig>,
         journal: &mut RecordSink,
         deadline: Instant,
+    ) -> Result<Self> {
+        let mut connection = Self::begin(stream, reactor, id, host, config, journal)?;
+        let result = (|| -> Result<()> {
+            while !connection.progress_setup(host, PATH, journal, deadline)? {
+                reactor.service(&mut connection, deadline, journal)?;
+            }
+            Ok(())
+        })();
+        if let Err(error) = result {
+            connection.close(reactor, journal, format!("{error:#}"))?;
+            return Err(error);
+        }
+        Ok(connection)
+    }
+
+    pub(super) fn begin(
+        mut stream: TcpStream,
+        reactor: &mut Reactor,
+        id: u64,
+        host: &'static str,
+        config: Arc<ClientConfig>,
+        journal: &mut RecordSink,
     ) -> Result<Self> {
         journal.append(
             Some(id),
@@ -129,27 +151,25 @@ impl Connection {
             eof: false,
             read_error: None,
         };
-        if let Err(error) = connection.establish(reactor, host, journal, deadline) {
-            connection.close(reactor, journal, format!("{error:#}"))?;
-            return Err(error);
-        }
+        connection.collect_ciphertext(None)?;
         Ok(connection)
     }
 
-    fn establish(
+    pub(super) fn progress_setup(
         &mut self,
-        reactor: &mut Reactor,
         host: &str,
+        path: &str,
         journal: &mut RecordSink,
         deadline: Instant,
-    ) -> Result<()> {
-        self.collect_ciphertext(None)?;
-        while self.tls.is_handshaking() {
-            self.check_setup(deadline, "TLS handshake")?;
-            reactor.service(self, deadline, journal)?;
+    ) -> Result<bool> {
+        if self.upgraded {
+            return Ok(true);
         }
-        self.check_setup(deadline, "TLS handshake")?;
-        let (request, key) = websocket::upgrade_request(host, PATH)?;
+        self.check_setup(deadline, "TLS/WebSocket setup")?;
+        if self.tls.is_handshaking() || self.upgrade.is_some() {
+            return Ok(false);
+        }
+        let (request, key) = websocket::upgrade_request(host, path)?;
         journal.append(
             Some(self.connection_id),
             Event::HttpRequest {
@@ -158,11 +178,7 @@ impl Connection {
         )?;
         self.upgrade = Some((key, Vec::new()));
         self.queue_bytes(request.as_bytes(), None)?;
-        while !self.upgraded {
-            self.check_setup(deadline, "WebSocket upgrade")?;
-            reactor.service(self, deadline, journal)?;
-        }
-        Ok(())
+        Ok(false)
     }
 
     fn check_setup(&mut self, deadline: Instant, operation: &str) -> Result<()> {
@@ -174,6 +190,10 @@ impl Connection {
         Ok(())
     }
 
+    pub(super) fn id(&self) -> u64 {
+        self.connection_id
+    }
+
     pub fn token(&self) -> Token {
         self.token
     }
@@ -182,6 +202,11 @@ impl Connection {
         let bytes = websocket::encode(&message)?;
         journal.append(Some(self.connection_id), Event::WsOut { message })?;
         self.queue_bytes(&bytes, None)
+    }
+
+    pub(super) fn send_private(&mut self, message: String, ticket: Option<TxTicket>) -> Result<()> {
+        let bytes = websocket::encode(&Message::Text(message))?;
+        self.queue_bytes(&bytes, ticket)
     }
 
     pub fn queue_bytes(&mut self, bytes: &[u8], ticket: Option<TxTicket>) -> Result<()> {

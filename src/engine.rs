@@ -9,6 +9,7 @@ use crate::event::{
 };
 use crate::hyperliquid::TESTNET_ENDPOINT;
 use crate::intent::Intent;
+use crate::maker;
 use crate::order_test::{Command, Input, Lifecycle, Outcome};
 use crate::queue::{CommandsOut, RecordSource};
 
@@ -75,6 +76,30 @@ fn follow(
                     _ => anyhow::bail!("unsupported journal format {version}"),
                 });
             }
+            Record {
+                event:
+                    Event::MakerStart {
+                        version,
+                        config,
+                        seed,
+                        observe,
+                    },
+                seq,
+                connection_id,
+                ..
+            } => {
+                ensure!(
+                    seq == 0 && connection_id.is_none() && commands.is_none(),
+                    "invalid maker session start"
+                );
+                ensure!(
+                    version == crate::event::MAKER_FORMAT_VERSION,
+                    "unsupported maker format {version}"
+                );
+                session = Some(Session::Maker(Box::new(maker::diagnostics::Replay::new(
+                    maker::Engine::new(config, seed, observe)?,
+                ))));
+            }
             record => {
                 let seq = record.seq;
                 let session = session
@@ -91,12 +116,14 @@ fn follow(
     match session {
         Session::Book(_) => Ok(None),
         Session::Orders(state) => state.finish().map(Some),
+        Session::Maker(state) => state.finish().map(|_| None),
     }
 }
 
 enum Session {
     Book(Book),
     Orders(Box<OrderReplay>),
+    Maker(Box<maker::diagnostics::Replay>),
 }
 
 impl Session {
@@ -125,6 +152,7 @@ impl Session {
                 Ok(())
             }
             Self::Orders(state) => state.apply(record, output, commands),
+            Self::Maker(state) => state.apply(record, output),
         }
     }
 }

@@ -15,6 +15,7 @@ use self::connection::Connection;
 use self::timer::Periodic;
 
 mod connection;
+pub mod maker;
 pub mod reactor;
 mod rx_timestamp;
 mod timer;
@@ -58,7 +59,7 @@ pub fn capture(
 fn resolve(host: &str) -> Result<Vec<SocketAddr>> {
     Ok((host, 443)
         .to_socket_addrs()
-        .context("resolve Hyperliquid address")?
+        .with_context(|| format!("resolve {host}"))?
         .collect())
 }
 

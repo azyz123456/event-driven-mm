@@ -5,6 +5,8 @@ mod hyperliquid;
 mod intent;
 mod journal;
 mod latency;
+mod lighter;
+mod maker;
 mod network;
 mod order_test;
 mod queue;
@@ -29,7 +31,7 @@ use crate::network::reactor::Reactor;
 use crate::queue::{RecordSource, command_queue, file_queue};
 
 #[derive(Parser)]
-#[command(about = "Record a Hyperliquid book and replay its midpoints")]
+#[command(about = "Capture, trade on testnet, and replay venue journals")]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -66,6 +68,32 @@ enum Command {
         /// Print latency sample counts and percentiles to stderr.
         #[arg(long)]
         latency: bool,
+    },
+    /// Run a market-making session on testnet or capture public feeds in observe mode.
+    Maker {
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        duration_secs: NonZeroU64,
+        #[arg(long)]
+        log: PathBuf,
+        #[arg(long)]
+        observe: bool,
+        #[arg(long)]
+        hyperliquid_account: Option<String>,
+        #[arg(long)]
+        lighter_account: Option<u64>,
+        #[arg(long, requires = "lighter_account", conflicts_with = "observe")]
+        lighter_key_index: Option<u8>,
+        #[arg(long, default_value_t = 1, value_parser = clap::value_parser!(u8).range(1..=5))]
+        feed_copies: u8,
+    },
+    /// Read a maker journal as a report or step through it one record at a time.
+    InspectMaker {
+        #[arg(long)]
+        log: PathBuf,
+        #[arg(long)]
+        step: bool,
     },
     /// Replay a finished journal offline and verify any recorded order intents.
     Replay {
@@ -127,6 +155,45 @@ fn main() -> Result<()> {
             let config = order_test::Config::new(account, coin, price, size, max_notional)?;
             run_order_test(config, &log, latency)
         }
+        Command::Maker {
+            config,
+            duration_secs,
+            log,
+            observe,
+            hyperliquid_account,
+            lighter_account,
+            lighter_key_index,
+            feed_copies,
+        } => {
+            let config: maker::Config = serde_json::from_reader(
+                File::open(&config)
+                    .with_context(|| format!("open maker config {}", config.display()))?,
+            )?;
+            let mut bytes = [0; 8];
+            getrandom::fill(&mut bytes).map_err(|error| anyhow!("seed maker session: {error}"))?;
+            let seed = (u64::from_le_bytes(bytes) % ((1 << 26) - 1)) + 1;
+            let engine = maker::Engine::new(config, seed, observe)?;
+            let clock = Arc::new(Latency::new());
+            let (journal, _) = file_queue(create_journal(&log)?, read_journal(&log)?, clock);
+            install_maker_interrupt()?;
+            network::maker::run(
+                engine,
+                network::maker::Account {
+                    hyperliquid: hyperliquid_account,
+                    lighter: lighter_account,
+                    key_index: lighter_key_index,
+                },
+                Duration::from_secs(duration_secs.get()),
+                feed_copies,
+                Reactor::new()?,
+                journal,
+            )
+        }
+        Command::InspectMaker { log, step } => maker::diagnostics::inspect(
+            RecordSource::replay(read_journal(&log)?),
+            step.then(|| io::stdin().lock()),
+            io::stdout().lock(),
+        ),
         Command::Replay { log } => engine::run(
             RecordSource::replay(read_journal(&log)?),
             || true,
@@ -180,4 +247,25 @@ fn create_journal(path: &std::path::Path) -> Result<File> {
 
 fn read_journal(path: &std::path::Path) -> Result<File> {
     File::open(path).with_context(|| format!("open journal {}", path.display()))
+}
+
+#[cfg(unix)]
+fn install_maker_interrupt() -> Result<()> {
+    extern "C" fn stop(_: libc::c_int) {
+        network::maker::STOP.store(true, Ordering::Relaxed);
+    }
+    // The signal handler only sets a lock-free atomic flag.
+    for signal in [libc::SIGINT, libc::SIGTERM] {
+        let previous = unsafe { libc::signal(signal, stop as *const () as libc::sighandler_t) };
+        ensure!(
+            previous != libc::SIG_ERR,
+            "could not install maker shutdown signal handler"
+        );
+    }
+    Ok(())
+}
+
+#[cfg(not(unix))]
+fn install_maker_interrupt() -> Result<()> {
+    Ok(())
 }

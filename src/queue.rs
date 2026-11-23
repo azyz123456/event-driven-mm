@@ -25,6 +25,7 @@ pub fn file_queue(output: File, input: File, latency: Arc<Latency>) -> (RecordSi
     let sink = RecordSink {
         journal: JournalWriter::new(output),
         publication: Arc::clone(&publication),
+        last_timing_sample: None,
     };
     let source = RecordSource {
         journal: JournalReader::new(input),
@@ -41,6 +42,7 @@ struct Publication {
 
 pub struct RecordSink {
     journal: JournalWriter,
+    last_timing_sample: Option<(Option<u64>, u64, u64)>,
     publication: Arc<Publication>,
 }
 
@@ -60,6 +62,17 @@ impl RecordSink {
         timing: Option<ReceiveTiming>,
         event: Event,
     ) -> Result<()> {
+        self.append_sequenced(wall, connection, timing, event)
+            .map(drop)
+    }
+
+    pub fn append_sequenced(
+        &mut self,
+        wall: SystemTime,
+        connection: Option<u64>,
+        timing: Option<ReceiveTiming>,
+        event: Event,
+    ) -> Result<u64> {
         let seq = self.journal.append_at(wall, connection, timing, event)?;
         let published = Instant::now();
         let mut recent = self
@@ -73,9 +86,13 @@ impl RecordSink {
         recent.push_back((seq, published));
         drop(recent);
         if let Some(timing) = timing {
-            self.latency().receive(timing);
+            let key = (connection, timing.batch_id, timing.decoded_elapsed_ns);
+            if self.last_timing_sample != Some(key) {
+                self.latency().receive(timing);
+                self.last_timing_sample = Some(key);
+            }
         }
-        Ok(())
+        Ok(seq)
     }
 
     pub fn sync(&self) -> Result<()> {
@@ -197,6 +214,10 @@ impl<T> Drop for CommandsOut<T> {
 }
 
 impl<T> CommandsIn<T> {
+    pub fn recv(&self) -> std::result::Result<Queued<T>, std::sync::mpsc::RecvError> {
+        self.0.recv()
+    }
+
     pub fn try_recv(&self) -> std::result::Result<Queued<T>, TryRecvError> {
         self.0.try_recv()
     }

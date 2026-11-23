@@ -32,9 +32,20 @@ pub enum Action {
 #[serde(rename_all = "snake_case")]
 pub enum Side {
     Buy,
+    Sell,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum TimeInForce {
     Alo,
+    Ioc,
+}
+
+impl Side {
+    pub fn signed(self, size: Decimal) -> Decimal {
+        match self {
+            Self::Buy => size,
+            Self::Sell => -size,
+        }
+    }
 }

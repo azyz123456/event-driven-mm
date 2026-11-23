@@ -4,11 +4,13 @@ use base64::{Engine, engine::general_purpose::STANDARD};
 use serde::{Deserialize, Serialize};
 
 use crate::intent::Intent;
+use crate::maker;
 use crate::order_test::{Config, Input, Outcome};
 
 pub const FORMAT_VERSION: u32 = 1;
 pub const ORDER_FORMAT_VERSION: u32 = 2;
 pub const REACTOR_FORMAT_VERSION: u32 = 3;
+pub const MAKER_FORMAT_VERSION: u32 = 4;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Record {
@@ -31,6 +33,36 @@ pub enum Event {
         coin: String,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         order_test: Option<Config>,
+    },
+    MakerStart {
+        version: u32,
+        config: maker::Config,
+        seed: u64,
+        observe: bool,
+    },
+    MakerInput {
+        elapsed_ms: u64,
+        input: maker::Input,
+    },
+    MakerIntent {
+        intent: maker::Intent,
+    },
+    MakerPrepared {
+        intent_id: u64,
+        nonce: u64,
+        tx_hash: Option<String>,
+    },
+    MakerProtectionPrepared {
+        request_id: u64,
+        nonce: u64,
+        expires_unix_ms: Option<u64>,
+    },
+    MakerNotice {
+        venue: maker::Venue,
+        reason: String,
+    },
+    MakerEnd {
+        summary: maker::End,
     },
     TcpConnectFailed {
         error: String,

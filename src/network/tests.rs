@@ -369,3 +369,92 @@ fn read_client_frame(peer: &mut PeerStream) -> Result<(u8, Vec<u8>)> {
 }
 
 mod order_tests;
+
+#[test]
+fn services_two_tls_upgrades_and_dispatches_both_feeds_from_one_poller() -> Result<()> {
+    let host = "localhost";
+    let key = rcgen::generate_simple_self_signed(vec![host.into()])?;
+    let cert = key.cert.der().clone();
+    let mut roots = RootCertStore::empty();
+    roots.add(cert.clone())?;
+    let client_config = client_config(roots);
+    let server_config = Arc::new(
+        ServerConfig::builder()
+            .with_no_client_auth()
+            .with_single_cert(
+                vec![cert],
+                PrivatePkcs8KeyDer::from(key.signing_key.serialize_der()).into(),
+            )?,
+    );
+    let file = tempfile::NamedTempFile::new()?;
+    let (mut journal, _) = file_queue(file.reopen()?, file.reopen()?, Arc::new(Latency::new()));
+    let mut reactor = Reactor::new()?;
+    let mut pairs = Vec::new();
+    for (id, path) in [(1, "/ws"), (2, "/stream")] {
+        let listener = TcpListener::bind("127.0.0.1:0")?;
+        let client = StdTcpStream::connect(listener.local_addr()?)?;
+        client.set_nonblocking(true)?;
+        let (peer, _) = listener.accept()?;
+        peer.set_read_timeout(Some(SOCKET_TIMEOUT))?;
+        peer.set_write_timeout(Some(SOCKET_TIMEOUT))?;
+        let peer = StreamOwned::new(ServerConnection::new(Arc::clone(&server_config))?, peer);
+        let client = Connection::begin(
+            TcpStream::from_std(client),
+            &mut reactor,
+            id,
+            host,
+            Arc::clone(&client_config),
+            &mut journal,
+        )?;
+        pairs.push((client, peer, path));
+    }
+
+    thread::scope(|scope| -> Result<()> {
+        let mut clients = Vec::new();
+        let mut peers = Vec::new();
+        for (client, mut peer, path) in pairs {
+            clients.push((client, path, None));
+            peers.push(scope.spawn(move || -> Result<()> {
+                let mut request = Vec::new();
+                while !request.ends_with(b"\r\n\r\n") {
+                    let mut byte = [0];
+                    peer.read_exact(&mut byte)?;
+                    request.push(byte[0]);
+                }
+                let request = String::from_utf8(request)?;
+                assert!(request.starts_with(&format!("GET {path} HTTP/1.1\r\n")));
+                let mut response = upgrade_response(&request)?;
+                response.extend(server_frame(0x81, path.as_bytes()));
+                peer.write_all(&response)?;
+                assert_eq!(
+                    read_client_frame(&mut peer)?,
+                    (0x81, path.as_bytes().to_vec())
+                );
+                Ok(())
+            }));
+        }
+        let deadline = Instant::now() + SOCKET_TIMEOUT;
+        while clients.iter().any(|(_, _, response)| response.is_none()) {
+            ensure!(Instant::now() < deadline, "one TLS peer starved the other");
+            for (client, path, response) in &mut clients {
+                if response.is_none()
+                    && client.progress_setup(host, path, &mut journal, deadline)?
+                    && let Some(incoming) = client.next_message()?
+                {
+                    assert_eq!(incoming.message, Message::Text(path.to_string()));
+                    client.send_private(path.to_string(), None)?;
+                    *response = Some(incoming.message);
+                }
+            }
+            let mut connections = clients
+                .iter_mut()
+                .map(|(client, _, _)| client)
+                .collect::<Vec<_>>();
+            reactor.service_many(&mut connections, deadline, &mut journal)?;
+        }
+        for peer in peers {
+            peer.join().expect("peer thread")?;
+        }
+        Ok(())
+    })
+}

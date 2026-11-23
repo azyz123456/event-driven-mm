@@ -5,7 +5,7 @@ use anyhow::{Context, Result, ensure};
 use chrono::DateTime;
 use hypersdk::hypercore::{
     BatchCancelCloid, BatchOrder, CancelByCloid, Chain, Cloid, OrderGrouping, OrderRequest,
-    OrderTypePlacement, PrivateKeySigner, TimeInForce as ExchangeTif,
+    OrderTypePlacement, PrivateKeySigner, ScheduleCancel, TimeInForce as ExchangeTif,
     api::Action as ExchangeAction,
 };
 use serde_json::{Value, value::RawValue};
@@ -51,36 +51,29 @@ impl Signer {
     }
 
     pub fn sign(&mut self, intent: &Intent, ttl_ms: u64) -> Result<SignedAction> {
-        let now: u64 = SystemTime::now()
-            .duration_since(UNIX_EPOCH)?
-            .as_millis()
-            .try_into()?;
-        let nonce = now.max(self.last_nonce.checked_add(1).context("nonce overflow")?);
-        let expires_after = nonce
-            .checked_add(ttl_ms)
-            .context("action expiry overflow")?;
-        let expiry = DateTime::from_timestamp_millis(expires_after.try_into()?)
-            .context("invalid action expiry")?;
         let cloid = intent
             .cloid
             .parse::<Cloid>()
             .context("invalid client order ID")?;
         let action = match intent.action {
             Action::Place {
-                side: Side::Buy,
-                tif: TimeInForce::Alo,
+                side,
+                tif,
                 price,
                 size,
                 ..
             } => ExchangeAction::from(BatchOrder {
                 orders: vec![OrderRequest {
                     asset: intent.asset.try_into()?,
-                    is_buy: true,
+                    is_buy: side == Side::Buy,
                     limit_px: price,
                     sz: size,
                     reduce_only: false,
                     order_type: OrderTypePlacement::Limit {
-                        tif: ExchangeTif::Alo,
+                        tif: match tif {
+                            TimeInForce::Alo => ExchangeTif::Alo,
+                            TimeInForce::Ioc => ExchangeTif::Ioc,
+                        },
                     },
                     cloid,
                 }],
@@ -95,6 +88,27 @@ impl Signer {
                 fast: false,
             }),
         };
+        self.sign_action(action, ttl_ms)
+    }
+
+    pub fn schedule_cancel(&mut self, time: Option<u64>) -> Result<SignedAction> {
+        self.sign_action(
+            ExchangeAction::ScheduleCancel(ScheduleCancel { time }),
+            5_000,
+        )
+    }
+
+    fn sign_action(&mut self, action: ExchangeAction, ttl_ms: u64) -> Result<SignedAction> {
+        let now: u64 = SystemTime::now()
+            .duration_since(UNIX_EPOCH)?
+            .as_millis()
+            .try_into()?;
+        let nonce = now.max(self.last_nonce.checked_add(1).context("nonce overflow")?);
+        let expires_after = nonce
+            .checked_add(ttl_ms)
+            .context("action expiry overflow")?;
+        let expiry = DateTime::from_timestamp_millis(expires_after.try_into()?)
+            .context("invalid action expiry")?;
         let action_json = serde_json::to_value(&action)?;
         let signed = action.sign_sync(&self.key, nonce, None, Some(expiry), Chain::Testnet)?;
         self.last_nonce = nonce;

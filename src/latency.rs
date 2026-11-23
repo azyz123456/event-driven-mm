@@ -92,14 +92,14 @@ pub fn unix_ns(time: SystemTime) -> Option<u64> {
         .ok()
 }
 
-struct Histogram {
+pub(crate) struct Histogram {
     bins: [u64; 65],
     total: u64,
     unavailable: u64,
 }
 
 impl Histogram {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             bins: [0; 65],
             total: 0,
@@ -107,13 +107,21 @@ impl Histogram {
         }
     }
 
-    fn add(&mut self, value: Option<u64>) {
+    pub(crate) fn add(&mut self, value: Option<u64>) {
         if let Some(ns) = value {
             self.bins[(64 - ns.leading_zeros()) as usize] += 1;
             self.total += 1;
         } else {
             self.unavailable += 1;
         }
+    }
+
+    pub(crate) fn summary(&self) -> serde_json::Value {
+        let percentile = |p| (self.total != 0).then(|| self.percentile(p) as u64);
+        serde_json::json!({
+            "samples": self.total, "unavailable": self.unavailable,
+            "p50_le_ns": percentile(50), "p95_le_ns": percentile(95), "p99_le_ns": percentile(99),
+        })
     }
 
     fn percentile(&self, percent: u64) -> u128 {
@@ -126,5 +134,11 @@ impl Histogram {
             }
         }
         u128::from(u64::MAX)
+    }
+}
+
+impl Default for Histogram {
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -113,18 +113,39 @@ impl Reactor {
         deadline: Instant,
         journal: &mut RecordSink,
     ) -> Result<()> {
-        connection.refresh_interest(self)?;
-        let until = if connection.has_ready_work() {
+        self.service_many(&mut [connection], deadline, journal)
+    }
+
+    pub(super) fn service_many(
+        &mut self,
+        connections: &mut [&mut Connection],
+        deadline: Instant,
+        journal: &mut RecordSink,
+    ) -> Result<()> {
+        for connection in connections.iter_mut() {
+            connection.refresh_interest(self)?;
+        }
+        let until = if connections
+            .iter()
+            .any(|connection| connection.has_ready_work())
+        {
             Instant::now()
         } else {
             deadline
         };
         self.poll_until(until)?;
-        let token = connection.token();
-        for event in self.events.iter().filter(|event| event.token() == token) {
-            connection.note_ready(event);
+        for event in self.events.iter() {
+            if let Some(connection) = connections
+                .iter_mut()
+                .find(|connection| connection.token() == event.token())
+            {
+                connection.note_ready(event);
+            }
         }
-        connection.drive(journal)
+        for connection in connections {
+            connection.drive(journal)?;
+        }
+        Ok(())
     }
 
     fn poll_until(&mut self, deadline: Instant) -> Result<()> {

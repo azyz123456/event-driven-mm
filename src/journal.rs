@@ -24,7 +24,7 @@ impl JournalWriter {
     }
 
     #[cfg(test)]
-    fn append(&mut self, connection_id: Option<u64>, event: Event) -> Result<u64> {
+    pub(crate) fn append(&mut self, connection_id: Option<u64>, event: Event) -> Result<u64> {
         self.append_at(SystemTime::now(), connection_id, None, event)
     }
 
